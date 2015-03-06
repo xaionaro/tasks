@@ -1,0 +1,3 @@
+[submodule "qtredmine"]
+	path = qtredmine
+	url = https://github.com/xaionaro/redmine-qt
