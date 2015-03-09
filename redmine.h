@@ -5,8 +5,13 @@
 
 class Redmine : public RedmineClient
 {
+    Q_OBJECT
+
 private:
     QString _apiKey;
+
+public slots:
+    void request_callback(QNetworkReply *reply);
 
 public:
     QString apiKey(QString apiKey);

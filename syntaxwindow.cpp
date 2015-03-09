@@ -13,8 +13,7 @@ SyntaxWindow::~SyntaxWindow()
     delete ui;
 }
 
-void SyntaxWindow::on_closeButton_toggled(bool checked)
+void SyntaxWindow::on_closeButton_clicked()
 {
-    (void)checked;
-    delete this;
+    qApp->quit();
 }

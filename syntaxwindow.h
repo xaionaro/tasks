@@ -16,7 +16,7 @@ public:
     ~SyntaxWindow();
 
 private slots:
-    void on_closeButton_toggled(bool checked);
+    void on_closeButton_clicked();
 
 private:
     Ui::SyntaxWindow *ui;

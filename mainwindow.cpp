@@ -13,7 +13,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 int MainWindow::updateTasks() {
     redmine->request(RedmineClient::GET, "/issues.json?"+issues_filter, "");
-
     return 0;
 }
 
