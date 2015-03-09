@@ -4,7 +4,7 @@
 
 Redmine::Redmine()
 {
-
+    this->setBaseUrl(SERVER_URL);
 }
 
 QString Redmine::apiKey(QString apiKey) {
@@ -20,35 +20,22 @@ int Redmine::init() {
     return 0;
 }
 
-void Redmine::request_callback(QNetworkReply *reply) {
-    qDebug("%p: %s", reply, (reply->isFinished() ? "finished" : "not finished"));
-    qDebug(reply->errorString().toLatin1());
-    QByteArray replyData = reply->readAll();
-    QString replyDataLength = QString::number(replyData.length());
-    info("Length: "+replyDataLength);
-
-    QString replyText = replyData;
-
-    info("Reply:  "+replyText);
-
-    delete reply;
-
-    return;
-}
-
-static void redmine_request_callback(void *_redmine, QNetworkReply *reply) {
-    Redmine *redmine = static_cast<Redmine *>(_redmine);
-    redmine->request_callback(reply);
-
-    return;
-}
-
 int Redmine::request(
         RedmineClient::EMode    mode,
         QString                 uri,
+        void *callback,
+        void *callback_arg,
         const QByteArray&       requestData
 ) {
-    this->sendRequest(SERVER_URL+uri, mode, redmine_request_callback, this, requestData);
+    this->sendRequest(uri, RedmineClient::JSON, mode, callback, callback_arg, requestData);
 
     return 0;
+}
+
+int Redmine::get_issues(void *callback, void *arg) {
+    return this->request(GET, "issues", callback, arg, "");
+}
+
+int Redmine::get_issues(void (*callback)(void*, QNetworkReply*, QJsonDocument*), void *arg) {
+    return this->get_issues((void *)callback, arg);
 }

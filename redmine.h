@@ -10,15 +10,21 @@ class Redmine : public RedmineClient
 private:
     QString _apiKey;
 
-public slots:
-    void request_callback(QNetworkReply *reply);
-
 public:
     QString apiKey(QString apiKey);
     QString apiKey();
 
     int init();
-    int request(RedmineClient::EMode mode, QString uri, const QByteArray& requestData = "");
+
+    int request(
+            RedmineClient::EMode mode,
+            QString uri,
+            void *callback,
+            void *callback_arg,
+            const QByteArray& requestData = "");
+
+    int get_issues(void  *callback, void *arg);
+    int get_issues(void (*callback)(void*, QNetworkReply*, QJsonDocument*), void *arg);
 
     Redmine();
 };

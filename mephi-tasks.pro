@@ -37,3 +37,11 @@ else:unix: LIBS += -L$$PWD/build-qtredmine-Desktop-Debug/ -lqtredmine
 
 INCLUDEPATH += $$PWD/qtredmine
 DEPENDPATH += $$PWD/qtredmine
+
+OTHER_FILES += \
+    images/bad.png \
+    images/heart.png \
+    images/trash.png
+
+RESOURCES += \
+    mephi-tasks.qrc

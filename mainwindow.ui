@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QListView" name="Tasks_2">
+   <widget class="QListWidget" name="issues">
     <property name="geometry">
      <rect>
       <x>10</x>
