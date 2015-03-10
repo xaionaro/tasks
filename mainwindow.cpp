@@ -1,3 +1,22 @@
+/*
+    mephi-tasks — a client to NRNU MEPhI Redmine server
+
+    Copyright (C) 2015  Dmitry Yu Okunev <dyokunev@ut.mephi.ru> 0x8E30679C
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "mainwindow.h"
 #include "helpwindow.h"
 #include "ui_mainwindow.h"
@@ -36,18 +55,10 @@ void MainWindow::issuesSetup()
 void MainWindow::on_issues_doubleClick(int row, int column)
 {
     (void)column;
-    //QMessageBox       msgBox;
     QString url = QString(SERVER_URL "/issues/%1").arg(this->issue_row2issue[row]["id"].toInt());
 
     QDesktopServices::openUrl(url);
     return;
- /*
-    msgBox.setText("Got double click on "+QString::number(column)+","+QString::number(row)+": "+QString::number(this->issue_row2issue[row]["id"].toInt()));
-    msgBox.setInformativeText("ACK?");
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    msgBox.exec();
-*/
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -85,9 +96,14 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     issues->setItem(pos, 0, item);
 
     //     Assignee:
-    item = new QTableWidgetItem("test");
+    item = new QTableWidgetItem(issue["assigned_to"].toObject()["name"].toString());
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
     issues->setItem(pos, 1, item);
+
+    //     Due date:
+    item = new QTableWidgetItem(issue["due_date"].toString());
+    item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+    issues->setItem(pos, 2, item);
 
     this->issue_row2issue.insert(pos, issue);
     //qDebug("Test: %i|%i", issue["id"].toInt(), this->issue_row2issue[0]["id"].toInt());
