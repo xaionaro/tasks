@@ -31,8 +31,8 @@ FORMS    += mainwindow.ui \
     syntaxwindow.ui \
     infowindow.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-qtredmine-Desktop-Debug/release/ -lqtredmine
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-qtredmine-Desktop-Debug/debug/ -lqtredmine
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Release/release/ -lqtredmine
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/ -lqtredmine
 else:unix: LIBS += -L$$PWD/build-qtredmine-Desktop-Debug/ -lqtredmine
 
 INCLUDEPATH += $$PWD/qtredmine
