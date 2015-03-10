@@ -148,6 +148,7 @@ int MainWindow::updateTasks() {
 
 MainWindow::~MainWindow()
 {
+    saveSettings();
     delete ui;
 }
 

@@ -21,10 +21,27 @@
 #include "syntaxwindow.h"
 #include "common.h"
 #include <QApplication>
+#include <QSettings>
 
 
 Redmine *redmine = NULL;
 QString issues_filter = "";
+
+struct settings settings;
+
+void loadSettings() {
+    QSettings qsettings(settings.settingsFilePath, QSettings::NativeFormat);
+    settings.apiKey = qsettings.value("apiKey").toString();
+
+    return;
+}
+
+void saveSettings() {
+    QSettings qsettings(settings.settingsFilePath, QSettings::NativeFormat);
+    qsettings.setValue("apiKey", settings.apiKey);
+
+    return;
+}
 
 int main(int argc, char *argv[])
 {
@@ -35,14 +52,21 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QStringList arglst = a.arguments();
 
+    settings.settingsFilePath = QApplication::applicationDirPath().left(1) + ":/mephi-tasks.ini";
+    loadSettings();
+/*
     if (arglst.count() <= 1) {
         SyntaxWindow synWin;
         synWin.show();
         return a.exec();
     }
+*/
 
-    QString apiKey = arglst[1];
-    redmine->apiKey(apiKey);
+    if (arglst.count() > 1) {
+        settings.apiKey = arglst[1];
+    }
+
+    redmine->apiKey(settings.apiKey);
     redmine->init();
 
     MainWindow w;
