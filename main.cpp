@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QStringList arglst = a.arguments();
 
-    settings.settingsFilePath = QApplication::applicationDirPath().left(1) + ":/mephi-tasks.ini";
+    settings.settingsFilePath = QApplication::applicationDirPath() + "/mephi-tasks.ini";
     loadSettings();
 /*
     if (arglst.count() <= 1) {
@@ -62,9 +62,8 @@ int main(int argc, char *argv[])
     }
 */
 
-    if (arglst.count() > 1) {
+    if (arglst.count() > 1)
         settings.apiKey = arglst[1];
-    }
 
     redmine->apiKey(settings.apiKey);
     redmine->init();
