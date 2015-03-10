@@ -24,7 +24,7 @@
 
 #include <QStringList>
 #include <QDesktopServices>
-//#include <QMessageBox>
+#include <QDateTime>
 
 void MainWindow::issuesSetup()
 {
@@ -40,8 +40,12 @@ void MainWindow::issuesSetup()
     issues->setColumnCount(columns.size());
 
     issues->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+
     issues->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
+    issues->horizontalHeader()->resizeSection(1, 150);
+
     issues->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
+    issues->horizontalHeader()->resizeSection(2, 100);
 
     issues->setHorizontalHeaderLabels(columns);
 
@@ -101,8 +105,15 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     issues->setItem(pos, 1, item);
 
     //     Due date:
-    item = new QTableWidgetItem(issue["due_date"].toString());
+    QString due_date_str = issue["due_date"].toString();
+    QDateTime now, date;
+    now  = QDateTime::currentDateTime();
+    date = QDateTime::fromString(due_date_str, "yyyy-MM-dd");
+
+    item = new QTableWidgetItem(due_date_str);
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+    if ((due_date_str != "") && (now > date))
+        item->setBackgroundColor(QColor(255, 192, 192));
     issues->setItem(pos, 2, item);
 
     this->issue_row2issue.insert(pos, issue);
