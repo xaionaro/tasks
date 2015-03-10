@@ -16,20 +16,17 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     helpwindow.cpp \
     redmine.cpp \
-    syntaxwindow.cpp \
-    infowindow.cpp
+    syntaxwindow.cpp
 
 HEADERS  += mainwindow.h \
     helpwindow.h \
     redmine.h \
     common.h \
-    syntaxwindow.h \
-    infowindow.h
+    syntaxwindow.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
-    syntaxwindow.ui \
-    infowindow.ui
+    syntaxwindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Release/release/ -lqtredmine
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/ -lqtredmine

@@ -7,6 +7,4 @@
 extern Redmine *redmine;
 extern QString issues_filter;
 
-extern int info(QString messageText);
-
 #endif // COMMON_H

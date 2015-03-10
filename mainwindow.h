@@ -18,12 +18,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    void issue_set(int pos, QJsonObject issue);
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 private slots:
     void on_actionExit_triggered();
     void on_actionHelp_triggered();
+    void on_issues_doubleClick(int row, int column);
 
 private:
     int updateTasks();
@@ -47,6 +49,10 @@ private:
     void createTrayIcon();
 
     void setIcon(int index);
+
+    void resizeEvent(QResizeEvent *event);
+    void issuesSetup();
+    QHash<int, QJsonObject> issue_row2issue;
 };
 
 #endif // MAINWINDOW_H

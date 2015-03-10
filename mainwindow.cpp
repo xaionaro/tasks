@@ -3,11 +3,61 @@
 #include "ui_mainwindow.h"
 #include "common.h"
 
+#include <QStringList>
+#include <QDesktopServices>
+//#include <QMessageBox>
+
+void MainWindow::issuesSetup()
+{
+    QTableWidget *issues = ui->issues;
+
+    // Columns:
+
+    QStringList columns;
+    QSize itemSize;
+
+    columns << "Название" << "Исполнитель" << "Срок";
+
+    issues->setColumnCount(columns.size());
+
+    issues->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    issues->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
+    issues->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
+
+    issues->setHorizontalHeaderLabels(columns);
+
+    // Signals:
+
+    connect(issues, SIGNAL(cellDoubleClicked(int, int)),
+            this,   SLOT(on_issues_doubleClick(int, int)));
+    return;
+}
+
+void MainWindow::on_issues_doubleClick(int row, int column)
+{
+    (void)column;
+    //QMessageBox       msgBox;
+    QString url = QString(SERVER_URL "/issues/%1").arg(this->issue_row2issue[row]["id"].toInt());
+
+    QDesktopServices::openUrl(url);
+    return;
+ /*
+    msgBox.setText("Got double click on "+QString::number(column)+","+QString::number(row)+": "+QString::number(this->issue_row2issue[row]["id"].toInt()));
+    msgBox.setInformativeText("ACK?");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.exec();
+*/
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    this->issuesSetup();
+
     this->updateTasks();
     this->createIconGroupBox();
     this->createTrayActions();
@@ -19,17 +69,43 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 
-static void get_issues_callback(void *_ui, QNetworkReply *reply, QJsonDocument *json) {
-    Ui::MainWindow *ui = static_cast<Ui::MainWindow *>(_ui);
+void MainWindow::issue_set(int pos, QJsonObject issue)
+{
+    QTableWidget     *issues = this->ui->issues;
+    QTableWidgetItem *item;
+
+    qDebug("Issue: #%i:\t%s", issue["id"].toInt(), issue["subject"].toString().toUtf8().data());
+
+    // New row:
+    issues->insertRow(pos);
+
+    //     Issue name:
+    item = new QTableWidgetItem(issue["subject"].toString());
+    item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+    issues->setItem(pos, 0, item);
+
+    //     Assignee:
+    item = new QTableWidgetItem("test");
+    item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+    issues->setItem(pos, 1, item);
+
+    this->issue_row2issue.insert(pos, issue);
+    //qDebug("Test: %i|%i", issue["id"].toInt(), this->issue_row2issue[0]["id"].toInt());
+    return;
+}
+
+static void get_issues_callback(void *_win, QNetworkReply *reply, QJsonDocument *json) {
+    (void)reply;
+
+    MainWindow     *win = static_cast<MainWindow *>(_win);
+
+    int issues_count = 0;
 
     QJsonObject answer = json->object();
     QJsonArray  issues = answer["issues"].toArray();
 
-    foreach (const QJsonValue &_issue, issues) {
-        QJsonObject issue = _issue.toObject();
-        qDebug("Issue: #%i:\t%s", issue["id"].toInt(), issue["subject"].toString().toUtf8().data());
-        ui->issues->addItem(issue["subject"].toString());
-    }
+    foreach (const QJsonValue &issue, issues)
+        win->issue_set(issues_count++, issue.toObject());
 
     return;
 }
@@ -39,7 +115,7 @@ static void get_issues_callback_wrapper(void *_this, QNetworkReply *reply, QJson
 }*/
 
 int MainWindow::updateTasks() {
-    redmine->get_issues(get_issues_callback, ui);
+    redmine->get_issues(get_issues_callback, this);
     return 0;
 }
 
@@ -118,3 +194,13 @@ void MainWindow::createIconGroupBox()
     iconLayout->addWidget(showIconCheckBox);
     iconGroupBox->setLayout(iconLayout);
 }
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    ui->issues->resize(this->width(), this->height()-41);
+
+    QWidget::resizeEvent(event);
+    return;
+}
+
+

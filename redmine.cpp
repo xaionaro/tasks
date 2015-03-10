@@ -27,7 +27,8 @@ int Redmine::request(
         void *callback_arg,
         const QByteArray&       requestData
 ) {
-    this->sendRequest(uri, RedmineClient::JSON, mode, callback, callback_arg, requestData);
+    this->sendRequest(uri, RedmineClient::JSON, mode,
+                      callback, callback_arg, requestData);
 
     return 0;
 }
@@ -36,6 +37,9 @@ int Redmine::get_issues(void *callback, void *arg) {
     return this->request(GET, "issues", callback, arg, "");
 }
 
-int Redmine::get_issues(void (*callback)(void*, QNetworkReply*, QJsonDocument*), void *arg) {
+int Redmine::get_issues(
+        void (*callback)(void*, QNetworkReply*, QJsonDocument*),
+        void *arg)
+{
     return this->get_issues((void *)callback, arg);
 }

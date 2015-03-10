@@ -1,19 +1,11 @@
 #include "mainwindow.h"
 #include "syntaxwindow.h"
-#include "infowindow.h"
 #include "common.h"
 #include <QApplication>
 
 
 Redmine *redmine = NULL;
 QString issues_filter = "";
-
-int info(QString messageText) {
-    InfoWindow *win = new InfoWindow();
-    win->show();
-    win->setMessageText(messageText);
-    return 0;
-}
 
 int main(int argc, char *argv[])
 {
