@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
-    <height>482</height>
+    <width>681</width>
+    <height>470</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,38 +18,51 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
+      <y>30</y>
       <width>681</width>
-      <height>441</height>
+      <height>421</height>
      </rect>
     </property>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>680</width>
-     <height>19</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuInformation">
-    <property name="title">
-     <string>Информация</string>
+   <widget class="QLabel" name="labelRectorTasks">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>661</width>
+      <height>16</height>
+     </rect>
     </property>
-    <addaction name="actionHelp"/>
-   </widget>
-   <widget class="QMenu" name="menuInstance">
-    <property name="title">
-     <string>Программа</string>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
     </property>
-    <addaction name="actionExit"/>
+    <property name="text">
+     <string>Поручения ректора</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+    </property>
    </widget>
-   <addaction name="menuInstance"/>
-   <addaction name="menuInformation"/>
+   <widget class="QLabel" name="labelTasksNRNUMEPhI">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>450</y>
+      <width>661</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Система управления задачами НИЯУ МИФИ, УИ ДИТ &lt;redmine@mephi.ru&gt;</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionHelp">
    <property name="text">
     <string>Помощь</string>

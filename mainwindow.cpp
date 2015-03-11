@@ -25,6 +25,8 @@
 #include <QStringList>
 #include <QDesktopServices>
 #include <QDateTime>
+#include <QMenu>
+#include <QList>
 
 void MainWindow::issuesSetup()
 {
@@ -35,7 +37,7 @@ void MainWindow::issuesSetup()
     QStringList columns;
     QSize itemSize;
 
-    columns << "Название" << "Исполнитель" << "Срок";
+    columns << "Название" << "Исполнитель" << "Срок" << "Статус";
 
     issues->setColumnCount(columns.size());
 
@@ -139,6 +141,9 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
 {
     QTableWidget     *issues = this->ui->issues;
     QTableWidgetItem *item;
+    QJsonObject       issue_status = issue["status"].toObject();
+    bool              isClosed = redmine->get_issue_status(issue_status["id"].toInt())["is_closed"].toBool();
+    QColor            closedBgColor = QColor(192, 255, 192);
 
     //qDebug("Issue: #%i:\t%s", issue["id"].toInt(), issue["subject"].toString().toUtf8().data());
 
@@ -148,6 +153,7 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     //     Issue name:
     item = new QTableWidgetItem(issue["subject"].toString());
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+    if (isClosed) item->setBackgroundColor(closedBgColor);
     issues->setItem(pos, 0, item);
 
     //     Assignee:
@@ -156,6 +162,7 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     //         Setting the assignee value:
     item = new QTableWidgetItem(assignee_str);
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+    if (isClosed) item->setBackgroundColor(closedBgColor);
     issues->setItem(pos, 1, item);
     item = issues->item(pos, 1);
     //         Co-assignees (asynchronous):
@@ -190,20 +197,44 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
 
     item = new QTableWidgetItem(due_date_str);
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-    if ((due_date_str != "") && (now > date)) {
+    if (isClosed) item->setBackgroundColor(closedBgColor);
+    if ((due_date_str != "") && (now > date) && (!isClosed)) {
         item->setBackgroundColor(QColor(255, 192, 192));
         this->statusWorsenTo(BAD);
     }
     issues->setItem(pos, 2, item);
+
+    //     Status:
+    item = new QTableWidgetItem(issue_status["name"].toString());
+    if (isClosed) item->setBackgroundColor(closedBgColor);
+    issues->setItem(pos, 3, item);
 
     this->issue_row2issue.insert(pos, issue);
     //qDebug("Test: %i|%i", issue["id"].toInt(), this->issue_row2issue[0]["id"].toInt());
     return;
 }
 
+/*
+bool issueCmpFunct_statusPosition_lt(const QJsonObject &issue_a, const QJsonObject &issue_b)
+{
+    int issue_statusPosition_a = redmine->get_issue_status(issue_a["status"].toObject()["id"].toInt())["position"].toInt();
+    int issue_statusPosition_b = redmine->get_issue_status(issue_b["status"].toObject()["id"].toInt())["position"].toInt();
+
+    return issue_statusPosition_a < issue_statusPosition_b;
+}
+*/
+bool issueCmpFunct_statusIsClosed_lt(const QJsonObject &issue_a, const QJsonObject &issue_b)
+{
+    int issue_statusIsClosed_a = redmine->get_issue_status(issue_a["status"].toObject()["id"].toInt())["is_closed"].toBool();
+    int issue_statusIsClosed_b = redmine->get_issue_status(issue_b["status"].toObject()["id"].toInt())["is_closed"].toBool();
+
+    return issue_statusIsClosed_a < issue_statusIsClosed_b;
+}
+
 static void get_issues_callback(void *_win, QNetworkReply *reply, QJsonDocument *json) {
     (void)reply;
     MainWindow *win = static_cast<MainWindow *>(_win);
+    QList<QJsonObject> issues_list;
 
     if (win->status() == MainWindow::BAD)
         win->status(MainWindow::GOOD);
@@ -216,7 +247,12 @@ static void get_issues_callback(void *_win, QNetworkReply *reply, QJsonDocument 
     QJsonArray  issues = answer["issues"].toArray();
 
     foreach (const QJsonValue &issue, issues)
-        win->issue_set(issues_count++, issue.toObject());
+        issues_list.append(issue.toObject());
+
+    qSort(issues_list.begin(), issues_list.end(), issueCmpFunct_statusIsClosed_lt);
+
+    foreach (const QJsonObject &issue, issues_list)
+        win->issue_set(issues_count++, issue);
 
     win->setIcon(win->status());
     return;
@@ -315,7 +351,8 @@ void MainWindow::createIconComboBox()
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    ui->issues->resize(this->width(), this->height()-41);
+    ui->issues->resize(this->width(), this->height()-50);
+    ui->labelTasksNRNUMEPhI->move((this->width() - ui->labelTasksNRNUMEPhI->width())/2, this->height() - 20);
 
     QWidget::resizeEvent(event);
     return;

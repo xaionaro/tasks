@@ -19,7 +19,6 @@
 
 #include "redmine.h"
 #include "common.h"
-#include <RedmineClient.hpp>
 
 Redmine::Redmine()
 {
@@ -34,32 +33,119 @@ QString Redmine::apiKey() {
     return this->_apiKey;
 }
 
+static void redmine_init_unlock(void *_null, QNetworkReply *reply, QJsonDocument *statuses) {
+    (void)_null; (void)reply; (void)statuses;
+    redmine->initBarrier.exit();
+}
 int Redmine::init() {
     this->setAuth(this->_apiKey);
+    QNetworkReply *updateIssueStatusesReply = this->updateIssueStatuses(redmine_init_unlock);
+
+    // Wait until issue statuses will be received:
+    connect(updateIssueStatusesReply, SIGNAL(finished()), &this->initBarrier, SLOT(quit()));
+    this->initBarrier.exec();
     return 0;
 }
 
-int Redmine::request(
+QNetworkReply *Redmine::request(
         RedmineClient::EMode    mode,
         QString                 uri,
-        void *callback,
-        void *callback_arg,
-        QString getParams,
-        const QByteArray &requestData
+        funct_callback_json     callback,
+        void                   *callback_arg,
+        QString                 getParams,
+        const QByteArray       &requestData
 ) {
-    this->sendRequest(uri, RedmineClient::JSON, mode,
-                      callback, callback_arg, getParams, requestData);
-
-    return 0;
+    return this->request(mode, uri, (void *)callback, callback_arg, getParams, requestData);
 }
+
+QNetworkReply *Redmine::request(
+        RedmineClient::EMode    mode,
+        QString                 uri,
+        void                   *callback,
+        void                   *callback_arg,
+        QString                 getParams,
+        const QByteArray       &requestData
+) {
+    return this->sendRequest(uri, RedmineClient::JSON, mode,
+                      callback, callback_arg, getParams, requestData);
+}
+
+/********* updateIssueStatuses *********/
+
+struct redmine_updateIssueStatuses_callback_wrapper_arg {
+    funct_callback_json  real_callback;
+    void                *arg;
+};
+
+void Redmine::set_issue_status(int status_id, QJsonObject status)
+{
+    this->issue_statuses.insert(status_id, status);
+    //qDebug("status #%i: %s", status_id, status["name"].toString().toUtf8().data());
+    return;
+}
+
+void Redmine::clear_issue_status()
+{
+    this->issue_statuses.clear();
+}
+
+QJsonObject Redmine::get_issue_status(int issue_status_id)
+{
+    return this->issue_statuses[issue_status_id];
+}
+
+void Redmine::updateIssueStatuses_callback(QNetworkReply *reply, QJsonDocument *statuses_doc)
+{
+    (void)reply;
+    int statuses_count = 0;
+    QJsonArray statuses = statuses_doc->object()["issue_statuses"].toArray();
+
+    this->clear_issue_status();
+
+    foreach (const QJsonValue &status_val, statuses) {
+        QJsonObject status = status_val.toObject();
+        status["position"] = statuses_count++;
+        this->set_issue_status(status["id"].toInt(), status);
+    }
+    return;
+}
+
+static void redmine_updateIssueStatuses_callback_wrapper(void *_arg, QNetworkReply *reply, QJsonDocument *statuses) {
+    //Redmine *redmine = static_cast<Redmine *>(_redmine);
+    struct redmine_updateIssueStatuses_callback_wrapper_arg *arg =
+            (struct redmine_updateIssueStatuses_callback_wrapper_arg *)_arg;
+    funct_callback_json  callback     = arg->real_callback;
+    void                *callback_arg = arg->arg;
+
+    redmine->updateIssueStatuses_callback(reply, statuses);
+    callback(callback_arg, reply, statuses);
+    delete arg;
+    return;
+}
+
+QNetworkReply *Redmine::updateIssueStatuses(funct_callback_json callback, void *arg)
+{
+    struct redmine_updateIssueStatuses_callback_wrapper_arg *wrapper_arg =
+            new struct redmine_updateIssueStatuses_callback_wrapper_arg;
+
+    wrapper_arg->real_callback = callback;
+    wrapper_arg->arg           = arg;
+
+    return this->request(GET,
+                         "issue_statuses",
+                         redmine_updateIssueStatuses_callback_wrapper,
+                         wrapper_arg);
+}
+
+/********* /updateIssueStatuses *********/
 
 /********* get_issues *********/
 
-int Redmine::get_issues(void *callback, void *arg) {
+QNetworkReply *Redmine::get_issues(void *callback, void *arg) {
     return this->request(GET, "issues", callback, arg, settings.issuesFilter);
 }
 
-int Redmine::get_issues(
+QNetworkReply *Redmine::get_issues(
         funct_callback_json callback,
         void *arg)
 {
@@ -104,12 +190,12 @@ static void get_user_callback_wrapper(void *_arg, QNetworkReply *reply, QJsonDoc
     return;
 }
 
-int Redmine::get_user(int user_id, void *callback, void *arg)
+QNetworkReply *Redmine::get_user(int user_id, void *callback, void *arg)
 {
     return this->request(GET, "users/"+QString::number(user_id), callback, arg);
 }
 
-int Redmine::get_user(
+QNetworkReply *Redmine::get_user(
         int user_id,
         funct_callback_json callback,
         void *arg)
