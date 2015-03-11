@@ -52,13 +52,82 @@ int Redmine::request(
     return 0;
 }
 
+/********* get_issues *********/
+
 int Redmine::get_issues(void *callback, void *arg) {
     return this->request(GET, "issues", callback, arg, "");
 }
 
 int Redmine::get_issues(
-        void (*callback)(void*, QNetworkReply*, QJsonDocument*),
+        funct_callback_json callback,
         void *arg)
 {
     return this->get_issues((void *)callback, arg);
 }
+
+/********* /get_issues *********/
+
+/********* get_user *********/
+
+struct get_user_callback_arg {
+    void                *redmine;
+    int                  user_id;
+    funct_callback_json  real_callback;
+    void                *arg;
+};
+
+// Caching function
+
+void Redmine::get_user_callback(
+        int user_id,
+        QNetworkReply *reply,
+        QJsonDocument *user,
+        funct_callback_json callback,
+        void *arg)
+{
+    if (user != NULL)
+        this->users[user_id] = *user;
+
+    callback(arg, reply, user);
+    return;
+}
+
+
+static void get_user_callback_wrapper(void *_arg, QNetworkReply *reply, QJsonDocument *user) {
+    struct get_user_callback_arg *arg = (struct get_user_callback_arg *)_arg;
+
+    Redmine *redmine = static_cast<Redmine *>(arg->redmine);
+    funct_callback_json callback = arg->real_callback;
+    redmine->get_user_callback(arg->user_id, reply, user, callback, arg->arg);
+    delete arg;
+    return;
+}
+
+int Redmine::get_user(int user_id, void *callback, void *arg)
+{
+    return this->request(GET, "users/"+QString::number(user_id), callback, arg, "");
+}
+
+int Redmine::get_user(
+        int user_id,
+        funct_callback_json callback,
+        void *arg)
+{
+    struct get_user_callback_arg *get_user_callback_arg_p = new struct get_user_callback_arg;
+    qDebug("user request: %i", user_id);
+
+    if (this->users.contains(user_id)) {
+        callback(arg, NULL, &this->users[user_id]);
+        return 0;
+    }
+
+    get_user_callback_arg_p->redmine       = this;
+    get_user_callback_arg_p->user_id       = user_id;
+    get_user_callback_arg_p->real_callback = callback;
+    get_user_callback_arg_p->arg           = arg;
+
+    // Fix a memleak of get_user_callback_arg if this->get_user() didn't success
+    return this->get_user(user_id, (void *)get_user_callback_wrapper, get_user_callback_arg_p);
+}
+
+/********* /get_user *********/

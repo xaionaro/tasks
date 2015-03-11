@@ -83,13 +83,37 @@ MainWindow::MainWindow(QWidget *parent) :
     this->trayIcon->show();
 }
 
+struct append_assignee_arg {
+    void *_issues;
+    int   pos;
+};
+
+static void append_assignee(void *_arg, QNetworkReply *reply, QJsonDocument *coassignee_doc) {
+    (void)reply;
+    struct append_assignee_arg *arg = (struct append_assignee_arg *)_arg;
+    QJsonObject coassignee = coassignee_doc->object()["user"].toObject();
+
+    //qDebug("answer is: %s", coassignee_doc->toJson().data());
+
+    QTableWidget *issues = static_cast<QTableWidget *>(arg->_issues);
+    int              pos = arg->pos;
+
+    QTableWidgetItem *item = issues->item(pos, 1);
+    item->setText(
+                item->text() + ",\n " +
+                coassignee["firstname"].toString() + " " +
+                coassignee["lastname"].toString()
+            );
+
+    return;
+}
 
 void MainWindow::issue_set(int pos, QJsonObject issue)
 {
     QTableWidget     *issues = this->ui->issues;
     QTableWidgetItem *item;
 
-    qDebug("Issue: #%i:\t%s", issue["id"].toInt(), issue["subject"].toString().toUtf8().data());
+    //qDebug("Issue: #%i:\t%s", issue["id"].toInt(), issue["subject"].toString().toUtf8().data());
 
     // New row:
     issues->insertRow(pos);
@@ -100,9 +124,36 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     issues->setItem(pos, 0, item);
 
     //     Assignee:
-    item = new QTableWidgetItem(issue["assigned_to"].toObject()["name"].toString());
+    //         Assignee:
+    QString assignee_str    = issue["assigned_to"].toObject()["name"].toString();
+    //         Setting the assignee value:
+    item = new QTableWidgetItem(assignee_str);
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
     issues->setItem(pos, 1, item);
+    item = issues->item(pos, 1);
+    //         Co-assignees (asynchronous):
+    QJsonArray customFields = issue["custom_fields"].toArray();
+    foreach (const QJsonValue &customField, customFields) {
+        if (customField.toObject()["name"].toString() == "Соисполнители") {
+            QJsonArray coassignees_id_obj = customField.toObject()["value"].toArray();
+            foreach (const QJsonValue &coassignee_id_obj, coassignees_id_obj) {
+                // Don't try to use .toInt() directly, the answer will always be "0":
+                int coassignee_id = coassignee_id_obj.toString().toInt();
+
+                //qDebug("Coassignee: %i!", coassignee_id);
+                struct append_assignee_arg *append_assignee_arg_p;
+                append_assignee_arg_p = new struct append_assignee_arg;
+                // TODO: fix a memleak if redmine->get_user doesn't success
+
+                append_assignee_arg_p->_issues = issues;
+                append_assignee_arg_p->pos     = pos;
+
+                redmine->get_user(coassignee_id, append_assignee, (void *)append_assignee_arg_p);
+            }
+
+            break;
+        }
+    }
 
     //     Due date:
     QString due_date_str = issue["due_date"].toString();
