@@ -49,6 +49,9 @@ void MainWindow::issuesSetup()
 
     issues->setHorizontalHeaderLabels(columns);
 
+    //issues->verticalHeader()->setDefaultSectionSize(18);
+    issues->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
     // Signals:
 
     connect(issues, SIGNAL(cellDoubleClicked(int, int)),
@@ -74,13 +77,20 @@ MainWindow::MainWindow(QWidget *parent) :
     this->issuesSetup();
 
     this->updateTasks();
-    this->createIconGroupBox();
+    this->createIconComboBox();
     this->createTrayActions();
     this->createTrayIcon();
 
-    this->setIcon(0);
+    this->status(GOOD);
+    this->setIcon(GOOD);
 
     this->trayIcon->show();
+
+    this->timerUpdateTasks = new QTimer(this);
+    connect(this->timerUpdateTasks, SIGNAL(timeout()), this, SLOT(updateTasks()));
+    this->timerUpdateTasks->start(10000);
+
+    return;
 }
 
 struct append_assignee_arg {
@@ -98,13 +108,30 @@ static void append_assignee(void *_arg, QNetworkReply *reply, QJsonDocument *coa
     QTableWidget *issues = static_cast<QTableWidget *>(arg->_issues);
     int              pos = arg->pos;
 
+    QString firstname = coassignee["firstname"].toString();
+    QString lastname  = coassignee["lastname"].toString();
+    QString initials  = firstname.left(1) + " " + firstname.left(firstname.indexOf(" ")+2).right(1); // TODO: Move this to class Redmine
+
     QTableWidgetItem *item = issues->item(pos, 1);
     item->setText(
-                item->text() + ",\n " +
-                coassignee["firstname"].toString() + " " +
-                coassignee["lastname"].toString()
+                item->text() + "\n  " +
+                lastname + " " + initials
             );
 
+    return;
+}
+
+void MainWindow::issues_clear()
+{
+    QTableWidget *issues = this->ui->issues;
+    int row_count= issues->rowCount();
+
+    while (row_count-- > 0)
+    {
+        issues->removeRow(row_count);
+    }
+
+    this->issue_row2issue.clear();
     return;
 }
 
@@ -163,8 +190,10 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
 
     item = new QTableWidgetItem(due_date_str);
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-    if ((due_date_str != "") && (now > date))
+    if ((due_date_str != "") && (now > date)) {
         item->setBackgroundColor(QColor(255, 192, 192));
+        this->statusWorsenTo(BAD);
+    }
     issues->setItem(pos, 2, item);
 
     this->issue_row2issue.insert(pos, issue);
@@ -174,8 +203,12 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
 
 static void get_issues_callback(void *_win, QNetworkReply *reply, QJsonDocument *json) {
     (void)reply;
+    MainWindow *win = static_cast<MainWindow *>(_win);
 
-    MainWindow     *win = static_cast<MainWindow *>(_win);
+    if (win->status() == MainWindow::BAD)
+        win->status(MainWindow::GOOD);
+
+    win->issues_clear();
 
     int issues_count = 0;
 
@@ -185,6 +218,7 @@ static void get_issues_callback(void *_win, QNetworkReply *reply, QJsonDocument 
     foreach (const QJsonValue &issue, issues)
         win->issue_set(issues_count++, issue.toObject());
 
+    win->setIcon(win->status());
     return;
 }
 /*
@@ -200,7 +234,8 @@ int MainWindow::updateTasks() {
 MainWindow::~MainWindow()
 {
     saveSettings();
-    delete ui;
+    delete this->ui;
+    delete this->timerUpdateTasks;
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -215,63 +250,67 @@ void MainWindow::on_actionHelp_triggered()
     return;
 }
 
+void MainWindow::toggleShowHide() {
+    if (this->isVisible())
+        this->hide();
+    else
+        this->show();
+
+    return;
+}
+
 void MainWindow::createTrayActions()
 {
-    minimizeAction = new QAction(tr("Mi&nimize"), this);
-    connect(minimizeAction, SIGNAL(triggered()), this, SLOT(hide()));
+    showHideAction = new QAction(tr("Показать/Спрятать"), this);
+    connect(showHideAction, SIGNAL(triggered()), this, SLOT(toggleShowHide()));
 
-    maximizeAction = new QAction(tr("Ma&ximize"), this);
-    connect(maximizeAction, SIGNAL(triggered()), this, SLOT(showMaximized()));
-
-    restoreAction = new QAction(tr("&Restore"), this);
-    connect(restoreAction, SIGNAL(triggered()), this, SLOT(showNormal()));
-
-    quitAction = new QAction(tr("&Quit"), this);
+    quitAction = new QAction(tr("Завершить"), this);
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+}
+
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger:
+    case QSystemTrayIcon::DoubleClick:
+        this->toggleShowHide();
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::createTrayIcon()
 {
     trayIconMenu = new QMenu(this);
-    trayIconMenu->addAction(minimizeAction);
-    trayIconMenu->addAction(maximizeAction);
-    trayIconMenu->addAction(restoreAction);
-    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(showHideAction);
     trayIconMenu->addAction(quitAction);
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
+
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+                this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 }
 
-void MainWindow::setIcon(int index)
+void MainWindow::setIcon(EIcon index)
 {
-    QIcon icon = iconComboBox->itemIcon(index);
-    trayIcon->setIcon(icon);
-    setWindowIcon(icon);
+    //qDebug("icon: %i", index);
+    QIcon icon = this->iconComboBox->itemIcon(index);
+    this->trayIcon->setIcon(icon);
+    this->setWindowIcon(icon);
 
-    trayIcon->setToolTip(iconComboBox->itemText(index));
+    this->trayIcon->setToolTip(this->iconComboBox->itemText(index));
 }
 
-void MainWindow::createIconGroupBox()
+void MainWindow::createIconComboBox()
 {
-    iconGroupBox = new QGroupBox(tr("Tray Icon"));
-
-    iconLabel = new QLabel("Icon:");
-
-    iconComboBox = new QComboBox;
-    iconComboBox->addItem(QIcon(":/images/bad.png"),   tr("Bad"));
-    iconComboBox->addItem(QIcon(":/images/heart.png"), tr("Heart"));
-    iconComboBox->addItem(QIcon(":/images/trash.png"), tr("Trash"));
-
-    showIconCheckBox = new QCheckBox(tr("Show icon"));
-    showIconCheckBox->setChecked(true);
-
-    QHBoxLayout *iconLayout = new QHBoxLayout;
-    iconLayout->addWidget(iconLabel);
-    iconLayout->addWidget(iconComboBox);
-    iconLayout->addStretch();
-    iconLayout->addWidget(showIconCheckBox);
-    iconGroupBox->setLayout(iconLayout);
+    this->iconComboBox = new QComboBox;
+    this->iconComboBox->addItem(QIcon(":/images/good.png"), tr("Good"));
+    this->iconComboBox->addItem(QIcon(":/images/bad.png"),  tr("Bad"));
+    return;
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

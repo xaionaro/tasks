@@ -114,7 +114,7 @@ int Redmine::get_user(
         void *arg)
 {
     struct get_user_callback_arg *get_user_callback_arg_p = new struct get_user_callback_arg;
-    qDebug("user request: %i", user_id);
+    //qDebug("user request: %i", user_id);
 
     if (this->users.contains(user_id)) {
         callback(arg, NULL, &this->users[user_id]);
