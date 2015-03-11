@@ -22,7 +22,8 @@
 #include "common.h"
 #include <QApplication>
 #include <QSettings>
-
+#include <QFileInfo>
+#include <QDir>
 
 Redmine *redmine = NULL;
 
@@ -50,10 +51,15 @@ int main(int argc, char *argv[])
     redmine = &_redmine;
     qDebug("Starting");
 
+    QStringList paths = QCoreApplication::libraryPaths();
+    paths.append(".");
+    paths.append(QFileInfo(argv[0]).dir().path());
+    QCoreApplication::setLibraryPaths(paths);
+
     QApplication a(argc, argv);
     QStringList arglst = a.arguments();
 
-    settings.settingsFilePath = QApplication::applicationDirPath() + "/mephi-tasks.ini";
+    settings.settingsFilePath = QDir::fromNativeSeparators( QApplication::applicationDirPath() + "/mephi-tasks.ini" );
     loadSettings();
 /*
     if (arglst.count() <= 1) {
