@@ -44,10 +44,11 @@ int Redmine::request(
         QString                 uri,
         void *callback,
         void *callback_arg,
-        const QByteArray&       requestData
+        QString getParams,
+        const QByteArray &requestData
 ) {
     this->sendRequest(uri, RedmineClient::JSON, mode,
-                      callback, callback_arg, requestData);
+                      callback, callback_arg, getParams, requestData);
 
     return 0;
 }
@@ -55,7 +56,7 @@ int Redmine::request(
 /********* get_issues *********/
 
 int Redmine::get_issues(void *callback, void *arg) {
-    return this->request(GET, "issues", callback, arg, "");
+    return this->request(GET, "issues", callback, arg, settings.issuesFilter);
 }
 
 int Redmine::get_issues(
@@ -105,7 +106,7 @@ static void get_user_callback_wrapper(void *_arg, QNetworkReply *reply, QJsonDoc
 
 int Redmine::get_user(int user_id, void *callback, void *arg)
 {
-    return this->request(GET, "users/"+QString::number(user_id), callback, arg, "");
+    return this->request(GET, "users/"+QString::number(user_id), callback, arg);
 }
 
 int Redmine::get_user(

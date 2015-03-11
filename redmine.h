@@ -24,6 +24,7 @@ public:
             QString uri,
             void *callback,
             void *callback_arg,
+            QString getParams = "",
             const QByteArray& requestData = "");
 
     /* Request all issues

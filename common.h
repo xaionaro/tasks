@@ -10,6 +10,7 @@ extern QString issues_filter;
 struct settings {
     QString settingsFilePath;
     QString apiKey;
+    QString issuesFilter;
 };
 extern struct settings settings;
 extern void loadSettings();

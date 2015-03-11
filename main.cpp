@@ -25,20 +25,21 @@
 
 
 Redmine *redmine = NULL;
-QString issues_filter = "";
 
 struct settings settings;
 
 void loadSettings() {
     QSettings qsettings(settings.settingsFilePath, QSettings::NativeFormat);
-    settings.apiKey = qsettings.value("apiKey").toString();
+    settings.apiKey       = qsettings.value("apiKey").toString();
+    settings.issuesFilter = qsettings.value("issuesFilter").toString();
 
     return;
 }
 
 void saveSettings() {
     QSettings qsettings(settings.settingsFilePath, QSettings::NativeFormat);
-    qsettings.setValue("apiKey", settings.apiKey);
+    qsettings.setValue("apiKey",       settings.apiKey);
+    qsettings.setValue("issuesFilter", settings.issuesFilter);
 
     return;
 }
