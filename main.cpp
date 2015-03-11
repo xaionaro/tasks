@@ -22,7 +22,6 @@
 #include "common.h"
 #include <QApplication>
 #include <QSettings>
-#include <QFileInfo>
 #include <QDir>
 
 Redmine *redmine = NULL;
@@ -30,7 +29,7 @@ Redmine *redmine = NULL;
 struct settings settings;
 
 void loadSettings() {
-    QSettings qsettings(settings.settingsFilePath, QSettings::NativeFormat);
+    QSettings qsettings(settings.settingsFilePath, QSettings::IniFormat);
     settings.apiKey       = qsettings.value("apiKey").toString();
     settings.issuesFilter = qsettings.value("issuesFilter").toString();
 
@@ -38,7 +37,7 @@ void loadSettings() {
 }
 
 void saveSettings() {
-    QSettings qsettings(settings.settingsFilePath, QSettings::NativeFormat);
+    QSettings qsettings(settings.settingsFilePath, QSettings::IniFormat);
     qsettings.setValue("apiKey",       settings.apiKey);
     qsettings.setValue("issuesFilter", settings.issuesFilter);
 
@@ -51,15 +50,11 @@ int main(int argc, char *argv[])
     redmine = &_redmine;
     qDebug("Starting");
 
-    QStringList paths = QCoreApplication::libraryPaths();
-    paths.append(".");
-    paths.append(QFileInfo(argv[0]).dir().path());
-    QCoreApplication::setLibraryPaths(paths);
-
     QApplication a(argc, argv);
     QStringList arglst = a.arguments();
 
-    settings.settingsFilePath = QDir::fromNativeSeparators( QApplication::applicationDirPath() + "/mephi-tasks.ini" );
+    settings.settingsFilePath = QDir::toNativeSeparators( QApplication::applicationDirPath() + "/mephi-tasks.ini" );
+    qDebug("Settings path is: %s", settings.settingsFilePath.toUtf8().data());
     loadSettings();
 /*
     if (arglst.count() <= 1) {
