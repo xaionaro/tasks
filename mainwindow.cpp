@@ -78,6 +78,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setWindowTitle("Система «Задачи» НИЯУ МИФИ: Поручения ректора");
 
+    Qt::WindowFlags flags = this->windowFlags();
+    this->setWindowFlags(flags | Qt::WindowStaysOnTopHint);
+
     this->issuesSetup();
 
     this->updateTasks();
@@ -170,8 +173,11 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     item = issues->item(pos, 1);
     //         Co-assignees (asynchronous):
     QJsonArray customFields = issue["custom_fields"].toArray();
+    //qDebug("foreach custom_fields");
     foreach (const QJsonValue &customField, customFields) {
+        //qDebug("custom_field: %s", customField.toObject()["name"].toString().toUtf8().data());
         if (customField.toObject()["name"].toString() == "Соисполнители") {
+            //qDebug("Coassignees field");
             QJsonArray coassignees_id_obj = customField.toObject()["value"].toArray();
             foreach (const QJsonValue &coassignee_id_obj, coassignees_id_obj) {
                 // Don't try to use .toInt() directly, the answer will always be "0":
@@ -201,7 +207,8 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     item = new QTableWidgetItem(due_date_str);
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
     if (isClosed) item->setBackgroundColor(closedBgColor);
-    if ((due_date_str != "") && (now > date) && (!isClosed)) {
+    if ((due_date_str != "") && (now.toTime_t() - (3600*24-1) > date.toTime_t()) && (!isClosed)) {
+        //qDebug("%i %i\n", now.toTime_t(), date.toTime_t());
         item->setBackgroundColor(QColor(255, 192, 192));
         this->statusWorsenTo(BAD);
     }
