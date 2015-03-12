@@ -76,6 +76,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    this->setWindowTitle("Система «Задачи» НИЯУ МИФИ: Поручения ректора");
+
     this->issuesSetup();
 
     this->updateTasks();
@@ -344,8 +346,8 @@ void MainWindow::setIcon(EIcon index)
 void MainWindow::createIconComboBox()
 {
     this->iconComboBox = new QComboBox;
-    this->iconComboBox->addItem(QIcon(":/images/good.png"), tr("Good"));
-    this->iconComboBox->addItem(QIcon(":/images/bad.png"),  tr("Bad"));
+    this->iconComboBox->addItem(QIcon(":/images/good.png"), tr("Просроченных задач нет"));
+    this->iconComboBox->addItem(QIcon(":/images/bad.png"),  tr("Есть просроченные задачи"));
     return;
 }
 
