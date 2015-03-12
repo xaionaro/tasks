@@ -201,14 +201,17 @@ QNetworkReply *Redmine::get_user(
         funct_callback_json callback,
         void *arg)
 {
-    struct get_user_callback_arg *get_user_callback_arg_p =
-            (struct get_user_callback_arg *)calloc(1, sizeof(struct get_user_callback_arg));
+    struct get_user_callback_arg *get_user_callback_arg_p = NULL;
+
     //qDebug("user request: %i", user_id);
 
     if (this->users.contains(user_id)) {
         callback(arg, NULL, &this->users[user_id]);
         return 0;
     }
+
+    get_user_callback_arg_p =
+            (struct get_user_callback_arg *)calloc(1, sizeof(struct get_user_callback_arg));
 
     get_user_callback_arg_p->redmine       = this;
     get_user_callback_arg_p->user_id       = user_id;

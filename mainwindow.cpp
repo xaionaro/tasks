@@ -297,6 +297,7 @@ void MainWindow::on_actionHelp_triggered()
 }
 
 void MainWindow::showOnTop() {
+#ifdef WIN32
     // raise() doesn't work :(
 
     Qt::WindowFlags flags_old   = this->windowFlags();
@@ -305,6 +306,10 @@ void MainWindow::showOnTop() {
     this->show();
     this->setWindowFlags(flags_old);
     this->show();
+#else
+    this->show();
+    this->raise();
+#endif
 
     return;
 }
