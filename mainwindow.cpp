@@ -297,7 +297,7 @@ void MainWindow::on_actionHelp_triggered()
 }
 
 void MainWindow::showOnTop() {
-#ifdef WIN32
+#ifdef Q_OS_WIN32
     // raise() doesn't work :(
 
     Qt::WindowFlags flags_old   = this->windowFlags();
