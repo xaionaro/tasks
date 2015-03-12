@@ -32,20 +32,21 @@ public:
             QString                 uri,
             void                   *callback,
             void                   *callback_arg = NULL,
+            bool                    free_arg = false,
             QString                 getParams = "",
             const QByteArray       &requestData = "");
-    QNetworkReply *request(
-            RedmineClient::EMode    mode,
+    QNetworkReply *request(RedmineClient::EMode    mode,
             QString                 uri,
             funct_callback_json     callback,
             void                   *callback_arg = NULL,
+            bool                    free_arg = false,
             QString                 getParams = "",
             const QByteArray       &requestData = "");
 
     /* Request all issues
      */
-    QNetworkReply *get_issues(void  *callback, void *arg);
-    QNetworkReply *get_issues(funct_callback_json callback, void *arg);
+    QNetworkReply *get_issues(void  *callback, void *arg, bool free_arg = false);
+    QNetworkReply *get_issues(funct_callback_json callback, void *arg, bool free_arg = false);
 
     /* Get issue status info
      */
