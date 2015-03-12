@@ -65,6 +65,8 @@ private:
     QHash<int, QJsonObject> issue_row2issue;
     QTimer *timerUpdateTasks;
 
+    void showOnTop();
+
     EStatus _status;
 };
 

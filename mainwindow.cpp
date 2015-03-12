@@ -78,8 +78,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setWindowTitle("Система «Задачи» НИЯУ МИФИ: Поручения ректора");
 
-    Qt::WindowFlags flags = this->windowFlags();
-    this->setWindowFlags(flags | Qt::WindowStaysOnTopHint);
+    //Qt::WindowFlags flags = this->windowFlags();
+    //this->setWindowFlags(flags | Qt::WindowStaysOnTopHint);
 
     this->issuesSetup();
 
@@ -296,11 +296,25 @@ void MainWindow::on_actionHelp_triggered()
     return;
 }
 
+void MainWindow::showOnTop() {
+    // raise() doesn't work :(
+
+    Qt::WindowFlags flags_old   = this->windowFlags();
+    Qt::WindowFlags flags_ontop = flags_old | Qt::WindowStaysOnTopHint;
+    this->setWindowFlags(flags_ontop);
+    this->show();
+    this->setWindowFlags(flags_old);
+    this->show();
+
+    return;
+}
+
 void MainWindow::toggleShowHide() {
     if (this->isVisible())
         this->hide();
-    else
-        this->show();
+    else {
+        this->showOnTop();
+    }
 
     return;
 }
