@@ -57,11 +57,11 @@ void MainWindow::issuesSetup()
     // Signals:
 
     connect(issues, SIGNAL(cellDoubleClicked(int, int)),
-            this,   SLOT(on_issues_doubleClick(int, int)));
+            this,   SLOT(issues_doubleClick(int, int)));
     return;
 }
 
-void MainWindow::on_issues_doubleClick(int row, int column)
+void MainWindow::issues_doubleClick(int row, int column)
 {
     (void)column;
     QString url = QString(SERVER_URL "/issues/%1").arg(this->issue_row2issue[row]["id"].toInt());
@@ -122,6 +122,7 @@ static void append_assignee(void *_arg, QNetworkReply *reply, QJsonDocument *coa
                 lastname + " " + initials
             );
 
+    delete arg;
     return;
 }
 
@@ -336,18 +337,17 @@ void MainWindow::createTrayIcon()
 void MainWindow::setIcon(EIcon index)
 {
     //qDebug("icon: %i", index);
-    QIcon icon = this->iconComboBox->itemIcon(index);
+    QIcon icon = this->iconComboBox.itemIcon(index);
     this->trayIcon->setIcon(icon);
     this->setWindowIcon(icon);
 
-    this->trayIcon->setToolTip(this->iconComboBox->itemText(index));
+    this->trayIcon->setToolTip(this->iconComboBox.itemText(index));
 }
 
 void MainWindow::createIconComboBox()
 {
-    this->iconComboBox = new QComboBox;
-    this->iconComboBox->addItem(QIcon(":/images/good.png"), tr("Просроченных задач нет"));
-    this->iconComboBox->addItem(QIcon(":/images/bad.png"),  tr("Есть просроченные задачи"));
+    this->iconComboBox.addItem(QIcon(":/images/good.png"), tr("Просроченных задач нет"));
+    this->iconComboBox.addItem(QIcon(":/images/bad.png"),  tr("Есть просроченные задачи"));
     return;
 }
 
@@ -361,3 +361,22 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 }
 
 
+
+void MainWindow::on_issues_itemSelectionChanged()
+{
+    QTableWidget                     *issues             = this->ui->issues;
+    int                               columns_count      = issues->columnCount();
+    QList<QTableWidgetSelectionRange> selected_list      = issues->selectedRanges();
+
+    foreach (QTableWidgetSelectionRange range, selected_list)
+        if (range.leftColumn() != 0 || range.rightColumn() != columns_count-1)
+
+            issues->setRangeSelected(
+                    QTableWidgetSelectionRange(
+                        range.topRow(),    0,
+                        range.bottomRow(), columns_count-1
+                    ),
+                    true
+                );
+
+}

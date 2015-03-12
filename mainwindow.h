@@ -38,15 +38,17 @@ public:
 private slots:
     void on_actionExit_triggered();
     void on_actionHelp_triggered();
-    void on_issues_doubleClick(int row, int column);
+    void issues_doubleClick(int row, int column);
     void toggleShowHide();
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     int updateTasks();
 
+    void on_issues_itemSelectionChanged();
+
 private:
     Ui::MainWindow *ui;
 
-    QComboBox *iconComboBox;
+    QComboBox iconComboBox;
 
     QAction *showHideAction;
     QAction *quitAction;

@@ -186,7 +186,7 @@ static void get_user_callback_wrapper(void *_arg, QNetworkReply *reply, QJsonDoc
     Redmine *redmine = static_cast<Redmine *>(arg->redmine);
     funct_callback_json callback = arg->real_callback;
     redmine->get_user_callback(arg->user_id, reply, user, callback, arg->arg);
-    delete arg;
+    free(arg);
     return;
 }
 
@@ -200,7 +200,8 @@ QNetworkReply *Redmine::get_user(
         funct_callback_json callback,
         void *arg)
 {
-    struct get_user_callback_arg *get_user_callback_arg_p = new struct get_user_callback_arg;
+    struct get_user_callback_arg *get_user_callback_arg_p =
+            (struct get_user_callback_arg *)calloc(1, sizeof(struct get_user_callback_arg));
     //qDebug("user request: %i", user_id);
 
     if (this->users.contains(user_id)) {

@@ -46,8 +46,6 @@ void saveSettings() {
 
 int main(int argc, char *argv[])
 {
-    Redmine    _redmine;
-    redmine = &_redmine;
     qDebug("Starting");
 
     QApplication a(argc, argv);
@@ -67,12 +65,20 @@ int main(int argc, char *argv[])
     if (arglst.count() > 1)
         settings.apiKey = arglst[1];
 
-    redmine->apiKey(settings.apiKey);
-    redmine->init();
+    /* We need to follow the important next order of objects initialization:
+     * QApplication, Redmine, MainWindow
+     */
+    {
+        Redmine    _redmine;
+        redmine = &_redmine;
+        redmine->apiKey(settings.apiKey);
+        redmine->init();
+        {
+            MainWindow w;
+            w.show();
 
-    MainWindow w;
-    w.show();
-
-    a.setQuitOnLastWindowClosed(false);
-    return a.exec();
+            a.setQuitOnLastWindowClosed(false);
+            return a.exec();
+        }
+    }
 }
