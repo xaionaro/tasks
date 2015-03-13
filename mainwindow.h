@@ -9,6 +9,9 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QTimer>
+#include <QNetworkReply>
+
+#include "redmine.h"
 
 namespace Ui {
     class MainWindow;
@@ -17,6 +20,7 @@ namespace Ui {
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+    CALLBACK_DISPATCHER(Redmine, MainWindow, NULL)
 
 public:
     enum EIcon {
@@ -35,6 +39,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+
 private slots:
     void on_actionExit_triggered();
     void on_actionHelp_triggered();
@@ -44,6 +49,8 @@ private slots:
     int updateTasks();
 
     void on_issues_itemSelectionChanged();
+
+    void append_assignee(QNetworkReply *reply, QJsonDocument *coassignee_doc, void *_arg);
 
 private:
     Ui::MainWindow *ui;
@@ -66,6 +73,8 @@ private:
     QTimer *timerUpdateTasks;
 
     void showOnTop();
+
+    void get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
 
     EStatus _status;
 };

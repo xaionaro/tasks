@@ -76,10 +76,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    qDebug("MainWindow::MainWindow(): %p", this);
+
     this->setWindowTitle("Система «Задачи» НИЯУ МИФИ: Поручения ректора");
 
     //Qt::WindowFlags flags = this->windowFlags();
     //this->setWindowFlags(flags | Qt::WindowStaysOnTopHint);
+
+    connect(redmine, SIGNAL(callback_call      (void*,callback_t,QNetworkReply*,QJsonDocument*,void*)),
+            this,    SLOT(  callback_dispatcher(void*,callback_t,QNetworkReply*,QJsonDocument*,void*)) );
 
     this->issuesSetup();
 
@@ -101,19 +106,18 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 struct append_assignee_arg {
-    void *_issues;
     int   pos;
 };
 
-static void append_assignee(void *_arg, QNetworkReply *reply, QJsonDocument *coassignee_doc) {
+void MainWindow::append_assignee(QNetworkReply *reply, QJsonDocument *coassignee_doc, void *_arg) {
     (void)reply;
     struct append_assignee_arg *arg = (struct append_assignee_arg *)_arg;
     QJsonObject coassignee = coassignee_doc->object()["user"].toObject();
 
-    //qDebug("answer is: %s", coassignee_doc->toJson().data());
-
-    QTableWidget *issues = static_cast<QTableWidget *>(arg->_issues);
+    QTableWidget *issues = this->ui->issues;
     int              pos = arg->pos;
+
+    qDebug("pos: %i; answer is: %s", pos, coassignee_doc->toJson().data());
 
     QString firstname = coassignee["firstname"].toString();
     QString lastname  = coassignee["lastname"].toString();
@@ -131,6 +135,7 @@ static void append_assignee(void *_arg, QNetworkReply *reply, QJsonDocument *coa
 
 void MainWindow::issues_clear()
 {
+    qDebug("MainWindow::issues_clear(): %p", this);
     QTableWidget *issues = this->ui->issues;
     int row_count= issues->rowCount();
 
@@ -173,25 +178,20 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     item = issues->item(pos, 1);
     //         Co-assignees (asynchronous):
     QJsonArray customFields = issue["custom_fields"].toArray();
-    //qDebug("foreach custom_fields");
     foreach (const QJsonValue &customField, customFields) {
-        //qDebug("custom_field: %s", customField.toObject()["name"].toString().toUtf8().data());
         if (customField.toObject()["name"].toString() == "Соисполнители") {
-            //qDebug("Coassignees field");
             QJsonArray coassignees_id_obj = customField.toObject()["value"].toArray();
             foreach (const QJsonValue &coassignee_id_obj, coassignees_id_obj) {
                 // Don't try to use .toInt() directly, the answer will always be "0":
                 int coassignee_id = coassignee_id_obj.toString().toInt();
 
-                //qDebug("Coassignee: %i!", coassignee_id);
                 struct append_assignee_arg *append_assignee_arg_p;
                 append_assignee_arg_p = new struct append_assignee_arg;
                 // TODO: fix a memleak if redmine->get_user doesn't success
 
-                append_assignee_arg_p->_issues = issues;
                 append_assignee_arg_p->pos     = pos;
 
-                redmine->get_user(coassignee_id, append_assignee, (void *)append_assignee_arg_p);
+                redmine->get_user(coassignee_id, (Redmine::callback_t)&MainWindow::append_assignee, (void *)append_assignee_arg_p);
             }
 
             break;
@@ -208,7 +208,6 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
     if (isClosed) item->setBackgroundColor(closedBgColor);
     if ((due_date_str != "") && (now.toTime_t() - (3600*24-1) > date.toTime_t()) && (!isClosed)) {
-        //qDebug("%i %i\n", now.toTime_t(), date.toTime_t());
         item->setBackgroundColor(QColor(255, 192, 192));
         this->statusWorsenTo(BAD);
     }
@@ -220,19 +219,9 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
     issues->setItem(pos, 3, item);
 
     this->issue_row2issue.insert(pos, issue);
-    //qDebug("Test: %i|%i", issue["id"].toInt(), this->issue_row2issue[0]["id"].toInt());
     return;
 }
 
-/*
-bool issueCmpFunct_statusPosition_lt(const QJsonObject &issue_a, const QJsonObject &issue_b)
-{
-    int issue_statusPosition_a = redmine->get_issue_status(issue_a["status"].toObject()["id"].toInt())["position"].toInt();
-    int issue_statusPosition_b = redmine->get_issue_status(issue_b["status"].toObject()["id"].toInt())["position"].toInt();
-
-    return issue_statusPosition_a < issue_statusPosition_b;
-}
-*/
 bool issueCmpFunct_statusIsClosed_lt(const QJsonObject &issue_a, const QJsonObject &issue_b)
 {
     int issue_statusIsClosed_a = redmine->get_issue_status(issue_a["status"].toObject()["id"].toInt())["is_closed"].toBool();
@@ -241,15 +230,16 @@ bool issueCmpFunct_statusIsClosed_lt(const QJsonObject &issue_a, const QJsonObje
     return issue_statusIsClosed_a < issue_statusIsClosed_b;
 }
 
-static void get_issues_callback(void *_win, QNetworkReply *reply, QJsonDocument *json) {
+void MainWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
     (void)reply;
-    MainWindow *win = static_cast<MainWindow *>(_win);
+    qDebug("MainWindow::get_issues_callback(): %p %p", this, arg);
+    //MainWindow *win = static_cast<MainWindow *>(_win);
     QList<QJsonObject> issues_list;
 
-    if (win->status() == MainWindow::BAD)
-        win->status(MainWindow::GOOD);
+    if (this->status() == MainWindow::BAD)
+        this->status(MainWindow::GOOD);
 
-    win->issues_clear();
+    this->issues_clear();
 
     int issues_count = 0;
 
@@ -262,18 +252,14 @@ static void get_issues_callback(void *_win, QNetworkReply *reply, QJsonDocument 
     qSort(issues_list.begin(), issues_list.end(), issueCmpFunct_statusIsClosed_lt);
 
     foreach (const QJsonObject &issue, issues_list)
-        win->issue_set(issues_count++, issue);
+        this->issue_set(issues_count++, issue);
 
-    win->setIcon(win->status());
+    this->setIcon(this->status());
     return;
 }
-/*
-static void get_issues_callback_wrapper(void *_this, QNetworkReply *reply, QJsonDocument *json) {
-    static_cast<MainWindow *>(_this)->get_issues_callback(reply, json);
-}*/
 
 int MainWindow::updateTasks() {
-    redmine->get_issues(get_issues_callback, this);
+    redmine->get_issues((Redmine::callback_t)&MainWindow::get_issues_callback, this);
     return 0;
 }
 
