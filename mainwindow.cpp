@@ -76,7 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    qDebug("MainWindow::MainWindow(): %p", this);
+    /*qDebug("MainWindow::MainWindow(): %p", this);*/
 
     this->setWindowTitle("Система «Задачи» НИЯУ МИФИ: Поручения ректора");
 
@@ -117,7 +117,7 @@ void MainWindow::append_assignee(QNetworkReply *reply, QJsonDocument *coassignee
     QTableWidget *issues = this->ui->issues;
     int              pos = arg->pos;
 
-    qDebug("pos: %i; answer is: %s", pos, coassignee_doc->toJson().data());
+    /*qDebug("pos: %i; answer is: %s", pos, coassignee_doc->toJson().data());*/
 
     QString firstname = coassignee["firstname"].toString();
     QString lastname  = coassignee["lastname"].toString();
@@ -135,7 +135,7 @@ void MainWindow::append_assignee(QNetworkReply *reply, QJsonDocument *coassignee
 
 void MainWindow::issues_clear()
 {
-    qDebug("MainWindow::issues_clear(): %p", this);
+    /*qDebug("MainWindow::issues_clear(): %p", this);*/
     QTableWidget *issues = this->ui->issues;
     int row_count= issues->rowCount();
 
@@ -231,8 +231,8 @@ bool issueCmpFunct_statusIsClosed_lt(const QJsonObject &issue_a, const QJsonObje
 }
 
 void MainWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
-    (void)reply;
-    qDebug("MainWindow::get_issues_callback(): %p %p", this, arg);
+    (void)reply; (void)arg;
+    /*qDebug("MainWindow::get_issues_callback(): %p %p", this, arg);*/
     //MainWindow *win = static_cast<MainWindow *>(_win);
     QList<QJsonObject> issues_list;
 

@@ -57,9 +57,10 @@ QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
         callback_t              callback,
         void                   *callback_arg,
         bool                    free_arg,
-        QString                 getParams,
+        const QString          &getParams,
         const QByteArray       &requestData
 ) {
+    //qDebug("request: URI: %s", uri.toUtf8().data());
     return this->sendRequest(uri, RedmineClient::JSON, mode, obj_ptr,
                       (RedmineClient::callback_t)callback, callback_arg, free_arg, getParams, requestData);
 }
@@ -79,7 +80,6 @@ void Redmine::set_issue_status(int status_id, QJsonObject status)
 
 void Redmine::clear_issue_status()
 {
-    qDebug("this: %p %p", this, &issue_statuses);
     this->issue_statuses.clear();
 }
 
@@ -91,7 +91,6 @@ QJsonObject Redmine::get_issue_status(int issue_status_id)
 void Redmine::updateIssueStatuses_callback(QNetworkReply *reply, QJsonDocument *statuses_doc, void *_arg)
 {
     (void)reply;
-    qDebug("callback: this: %p", this);
 
     struct redmine_updateIssueStatuses_callback_arg *arg =
             (struct redmine_updateIssueStatuses_callback_arg *)_arg;
@@ -109,23 +108,26 @@ void Redmine::updateIssueStatuses_callback(QNetworkReply *reply, QJsonDocument *
         this->set_issue_status(status["id"].toInt(), status);
     }
 
-    qDebug("Redmine::updateIssueStatuses_callback(): this: %p", this);
     this->callback_call(NULL, callback, reply, statuses_doc, callback_arg);
     return;
 }
 
 QNetworkReply *Redmine::updateIssueStatuses(callback_t callback, void *arg)
 {
-    struct redmine_updateIssueStatuses_callback_arg *wrapper_arg =
+    struct redmine_updateIssueStatuses_callback_arg *wrapper_arg = NULL;
+
+    if (callback != NULL) {
+         wrapper_arg =
             (struct redmine_updateIssueStatuses_callback_arg *)
                 calloc(1, sizeof(struct redmine_updateIssueStatuses_callback_arg));
 
-    wrapper_arg->real_callback = callback;
-    wrapper_arg->arg           = arg;
+        wrapper_arg->real_callback = callback;
+        wrapper_arg->arg           = arg;
+    }
 
     return this->request(GET,
                          "issue_statuses",
-                         NULL,
+                         this,
                          &Redmine::updateIssueStatuses_callback,
                          wrapper_arg,
                          true);

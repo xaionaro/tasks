@@ -45,9 +45,9 @@ public:
             void                   *obj_ptr,
             callback_t              callback,
             void                   *callback_arg = NULL,
-            bool                    free_arg = false,
-            QString                 getParams = "",
-            const QByteArray       &requestData = "");
+            bool                    free_arg     = false,
+            const QString          &getParams    = "",
+            const QByteArray       &requestData  = "");
 
     /* Request all issues
      */
