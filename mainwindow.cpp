@@ -27,6 +27,7 @@
 #include <QDateTime>
 #include <QMenu>
 #include <QList>
+#include <QScrollBar>
 
 void MainWindow::issuesSetup()
 {
@@ -234,11 +235,16 @@ void MainWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, 
     (void)reply; (void)arg;
     /*qDebug("MainWindow::get_issues_callback(): %p %p", this, arg);*/
     //MainWindow *win = static_cast<MainWindow *>(_win);
-    QList<QJsonObject> issues_list;
+
+    QTableWidget *uiIssues = this->ui->issues;
+
+    QList<QTableWidgetSelectionRange> selected_list = uiIssues->selectedRanges();
+    QList<QJsonObject>                issues_list;
 
     if (this->status() == MainWindow::BAD)
         this->status(MainWindow::GOOD);
 
+    int scrollValue = uiIssues->verticalScrollBar()->value();
     this->issues_clear();
 
     int issues_count = 0;
@@ -253,6 +259,18 @@ void MainWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, 
 
     foreach (const QJsonObject &issue, issues_list)
         this->issue_set(issues_count++, issue);
+
+    uiIssues->verticalScrollBar()->setValue(scrollValue);
+
+    foreach (QTableWidgetSelectionRange range, selected_list)
+        uiIssues->setRangeSelected(
+                    QTableWidgetSelectionRange(
+                        range.topRow(),    range.leftColumn(),
+                        range.bottomRow(), range.rightColumn()
+                    ),
+                    true
+                );
+
 
     this->setIcon(this->status());
     return;
