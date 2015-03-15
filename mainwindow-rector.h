@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MAINWINDOW_RECTOR_H
+#define MAINWINDOW_RECTOR_H
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
@@ -14,13 +14,13 @@
 #include "redmine.h"
 
 namespace Ui {
-    class MainWindow;
+    class MainWindowRector;
 }
 
-class MainWindow : public QMainWindow
+class MainWindowRector : public QMainWindow
 {
     Q_OBJECT
-    CALLBACK_DISPATCHER(Redmine, MainWindow, NULL)
+    CALLBACK_DISPATCHER(Redmine, MainWindowRector, NULL)
 
 public:
     enum EIcon {
@@ -36,8 +36,8 @@ public:
     void issue_set(int pos, QJsonObject issue);
     void issues_clear();
     void setIcon(EIcon index);
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit MainWindowRector(QWidget *parent = 0);
+    ~MainWindowRector();
 
 
 private slots:
@@ -53,7 +53,7 @@ private slots:
     void append_assignee(QNetworkReply *reply, QJsonDocument *coassignee_doc, void *_arg);
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindowRector *ui;
 
     QComboBox iconComboBox;
 
@@ -79,4 +79,4 @@ private:
     EStatus _status;
 };
 
-#endif // MAINWINDOW_H
+#endif // MAINWINDOW_RECTOR_H

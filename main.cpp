@@ -17,7 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mainwindow.h"
+#include "mainwindow-rector.h"
+#include "mainwindow-full.h"
 #include "syntaxwindow.h"
 #include "common.h"
 #include <QApplication>
@@ -33,13 +34,22 @@ void loadSettings() {
     settings.apiKey       = qsettings.value("apiKey").toString();
     settings.issuesFilter = qsettings.value("issuesFilter").toString();
 
+    QString mode          = qsettings.value("mode").toString();
+
+    if (mode == "rector") {
+        settings.mode = MODE_RECTOR;
+    } else {
+        settings.mode = MODE_FULL;
+    }
+
     return;
 }
 
 void saveSettings() {
     QSettings qsettings(settings.settingsFilePath, QSettings::IniFormat);
-    qsettings.setValue("apiKey",       settings.apiKey);
-    qsettings.setValue("issuesFilter", settings.issuesFilter);
+    qsettings.setValue("apiKey",        settings.apiKey);
+    qsettings.setValue("issuesFilter",  settings.issuesFilter);
+    qsettings.setValue("mode",         (settings.mode == MODE_RECTOR) ? "rector" : "full");
 
     return;
 }
@@ -66,19 +76,30 @@ int main(int argc, char *argv[])
         settings.apiKey = arglst[1];
 
     /* We need to follow the important next order of objects initialization:
-     * QApplication, Redmine, MainWindow
+     * QApplication, Redmine, MainWindowRector
      */
     {
         Redmine    _redmine;
         redmine = &_redmine;
         redmine->apiKey(settings.apiKey);
         redmine->init();
-        {
-            MainWindow w;
-            w.show();
+        switch (settings.mode) {
+            case MODE_RECTOR:
+                {
+                    MainWindowRector w;
+                    w.show();
 
-            a.setQuitOnLastWindowClosed(false);
-            return a.exec();
+                    a.setQuitOnLastWindowClosed(false);
+                    return a.exec();
+                }
+            default:
+                {
+                    MainWindowFull w;
+                    w.show();
+
+                    a.setQuitOnLastWindowClosed(false);
+                    return a.exec();
+                }
         }
     }
 }

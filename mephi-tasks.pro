@@ -13,20 +13,25 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++11 -O0 -march=native
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
     helpwindow.cpp \
     redmine.cpp \
-    syntaxwindow.cpp
+    syntaxwindow.cpp \
+    mainwindow-rector.cpp \
+    mainwindow-full.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += \
     helpwindow.h \
     redmine.h \
     common.h \
-    syntaxwindow.h
+    syntaxwindow.h \
+    mainwindow-rector.h \
+    mainwindow-full.h
 
-FORMS    += mainwindow.ui \
+FORMS    += \
     helpwindow.ui \
-    syntaxwindow.ui
+    syntaxwindow.ui \
+    mainwindow-full.ui \
+    mainwindow-rector.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Release/release/ -lqtredmine
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/ -lqtredmine

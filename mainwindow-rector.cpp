@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mainwindow.h"
+#include "mainwindow-rector.h"
 #include "helpwindow.h"
-#include "ui_mainwindow.h"
+#include "ui_mainwindow-rector.h"
 #include "common.h"
 
 #include <QStringList>
@@ -29,7 +29,7 @@
 #include <QList>
 #include <QScrollBar>
 
-void MainWindow::issuesSetup()
+void MainWindowRector::issuesSetup()
 {
     QTableWidget *issues = ui->issues;
 
@@ -62,7 +62,7 @@ void MainWindow::issuesSetup()
     return;
 }
 
-void MainWindow::issues_doubleClick(int row, int column)
+void MainWindowRector::issues_doubleClick(int row, int column)
 {
     (void)column;
     QString url = QString(SERVER_URL "/issues/%1").arg(this->issue_row2issue[row]["id"].toInt());
@@ -71,13 +71,13 @@ void MainWindow::issues_doubleClick(int row, int column)
     return;
 }
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindowRector::MainWindowRector(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindowRector)
 {
     ui->setupUi(this);
 
-    /*qDebug("MainWindow::MainWindow(): %p", this);*/
+    /*qDebug("MainWindowRector::MainWindowRector(): %p", this);*/
 
     this->setWindowTitle("Система «Задачи» НИЯУ МИФИ: Поручения ректора");
 
@@ -110,7 +110,7 @@ struct append_assignee_arg {
     int   pos;
 };
 
-void MainWindow::append_assignee(QNetworkReply *reply, QJsonDocument *coassignee_doc, void *_arg) {
+void MainWindowRector::append_assignee(QNetworkReply *reply, QJsonDocument *coassignee_doc, void *_arg) {
     (void)reply;
     struct append_assignee_arg *arg = (struct append_assignee_arg *)_arg;
     QJsonObject coassignee = coassignee_doc->object()["user"].toObject();
@@ -134,9 +134,9 @@ void MainWindow::append_assignee(QNetworkReply *reply, QJsonDocument *coassignee
     return;
 }
 
-void MainWindow::issues_clear()
+void MainWindowRector::issues_clear()
 {
-    /*qDebug("MainWindow::issues_clear(): %p", this);*/
+    /*qDebug("MainWindowRector::issues_clear(): %p", this);*/
     QTableWidget *issues = this->ui->issues;
     int row_count= issues->rowCount();
 
@@ -149,7 +149,7 @@ void MainWindow::issues_clear()
     return;
 }
 
-void MainWindow::issue_set(int pos, QJsonObject issue)
+void MainWindowRector::issue_set(int pos, QJsonObject issue)
 {
     QTableWidget     *issues = this->ui->issues;
     QTableWidgetItem *item;
@@ -192,7 +192,7 @@ void MainWindow::issue_set(int pos, QJsonObject issue)
 
                 append_assignee_arg_p->pos     = pos;
 
-                redmine->get_user(coassignee_id, (Redmine::callback_t)&MainWindow::append_assignee, (void *)append_assignee_arg_p);
+                redmine->get_user(coassignee_id, (Redmine::callback_t)&MainWindowRector::append_assignee, (void *)append_assignee_arg_p);
             }
 
             break;
@@ -231,18 +231,18 @@ bool issueCmpFunct_statusIsClosed_lt(const QJsonObject &issue_a, const QJsonObje
     return issue_statusIsClosed_a < issue_statusIsClosed_b;
 }
 
-void MainWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
+void MainWindowRector::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
     (void)reply; (void)arg;
-    /*qDebug("MainWindow::get_issues_callback(): %p %p", this, arg);*/
-    //MainWindow *win = static_cast<MainWindow *>(_win);
+    /*qDebug("MainWindowRector::get_issues_callback(): %p %p", this, arg);*/
+    //MainWindowRector *win = static_cast<MainWindowRector *>(_win);
 
     QTableWidget *uiIssues = this->ui->issues;
 
     QList<QTableWidgetSelectionRange> selected_list = uiIssues->selectedRanges();
     QList<QJsonObject>                issues_list;
 
-    if (this->status() == MainWindow::BAD)
-        this->status(MainWindow::GOOD);
+    if (this->status() == MainWindowRector::BAD)
+        this->status(MainWindowRector::GOOD);
 
     int scrollValue = uiIssues->verticalScrollBar()->value();
     this->issues_clear();
@@ -276,31 +276,31 @@ void MainWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, 
     return;
 }
 
-int MainWindow::updateTasks() {
-    redmine->get_issues((Redmine::callback_t)&MainWindow::get_issues_callback, this);
+int MainWindowRector::updateTasks() {
+    redmine->get_issues((Redmine::callback_t)&MainWindowRector::get_issues_callback, this);
     return 0;
 }
 
-MainWindow::~MainWindow()
+MainWindowRector::~MainWindowRector()
 {
     saveSettings();
     delete this->ui;
     delete this->timerUpdateTasks;
 }
 
-void MainWindow::on_actionExit_triggered()
+void MainWindowRector::on_actionExit_triggered()
 {
     qApp->quit();
 }
 
-void MainWindow::on_actionHelp_triggered()
+void MainWindowRector::on_actionHelp_triggered()
 {
     HelpWindow *win = new HelpWindow();
     win->show();
     return;
 }
 
-void MainWindow::showOnTop() {
+void MainWindowRector::showOnTop() {
 #ifdef Q_OS_WIN32
     // raise() doesn't work :(
 
@@ -318,7 +318,7 @@ void MainWindow::showOnTop() {
     return;
 }
 
-void MainWindow::toggleShowHide() {
+void MainWindowRector::toggleShowHide() {
     if (this->isVisible())
         this->hide();
     else {
@@ -328,7 +328,7 @@ void MainWindow::toggleShowHide() {
     return;
 }
 
-void MainWindow::createTrayActions()
+void MainWindowRector::createTrayActions()
 {
     showHideAction = new QAction(tr("Показать/Спрятать"), this);
     connect(showHideAction, SIGNAL(triggered()), this, SLOT(toggleShowHide()));
@@ -337,7 +337,7 @@ void MainWindow::createTrayActions()
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 }
 
-void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
+void MainWindowRector::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     switch (reason) {
     case QSystemTrayIcon::Trigger:
@@ -351,7 +351,7 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void MainWindow::createTrayIcon()
+void MainWindowRector::createTrayIcon()
 {
     trayIconMenu = new QMenu(this);
     trayIconMenu->addAction(showHideAction);
@@ -364,7 +364,7 @@ void MainWindow::createTrayIcon()
                 this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 }
 
-void MainWindow::setIcon(EIcon index)
+void MainWindowRector::setIcon(EIcon index)
 {
     //qDebug("icon: %i", index);
     QIcon icon = this->iconComboBox.itemIcon(index);
@@ -374,14 +374,14 @@ void MainWindow::setIcon(EIcon index)
     this->trayIcon->setToolTip(this->iconComboBox.itemText(index));
 }
 
-void MainWindow::createIconComboBox()
+void MainWindowRector::createIconComboBox()
 {
     this->iconComboBox.addItem(QIcon(":/images/good.png"), tr("Просроченных задач нет"));
     this->iconComboBox.addItem(QIcon(":/images/bad.png"),  tr("Есть просроченные задачи"));
     return;
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event)
+void MainWindowRector::resizeEvent(QResizeEvent *event)
 {
     ui->issues->resize(this->width(), this->height()-50);
     ui->labelTasksNRNUMEPhI->move((this->width() - ui->labelTasksNRNUMEPhI->width())/2, this->height() - 20);
@@ -392,7 +392,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 
 
-void MainWindow::on_issues_itemSelectionChanged()
+void MainWindowRector::on_issues_itemSelectionChanged()
 {
     QTableWidget                     *issues             = this->ui->issues;
     int                               columns_count      = issues->columnCount();
