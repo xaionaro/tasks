@@ -15,6 +15,9 @@ public:
     explicit MainWindowFull(QWidget *parent = 0);
     ~MainWindowFull();
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
+
 private:
     Ui::MainWindowFull *ui;
 };

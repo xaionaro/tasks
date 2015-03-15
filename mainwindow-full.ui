@@ -20,9 +20,9 @@
    <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>0</x>
       <y>9</y>
-      <width>891</width>
+      <width>791</width>
       <height>541</height>
      </rect>
     </property>
@@ -49,12 +49,12 @@
     </rect>
    </property>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="navigationDock">
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <widget class="QTabWidget" name="navigation">
+   <widget class="QWidget" name="navigationDockContents">
+    <widget class="QTabWidget" name="navigationTabs">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -111,11 +111,11 @@
     </widget>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget_3">
+  <widget class="QDockWidget" name="filtersDock">
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_3">
+   <widget class="QWidget" name="filtersDockContents">
     <widget class="QWidget" name="verticalLayoutWidget">
      <property name="geometry">
       <rect>
@@ -125,7 +125,7 @@
        <height>521</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="filtersLayout">
       <item>
        <widget class="QRadioButton" name="radioButton_3">
         <property name="text">
@@ -151,21 +151,21 @@
     </widget>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget_4">
+  <widget class="QDockWidget" name="issueDock">
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_4">
+   <widget class="QWidget" name="issueDockContents">
     <widget class="QWidget" name="gridLayoutWidget">
      <property name="geometry">
       <rect>
-       <x>129</x>
+       <x>269</x>
        <y>9</y>
-       <width>1151</width>
+       <width>1011</width>
        <height>191</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QGridLayout" name="issueLayout">
       <item row="1" column="0">
        <widget class="QPushButton" name="pushButton">
         <property name="text">
@@ -181,8 +181,8 @@
    </widget>
   </widget>
   <zorder>dockWidget_2</zorder>
-  <zorder>dockWidget_3</zorder>
-  <zorder>dockWidget_4</zorder>
+  <zorder>filtersDock</zorder>
+  <zorder>issueDock</zorder>
  </widget>
  <resources/>
  <connections/>
