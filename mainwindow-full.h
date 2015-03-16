@@ -24,6 +24,8 @@ private:
     void on_resize_navigationDock(QResizeEvent *event);
     void on_resize_filtersDock(QResizeEvent *event);
     void on_resize_issueDock(QResizeEvent *event);
+
+    int navigationDockInitialWidth = 272;
 };
 
 #endif // MAINWINDOWFULL_H

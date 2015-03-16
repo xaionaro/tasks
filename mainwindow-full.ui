@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MainWindowFull</string>
   </property>
+  <property name="locale">
+   <locale language="Russian" country="Russia"/>
+  </property>
   <property name="dockOptions">
    <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks</set>
   </property>
@@ -50,6 +53,12 @@
    </property>
   </widget>
   <widget class="QDockWidget" name="navigationDock">
+   <property name="locale">
+    <locale language="Russian" country="Russia"/>
+   </property>
+   <property name="windowTitle">
+    <string>Навигация</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
@@ -64,7 +73,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>

@@ -21,11 +21,11 @@
 #include "mainwindow-full.h"
 #include "syntaxwindow.h"
 #include "common.h"
-#include <QApplication>
 #include <QSettings>
 #include <QDir>
 
-Redmine *redmine = NULL;
+Redmine      *redmine     = NULL;
+QApplication *application = NULL;
 
 struct settings settings;
 
@@ -59,6 +59,9 @@ int main(int argc, char *argv[])
     qDebug("Starting");
 
     QApplication a(argc, argv);
+
+    application = &a;
+
     QStringList arglst = a.arguments();
 
     settings.settingsFilePath = QDir::toNativeSeparators( QApplication::applicationDirPath() + "/mephi-tasks.ini" );

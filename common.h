@@ -1,11 +1,14 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <QApplication>
+
 #include "redmine.h"
 #define SERVER_URL "https://tasks.mephi.ru"
 
-extern Redmine *redmine;
-extern QString issues_filter;
+extern Redmine      *redmine;
+extern QApplication *application;
+extern QString       issues_filter;
 
 enum mode {
     MODE_FULL,
