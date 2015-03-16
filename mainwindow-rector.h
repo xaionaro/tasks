@@ -10,14 +10,16 @@
 #include <QHBoxLayout>
 #include <QTimer>
 #include <QNetworkReply>
+#include <QMap>
 
+#include "mainwindow-common.h"
 #include "redmine.h"
 
 namespace Ui {
     class MainWindowRector;
 }
 
-class MainWindowRector : public QMainWindow
+class MainWindowRector : public MainWindowCommon
 {
     Q_OBJECT
     CALLBACK_DISPATCHER(Redmine, MainWindowRector, NULL)
@@ -29,9 +31,9 @@ public:
     };
     typedef EIcon EStatus;
 
-    EStatus status        ()                  { return this->_status; };
-    EStatus status        (EStatus newstatus) { return this->_status = newstatus; };
-    EStatus statusWorsenTo(EStatus newstatus) { return this->_status = qMax(this->_status, newstatus); };
+    EStatus status        ()                  { return this->_status; }
+    EStatus status        (EStatus newstatus) { return this->_status = newstatus; }
+    EStatus statusWorsenTo(EStatus newstatus) { return this->_status = qMax(this->_status, newstatus); }
 
     void issue_set(int pos, QJsonObject issue);
     void issues_clear();
@@ -51,6 +53,8 @@ private slots:
     void on_issues_itemSelectionChanged();
 
     void append_assignee(QNetworkReply *reply, QJsonDocument *coassignee_doc, void *_arg);
+
+    void sortColumnSwitch(int columnIdx);
 
 private:
     Ui::MainWindowRector *ui;
@@ -77,6 +81,9 @@ private:
     void get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
 
     EStatus _status;
+
+    QMap <int, enum ESortColumn> sortColumnAscByIdx;
+    QMap <int, enum ESortColumn> sortColumnDescByIdx;
 };
 
 #endif // MAINWINDOW_RECTOR_H

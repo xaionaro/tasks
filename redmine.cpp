@@ -88,6 +88,12 @@ QJsonObject Redmine::get_issue_status(int issue_status_id)
     return this->issue_statuses[issue_status_id];
 }
 
+QJsonObject Redmine::get_issue_status(QJsonValueRef issues_status_json)
+{
+    return this->get_issue_status(issues_status_json.toObject()["id"].toInt());
+}
+
+
 void Redmine::updateIssueStatuses_callback(QNetworkReply *reply, QJsonDocument *statuses_doc, void *_arg)
 {
     (void)reply;
@@ -200,3 +206,22 @@ QNetworkReply *Redmine::get_user(int user_id,
 }
 
 /********* /get_user *********/
+
+/********* parseDateTime *********/
+
+QDateTime Redmine::parseDateTime(QJsonValueRef dataTime_json) {
+    // TODO: FIXME: make this function working on any timezone.
+
+    QString   date_str = dataTime_json.toString();
+    QDateTime date;
+
+    date = QDateTime::fromString(date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+03:00'");
+
+    if (!date.isValid())
+        // TODO: FIXME: add a hour
+        date = QDateTime::fromString(date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+04:00'");
+
+    return date;
+}
+
+/********* /parseDateTime *********/

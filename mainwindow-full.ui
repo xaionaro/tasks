@@ -159,10 +159,10 @@
     <widget class="QWidget" name="gridLayoutWidget">
      <property name="geometry">
       <rect>
-       <x>269</x>
-       <y>9</y>
-       <width>1011</width>
-       <height>191</height>
+       <x>0</x>
+       <y>0</y>
+       <width>1271</width>
+       <height>201</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="issueLayout">
@@ -180,7 +180,6 @@
     </widget>
    </widget>
   </widget>
-  <zorder>dockWidget_2</zorder>
   <zorder>filtersDock</zorder>
   <zorder>issueDock</zorder>
  </widget>

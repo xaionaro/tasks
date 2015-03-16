@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     redmine.cpp \
     syntaxwindow.cpp \
     mainwindow-rector.cpp \
-    mainwindow-full.cpp
+    mainwindow-full.cpp \
+    mainwindow-common.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -25,7 +26,8 @@ HEADERS  += \
     common.h \
     syntaxwindow.h \
     mainwindow-rector.h \
-    mainwindow-full.h
+    mainwindow-full.h \
+    mainwindow-common.h
 
 FORMS    += \
     helpwindow.ui \

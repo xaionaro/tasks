@@ -56,6 +56,7 @@ public:
     /* Get issue status info
      */
     QJsonObject get_issue_status(int issue_status_id);
+    QJsonObject get_issue_status(QJsonValueRef issues_status_json);
 
     /* Request user info (with caching). If 2nd argument to callback function
      * is NULL then a cached value is passed.
@@ -63,6 +64,10 @@ public:
     QNetworkReply *get_user(int user_id,
             callback_t callback,
             void *arg);
+
+    /* Parses JSON values like "2015-03-13T21:34:28.000+03:00" to QDateTime
+     */
+    QDateTime parseDateTime(QJsonValueRef dataTime_json);
 
     Redmine();
 

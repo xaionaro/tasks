@@ -38,7 +38,7 @@ void MainWindowRector::issuesSetup()
     QStringList columns;
     QSize itemSize;
 
-    columns << "Название" << "Исполнитель" << "Срок" << "Статус";
+    columns << "Название" << "Исполнитель" << "Срок" << "Статус" << "Обновлено";
 
     issues->setColumnCount(columns.size());
 
@@ -50,6 +50,12 @@ void MainWindowRector::issuesSetup()
     issues->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
     issues->horizontalHeader()->resizeSection(2, 100);
 
+    issues->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Interactive);
+    issues->horizontalHeader()->resizeSection(3, 100);
+
+    issues->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Interactive);
+    issues->horizontalHeader()->resizeSection(4, 130);
+
     issues->setHorizontalHeaderLabels(columns);
 
     //issues->verticalHeader()->setDefaultSectionSize(18);
@@ -58,8 +64,37 @@ void MainWindowRector::issuesSetup()
     // Signals:
 
     connect(issues, SIGNAL(cellDoubleClicked(int, int)),
-            this,   SLOT(issues_doubleClick(int, int)));
+            this,   SLOT  (issues_doubleClick(int, int)));
+
+    connect(issues->horizontalHeader(), SIGNAL(sectionClicked(int)),
+            this,                       SLOT  (sortColumnSwitch(int)));
+
+    issues->horizontalHeader()->setSortIndicatorShown(true);
+
+    this->sortColumnAscByIdx[0]  = SORT_UNDEFINED;
+    this->sortColumnAscByIdx[1]  = SORT_UNDEFINED;
+    this->sortColumnAscByIdx[2]  = SORT_UNDEFINED;
+    this->sortColumnAscByIdx[3]  = SORT_STATUS_POS_ASC;
+    this->sortColumnAscByIdx[4]  = SORT_UPDATED_ON_ASC;
+
+    this->sortColumnDescByIdx[0] = SORT_UNDEFINED;
+    this->sortColumnDescByIdx[1] = SORT_UNDEFINED;
+    this->sortColumnDescByIdx[2] = SORT_UNDEFINED;
+    this->sortColumnDescByIdx[3] = SORT_STATUS_POS_DESC;
+    this->sortColumnDescByIdx[4] = SORT_UPDATED_ON_DESC;
     return;
+}
+
+void MainWindowRector::sortColumnSwitch(int columnIdx) {
+    enum ESortColumn newSortColumn;
+
+    newSortColumn = this->sortColumnAscByIdx[columnIdx];
+    if (this->sortColumn[0] == newSortColumn)
+        newSortColumn = this->sortColumnDescByIdx[columnIdx];
+
+    this->sortColumn[0] = newSortColumn;
+
+    this->updateTasks();
 }
 
 void MainWindowRector::issues_doubleClick(int row, int column)
@@ -72,7 +107,7 @@ void MainWindowRector::issues_doubleClick(int row, int column)
 }
 
 MainWindowRector::MainWindowRector(QWidget *parent) :
-    QMainWindow(parent),
+    MainWindowCommon(parent),
     ui(new Ui::MainWindowRector)
 {
     ui->setupUi(this);
@@ -219,16 +254,15 @@ void MainWindowRector::issue_set(int pos, QJsonObject issue)
     if (isClosed) item->setBackgroundColor(closedBgColor);
     issues->setItem(pos, 3, item);
 
+    //     Updated on:
+    QDateTime updated_on = redmine->parseDateTime(issue["updated_on"]);
+
+    item = new QTableWidgetItem(updated_on.toString("yyyy'-'MM'-'dd HH':'MM"));
+    if (isClosed) item->setBackgroundColor(closedBgColor);
+    issues->setItem(pos, 4, item);
+
     this->issue_row2issue.insert(pos, issue);
     return;
-}
-
-bool issueCmpFunct_statusIsClosed_lt(const QJsonObject &issue_a, const QJsonObject &issue_b)
-{
-    int issue_statusIsClosed_a = redmine->get_issue_status(issue_a["status"].toObject()["id"].toInt())["is_closed"].toBool();
-    int issue_statusIsClosed_b = redmine->get_issue_status(issue_b["status"].toObject()["id"].toInt())["is_closed"].toBool();
-
-    return issue_statusIsClosed_a < issue_statusIsClosed_b;
 }
 
 void MainWindowRector::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
@@ -240,7 +274,7 @@ void MainWindowRector::get_issues_callback(QNetworkReply *reply, QJsonDocument *
 
     QList<QTableWidgetSelectionRange> selected_list = uiIssues->selectedRanges();
     QList<QJsonObject>                issues_list;
-
+    
     if (this->status() == MainWindowRector::BAD)
         this->status(MainWindowRector::GOOD);
 
@@ -253,9 +287,33 @@ void MainWindowRector::get_issues_callback(QNetworkReply *reply, QJsonDocument *
     QJsonArray  issues = answer["issues"].toArray();
 
     foreach (const QJsonValue &issue, issues)
-        issues_list.append(issue.toObject());
+        issues_list.append(issue.toObject()); 
+    
+    qSort(issues_list.begin(), issues_list.end(), this->sortFunctMap[SORT_STATUS_ISCLOSED_ASC]);
 
-    qSort(issues_list.begin(), issues_list.end(), issueCmpFunct_statusIsClosed_lt);
+    if (this->sortFunctMap[this->sortColumn[0]] != NULL) {
+
+        QList<QJsonObject>::iterator iterator,
+                issues_list_end_nonclosed = issues_list.end(),
+                issues_list_start_closed  = issues_list.end();
+
+        for (iterator = issues_list.begin(); iterator != issues_list.end(); iterator++) {
+            bool isClosed = redmine->get_issue_status((*iterator)["status"])["is_closed"].toBool();
+
+            if (isClosed) {
+                issues_list_end_nonclosed = iterator; // TODO: find out: why here no "-1" in the expression
+                issues_list_start_closed  = iterator;
+                break;
+            }
+        }
+
+        if (issues_list_end_nonclosed != issues_list.begin())
+            qSort(issues_list.begin(),      issues_list_end_nonclosed, this->sortFunctMap[this->sortColumn[0]]);
+
+        if (issues_list_end_nonclosed != issues_list.end())
+            qSort(issues_list_start_closed, issues_list.end(),         this->sortFunctMap[this->sortColumn[0]]);
+
+    }
 
     foreach (const QJsonObject &issue, issues_list)
         this->issue_set(issues_count++, issue);
@@ -391,14 +449,16 @@ void MainWindowRector::resizeEvent(QResizeEvent *event)
 }
 
 
+#include <QThread>
 
 void MainWindowRector::on_issues_itemSelectionChanged()
 {
     QTableWidget                     *issues             = this->ui->issues;
     int                               columns_count      = issues->columnCount();
+    int                               rows_count         = issues->rowCount();
     QList<QTableWidgetSelectionRange> selected_list      = issues->selectedRanges();
 
-    foreach (QTableWidgetSelectionRange range, selected_list)
+    foreach (QTableWidgetSelectionRange range, selected_list) {
         if (range.leftColumn() != 0 || range.rightColumn() != columns_count-1)
 
             issues->setRangeSelected(
@@ -408,5 +468,20 @@ void MainWindowRector::on_issues_itemSelectionChanged()
                     ),
                     true
                 );
+        else
+        /* Workaround: Drop selection if everything is selected
+         * it's required to do not select everything on sort switching
+         */
+        if (range.leftColumn() == 0 && range.rightColumn() == columns_count -1 &&
+            range.topRow()     == 0 && range.bottomRow()   == rows_count-1) {
 
+                issues->setRangeSelected(
+                    QTableWidgetSelectionRange(0, 0, rows_count-1, columns_count-1),
+                    false
+                );
+
+                break;
+        }
+
+    }
 }
