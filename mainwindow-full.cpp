@@ -9,11 +9,16 @@ MainWindowFull::MainWindowFull(QWidget *parent) :
     ui(new Ui::MainWindowFull)
 {
     ui->setupUi(this);
+
+    this->setWindowTitle("Система «Задачи» НИЯУ МИФИ");
+
     this->setCorner(Qt::TopLeftCorner,    Qt::LeftDockWidgetArea);
     this->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
     ui->navigationDock->installEventFilter(this);
     ui->issueDock->installEventFilter(this);
     ui->filtersDock->installEventFilter(this);
+
+    return;
 }
 
 

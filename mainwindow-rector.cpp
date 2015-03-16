@@ -40,6 +40,18 @@ void MainWindowRector::issuesSetup()
 
     columns << "Название" << "Исполнитель" << "Срок" << "Статус" << "Обновлено";
 
+    this->sortColumnAscByIdx[0]  = SORT_NAME_ASC;
+    this->sortColumnAscByIdx[1]  = SORT_ASSIGNEE_ASC;
+    this->sortColumnAscByIdx[2]  = SORT_DUE_TO_ASC;
+    this->sortColumnAscByIdx[3]  = SORT_STATUS_POS_ASC;
+    this->sortColumnAscByIdx[4]  = SORT_UPDATED_ON_ASC;
+
+    this->sortColumnDescByIdx[0] = SORT_NAME_DESC;
+    this->sortColumnDescByIdx[1] = SORT_ASSIGNEE_DESC;
+    this->sortColumnDescByIdx[2] = SORT_DUE_TO_DESC;
+    this->sortColumnDescByIdx[3] = SORT_STATUS_POS_DESC;
+    this->sortColumnDescByIdx[4] = SORT_UPDATED_ON_DESC;
+
     issues->setColumnCount(columns.size());
 
     issues->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -58,6 +70,8 @@ void MainWindowRector::issuesSetup()
 
     issues->setHorizontalHeaderLabels(columns);
 
+    issues->horizontalHeader()->setSortIndicator(this->sortLogicalIndex, this->sortOrder);
+
     //issues->verticalHeader()->setDefaultSectionSize(18);
     issues->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
@@ -71,30 +85,24 @@ void MainWindowRector::issuesSetup()
 
     issues->horizontalHeader()->setSortIndicatorShown(true);
 
-    this->sortColumnAscByIdx[0]  = SORT_UNDEFINED;
-    this->sortColumnAscByIdx[1]  = SORT_UNDEFINED;
-    this->sortColumnAscByIdx[2]  = SORT_UNDEFINED;
-    this->sortColumnAscByIdx[3]  = SORT_STATUS_POS_ASC;
-    this->sortColumnAscByIdx[4]  = SORT_UPDATED_ON_ASC;
-
-    this->sortColumnDescByIdx[0] = SORT_UNDEFINED;
-    this->sortColumnDescByIdx[1] = SORT_UNDEFINED;
-    this->sortColumnDescByIdx[2] = SORT_UNDEFINED;
-    this->sortColumnDescByIdx[3] = SORT_STATUS_POS_DESC;
-    this->sortColumnDescByIdx[4] = SORT_UPDATED_ON_DESC;
     return;
 }
 
 void MainWindowRector::sortColumnSwitch(int columnIdx) {
     enum ESortColumn newSortColumn;
 
+    this->sortLogicalIndex = columnIdx;
+
+    this->sortOrder = Qt::SortOrder::AscendingOrder;
     newSortColumn = this->sortColumnAscByIdx[columnIdx];
-    if (this->sortColumn[0] == newSortColumn)
+    if (this->sortColumn[0] == newSortColumn) {
+        this->sortOrder = Qt::SortOrder::DescendingOrder;
         newSortColumn = this->sortColumnDescByIdx[columnIdx];
+    }
 
     this->sortColumn[0] = newSortColumn;
 
-    this->updateTasks();
+    this->issues_display();
 }
 
 void MainWindowRector::issues_doubleClick(int row, int column)
@@ -172,22 +180,16 @@ void MainWindowRector::append_assignee(QNetworkReply *reply, QJsonDocument *coas
 void MainWindowRector::issues_clear()
 {
     /*qDebug("MainWindowRector::issues_clear(): %p", this);*/
-    QTableWidget *issues = this->ui->issues;
-    int row_count= issues->rowCount();
 
-    while (row_count-- > 0)
-    {
-        issues->removeRow(row_count);
-    }
-
-    this->issue_row2issue.clear();
+    this->issues_list.clear();
     return;
 }
 
-void MainWindowRector::issue_set(int pos, QJsonObject issue)
+void MainWindowRector::issue_display_oneissue(int pos)
 {
     QTableWidget     *issues = this->ui->issues;
     QTableWidgetItem *item;
+    QJsonObject       issue        = this->issue_row2issue[pos];
     QJsonObject       issue_status = issue["status"].toObject();
     bool              isClosed = redmine->get_issue_status(issue_status["id"].toInt())["is_closed"].toBool();
     QColor            closedBgColor = QColor(192, 255, 192);
@@ -260,35 +262,43 @@ void MainWindowRector::issue_set(int pos, QJsonObject issue)
     item = new QTableWidgetItem(updated_on.toString("yyyy'-'MM'-'dd HH':'MM"));
     if (isClosed) item->setBackgroundColor(closedBgColor);
     issues->setItem(pos, 4, item);
-
-    this->issue_row2issue.insert(pos, issue);
     return;
 }
 
-void MainWindowRector::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
-    (void)reply; (void)arg;
-    /*qDebug("MainWindowRector::get_issues_callback(): %p %p", this, arg);*/
-    //MainWindowRector *win = static_cast<MainWindowRector *>(_win);
+void MainWindowRector::issue_add(QJsonObject issue) {
+    this->issues_list.append(issue);
+    return;
+}
+
+
+QList<QJsonObject> MainWindowRector::issues_get() {
+    return this->issues_list;
+}
+
+void MainWindowRector::issues_display() {
 
     QTableWidget *uiIssues = this->ui->issues;
 
     QList<QTableWidgetSelectionRange> selected_list = uiIssues->selectedRanges();
-    QList<QJsonObject>                issues_list;
-    
+    QList<QJsonObject>                issues_list   = this->issues_get();
+
+    // Clearing the table
+    {
+        int row_count = uiIssues->rowCount();
+        while (row_count-- > 0)
+            uiIssues->removeRow(row_count);
+
+        this->issue_row2issue.clear();
+    }
+
+    // Filling the table
+    int issues_count = 0;
+
     if (this->status() == MainWindowRector::BAD)
         this->status(MainWindowRector::GOOD);
 
     int scrollValue = uiIssues->verticalScrollBar()->value();
-    this->issues_clear();
 
-    int issues_count = 0;
-
-    QJsonObject answer = json->object();
-    QJsonArray  issues = answer["issues"].toArray();
-
-    foreach (const QJsonValue &issue, issues)
-        issues_list.append(issue.toObject()); 
-    
     qSort(issues_list.begin(), issues_list.end(), this->sortFunctMap[SORT_STATUS_ISCLOSED_ASC]);
 
     if (this->sortFunctMap[this->sortColumn[0]] != NULL) {
@@ -315,8 +325,12 @@ void MainWindowRector::get_issues_callback(QNetworkReply *reply, QJsonDocument *
 
     }
 
-    foreach (const QJsonObject &issue, issues_list)
-        this->issue_set(issues_count++, issue);
+    foreach (const QJsonObject &issue, issues_list) {
+        this->issue_row2issue.insert(issues_count, issue);
+        this->issue_display_oneissue(issues_count);
+
+        issues_count++;
+    }
 
     uiIssues->verticalScrollBar()->setValue(scrollValue);
 
@@ -331,6 +345,24 @@ void MainWindowRector::get_issues_callback(QNetworkReply *reply, QJsonDocument *
 
 
     this->setIcon(this->status());
+
+    return;
+}
+
+void MainWindowRector::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
+    (void)reply; (void)arg;
+    /*qDebug("MainWindowRector::get_issues_callback(): %p %p", this, arg);*/
+    //MainWindowRector *win = static_cast<MainWindowRector *>(_win);
+
+    QJsonObject answer = json->object();
+    QJsonArray  issues = answer["issues"].toArray();
+
+    this->issues_clear();
+
+    foreach (const QJsonValue &issue_val, issues)
+        this->issue_add(issue_val.toObject());
+
+    this->issues_display();
     return;
 }
 

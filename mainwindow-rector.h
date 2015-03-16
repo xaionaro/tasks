@@ -35,8 +35,6 @@ public:
     EStatus status        (EStatus newstatus) { return this->_status = newstatus; }
     EStatus statusWorsenTo(EStatus newstatus) { return this->_status = qMax(this->_status, newstatus); }
 
-    void issue_set(int pos, QJsonObject issue);
-    void issues_clear();
     void setIcon(EIcon index);
     explicit MainWindowRector(QWidget *parent = 0);
     ~MainWindowRector();
@@ -57,6 +55,12 @@ private slots:
     void sortColumnSwitch(int columnIdx);
 
 private:
+    void issue_add(QJsonObject issue);
+    void issues_clear();
+    void issue_display_oneissue(int pos);
+    void issues_display();
+    QList<QJsonObject> issues_get();
+
     Ui::MainWindowRector *ui;
 
     QComboBox iconComboBox;
@@ -74,6 +78,7 @@ private:
     void resizeEvent(QResizeEvent *event);
     void issuesSetup();
     QHash<int, QJsonObject> issue_row2issue;
+    QList <QJsonObject> issues_list;
     QTimer *timerUpdateTasks;
 
     void showOnTop();
@@ -84,6 +89,7 @@ private:
 
     QMap <int, enum ESortColumn> sortColumnAscByIdx;
     QMap <int, enum ESortColumn> sortColumnDescByIdx;
+
 };
 
 #endif // MAINWINDOW_RECTOR_H
