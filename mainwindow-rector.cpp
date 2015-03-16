@@ -167,11 +167,11 @@ void MainWindowRector::append_assignee(QNetworkReply *reply, QJsonDocument *coas
     QString lastname  = coassignee["lastname"].toString();
     QString initials  = firstname.left(1) + " " + firstname.left(firstname.indexOf(" ")+2).right(1); // TODO: Move this to class Redmine
 
+    QString fullname  = lastname + " " + initials;
+
+
     QTableWidgetItem *item = issues->item(pos, 1);
-    item->setText(
-                item->text() + "\n  " +
-                lastname + " " + initials
-            );
+    item->setText(item->text() + "\n  " + fullname);
 
     delete arg;
     return;
@@ -207,7 +207,9 @@ void MainWindowRector::issue_display_oneissue(int pos)
 
     //     Assignee:
     //         Assignee:
-    QString assignee_str    = issue["assigned_to"].toObject()["name"].toString();
+    QJsonObject assignee_obj = issue["assigned_to"].toObject();
+    QString     assignee_str = assignee_obj["name"].toString();
+    int         assignee_id  = assignee_obj["id"  ].toInt();
     //         Setting the assignee value:
     item = new QTableWidgetItem(assignee_str);
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
@@ -223,13 +225,17 @@ void MainWindowRector::issue_display_oneissue(int pos)
                 // Don't try to use .toInt() directly, the answer will always be "0":
                 int coassignee_id = coassignee_id_obj.toString().toInt();
 
-                struct append_assignee_arg *append_assignee_arg_p;
-                append_assignee_arg_p = new struct append_assignee_arg;
-                // TODO: fix a memleak if redmine->get_user doesn't success
+                if (coassignee_id != assignee_id) {
+                    struct append_assignee_arg *append_assignee_arg_p;
+                    append_assignee_arg_p = new struct append_assignee_arg;
+                    // TODO: fix a memleak if redmine->get_user doesn't success
 
-                append_assignee_arg_p->pos     = pos;
+                    append_assignee_arg_p->pos     = pos;
 
-                redmine->get_user(coassignee_id, (Redmine::callback_t)&MainWindowRector::append_assignee, (void *)append_assignee_arg_p);
+                    redmine->get_user(coassignee_id,
+                                      (Redmine::callback_t)&MainWindowRector::append_assignee,
+                                      (void *)append_assignee_arg_p);
+                }
             }
 
             break;
