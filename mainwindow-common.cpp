@@ -145,3 +145,47 @@ MainWindowCommon::~MainWindowCommon()
     qsettings.setValue("sortorder",  (int)this->sortOrder);
     return;
 }
+
+/**** updateProjects ****/
+
+void MainWindowCommon::projects_clear()
+{
+    this->projects_list.clear();
+}
+
+void MainWindowCommon::project_add(QJsonObject project_json)
+{
+    this->projects_list.append(project_json);
+}
+
+void MainWindowCommon::projects_display()
+{
+    qFatal("projects_display() is not re-implemented by the derivative object");
+}
+
+QList<QJsonObject> MainWindowCommon::projects_get()
+{
+    return this->projects_list;
+}
+
+void MainWindowCommon::get_projects_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
+    (void)reply; (void)arg;
+
+    QJsonObject answer   = json->object();
+    QJsonArray  projects = answer["projects"].toArray();
+
+    this->projects_clear();
+
+    foreach (const QJsonValue &project_val, projects)
+        this->project_add(project_val.toObject());
+
+    this->projects_display();
+    return;
+}
+
+int MainWindowCommon::updateProjects() {
+    redmine->get_projects((Redmine::callback_t)&MainWindowCommon::get_projects_callback, this);
+    return 0;
+}
+
+/**** /updateProjects ****/

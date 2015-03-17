@@ -22,11 +22,16 @@
 #include "mainwindow-full.h"
 #include "ui_mainwindow-full.h"
 
+#include "helpwindow.h"
+
 MainWindowFull::MainWindowFull(QWidget *parent) :
     MainWindowCommon(parent),
     ui(new Ui::MainWindowFull)
 {
-    ui->setupUi(this);
+    this->ui->setupUi(this);
+
+    connect(redmine, SIGNAL(callback_call      (void*,callback_t,QNetworkReply*,QJsonDocument*,void*)),
+            this,    SLOT(  callback_dispatcher(void*,callback_t,QNetworkReply*,QJsonDocument*,void*)) );
 
     this->setWindowTitle("Система «Задачи» НИЯУ МИФИ");
 
@@ -35,49 +40,98 @@ MainWindowFull::MainWindowFull(QWidget *parent) :
 
     this->setDockOptions(AllowTabbedDocks | AllowNestedDocks);
 
-    ui->navigationDock->installEventFilter(this);
-    ui->issueDock->installEventFilter(this);
-    ui->filtersDock->installEventFilter(this);
+    this->ui->navigationDock->installEventFilter(this);
+    this->ui->issueDock->installEventFilter(this);
+    this->ui->filtersDock->installEventFilter(this);
+    this->ui->centralWidget->installEventFilter(this);
 
-    this->setMinimumWidth(1280);
+    this->ui->navigationDock->setMinimumWidth(this->navigationDockInitialWidth);
+    this->ui->filtersDock->setMinimumWidth(this->filtersDockInitialWidth);
+    this->ui->issueDock->setMinimumHeight(this->issueDockInitialHeight);
 
-    ui->navigationDock->setMinimumWidth(this->navigationDockInitialWidth);
+    QStringList projectsColumns;
+    projectsColumns << "Проект" << "Кол-во";
+    this->ui->projects->setHeaderLabels(projectsColumns);
+
+    QStringList issuesColumns;
+    issuesColumns << "Название" << "Исполнитель" << "Срок" << "Статус" << "Обновлено";
+    this->ui->issuesTree->setHeaderLabels(issuesColumns);
+
+    this->updateProjects();
 
     return;
 }
 
+MainWindowFull::~MainWindowFull()
+{
+    delete ui;
+}
+
+/**** ui ****/
+
+void unlockDockWidth(QDockWidget *widget, QResizeEvent *event, int initialWidth) {
+    if (event->oldSize().width() != -1 && event->size().width() != event->oldSize().width())
+        if (event->size().width() - event->oldSize().width() > -initialWidth/2)
+            widget->setMinimumWidth(0);
+}
+
+void unlockDockHeight(QDockWidget *widget, QResizeEvent *event, int initialHeight) {
+    if (event->oldSize().height() != -1 && event->size().height() != event->oldSize().height())
+        if (event->size().height() - event->oldSize().height() > -initialHeight/2)
+            widget->setMinimumHeight(0);
+}
+
+void MainWindowFull::on_resize_centralWidget(QResizeEvent *event) {
+/*
+    qDebug("centralWidget Resized (New Size) - Width: %d Height: %d (was: %d x %d)",
+        event->size().width(),
+        event->size().height(),
+        event->oldSize().width(),
+        event->oldSize().height()
+     );*/
+
+    this->ui->issuesLayout->setGeometry(QRect(0, 0, event->size().width(), event->size().height()-10));
+
+    return;
+}
 
 void MainWindowFull::on_resize_navigationDock(QResizeEvent *event) {
-    /*if (event->oldSize().width() != -1 && event->size().width() != event->oldSize().width())
-        if (event->size().width() - event->oldSize().width() > -(this->navigationDockInitialWidth)/2) */
-            ui->navigationDock->setMinimumWidth(0);
-
-
+    unlockDockWidth(this->ui->navigationDock, event, this->navigationDockInitialWidth);
+/*
     qDebug("navigationDock Resized (New Size) - Width: %d Height: %d (was: %d x %d)",
         event->size().width(),
         event->size().height(),
         event->oldSize().width(),
         event->oldSize().height()
-     );
+     );*/
+
+    this->ui->navigationTabs->resize(event->size());
+    this->ui->projects->resize(event->size());
 
     return;
 }
 
 void MainWindowFull::on_resize_issueDock(QResizeEvent *event) {
-    /*
+    unlockDockHeight(this->ui->issueDock, event, this->issueDockInitialHeight);
+/*
     qDebug("issueDock Resized (New Size) - Width: %d Height: %d",
         event->size().width(),
-        event->size().height());
-*/
+        event->size().height());*/
+
+    this->ui->issueLayout->setGeometry(QRect(0, 0, event->size().width(), event->size().height()-10));
+
     return;
 }
 
 void MainWindowFull::on_resize_filtersDock(QResizeEvent *event) {
-    /*
+    unlockDockWidth(this->ui->filtersDock, event, this->filtersDockInitialWidth);
+/*
     qDebug("filtersDock Resized (New Size) - Width: %d Height: %d",
         event->size().width(),
-        event->size().height());
-*/
+        event->size().height());*/
+
+    this->ui->filtersLayout->setGeometry(QRect(0, 0, event->size().width(), event->size().height()-10));
+
     return;
 }
 
@@ -92,11 +146,95 @@ bool MainWindowFull::eventFilter(QObject *obj, QEvent *event) {
         else
         if (obj == ui->filtersDock)
             this->on_resize_filtersDock   (static_cast<QResizeEvent*>(event));
+        else
+        if (obj == ui->centralWidget)
+            this->on_resize_centralWidget (static_cast<QResizeEvent*>(event));
     }
     return QWidget::eventFilter(obj, event);
 }
 
-MainWindowFull::~MainWindowFull()
+/**** /ui ****/
+
+/**** actions ****/
+
+void MainWindowFull::on_actionHelp_triggered()
 {
-    delete ui;
+    HelpWindow *win = new HelpWindow(this);
+    win->show();
 }
+
+void MainWindowFull::on_actionQuit_triggered()
+{
+    application->quit();
+}
+
+void MainWindowFull::on_toolActionHelp_triggered()
+{
+    this->on_actionHelp_triggered();
+}
+
+/**** /actions ****/
+
+/**** updateProjects ****/
+
+void MainWindowFull::project_display_recursive(QTreeWidgetItem *item, QJsonObject project) {
+    qDebug("MainWindowFull::project_display_recursive()");
+
+    int project_id = project["id"].toInt();
+
+    item->setText(0, QString::number(project_id));
+    item->setText(1, project["name"].toString());
+
+    foreach (const QJsonObject &child, this->projects_hierarchy[project_id]) {
+        this->project_display_child(item, child);
+    }
+}
+
+void MainWindowFull::project_display_child(QTreeWidgetItem *parent, QJsonObject child)
+{
+    qDebug("MainWindowFull::project_display_child()");
+
+    QTreeWidgetItem *item = new QTreeWidgetItem(parent);
+    this->project_display_recursive(item, child);
+}
+
+void MainWindowFull::project_display_topone(int pos)
+{
+    qDebug("pos: %i", pos);
+
+    QJsonObject project    = this->projects_row2project[pos];
+    QTreeWidgetItem *item = new QTreeWidgetItem(this->ui->projects);
+
+    this->project_display_recursive(item, project);
+}
+
+void MainWindowFull::projects_display()
+{
+    qDebug("MainWindowFull::projects_display()");
+
+    int topprojects_count = 0;
+    QList<QJsonObject> projects_list = this->projects_get();
+
+    this->projects_hierarchy.clear();
+
+    foreach (const QJsonObject &project, projects_list) {
+        int parent_id;
+
+        if (project.contains("parent"))
+            parent_id = project["parent"].toObject()["id"].toInt();
+        else
+            parent_id = 0;
+
+        qDebug("parent_id == %i", parent_id);
+        this->projects_hierarchy[parent_id].append(project);
+    }
+
+    foreach (const QJsonObject &project, this->projects_hierarchy[0]) {
+        this->projects_row2project.insert(topprojects_count, project);
+        this->project_display_topone(topprojects_count);
+
+        topprojects_count++;
+    }
+}
+
+/**** /updateProjects ****/

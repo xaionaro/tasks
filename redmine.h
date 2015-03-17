@@ -53,6 +53,10 @@ public:
      */
     QNetworkReply *get_issues(callback_t callback, void *arg, bool free_arg = false);
 
+    /* Request all projects
+     */
+    QNetworkReply *get_projects(callback_t callback, void *arg, bool free_arg = false);
+
     /* Get issue status info
      */
     QJsonObject get_issue_status(int issue_status_id);

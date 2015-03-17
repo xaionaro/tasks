@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>images/good.png</file>
         <file>images/bad.png</file>
+        <file>images/help.png</file>
     </qresource>
 </RCC>

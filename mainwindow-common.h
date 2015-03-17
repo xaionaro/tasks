@@ -48,11 +48,21 @@ protected:
     enum ESortColumn sortColumn[SORT_DEPTH];
     QMap <enum ESortColumn, sortfunct_t> sortFunctMap;
 
+    int updateProjects();
+    QList <QJsonObject> projects_get();
+
 signals:
 
 public slots:
 
 private:
+    /* projects */
+
+    virtual void projects_display();
+    void get_projects_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
+    void projects_clear();
+    void project_add(QJsonObject project_json);
+    QList <QJsonObject> projects_list;
 };
 
 #endif // MAINWINDOWCOMMON_H

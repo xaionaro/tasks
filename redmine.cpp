@@ -151,6 +151,16 @@ QNetworkReply *Redmine::get_issues(callback_t callback,
 
 /********* /get_issues *********/
 
+/********* get_projects *********/
+
+QNetworkReply *Redmine::get_projects(callback_t callback,
+        void *arg, bool free_arg)
+{
+    return this->request(GET, "projects", NULL, callback, arg, free_arg);
+}
+
+/********* /get_projects *********/
+
 /********* get_user *********/
 
 struct get_user_callback_arg {
