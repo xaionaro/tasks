@@ -60,7 +60,16 @@ MainWindowFull::MainWindowFull(QWidget *parent) :
     issuesColumns << "Название" << "Исполнитель" << "Срок" << "Статус" << "Обновлено";
     this->ui->issuesTree->setHeaderLabels(issuesColumns);
 
+    this->updateIssues();
     this->updateProjects();
+
+    this->timerUpdateIssues = new QTimer(this);
+    connect(this->timerUpdateIssues, SIGNAL(timeout()), this, SLOT(updateIssues()));
+    this->timerUpdateIssues->start(10000);
+
+    this->timerUpdateProjects = new QTimer(this);
+    connect(this->timerUpdateProjects, SIGNAL(timeout()), this, SLOT(updateProjects()));
+    this->timerUpdateProjects->start(5000);
 
     return;
 }
@@ -180,40 +189,86 @@ void MainWindowFull::on_toolActionHelp_triggered()
 
 /**** updateProjects ****/
 
-void MainWindowFull::project_display_recursive(QTreeWidgetItem *item, QJsonObject project, int level) {
-    int project_id = project["id"].toInt();
 
-    item->setData(0, Qt::EditRole, project["name"].toString()+" <span style='color: #808080'>(314)</span>");
+void projectWidgetItemSetText(QWidget *__this, QTreeWidgetItem *widgetItem, QJsonObject item, RedmineItemTree *tree, int level) {
+    (void)tree; (void)level;
+    int item_id = item["id"].toInt();
+    MainWindowFull *_this = reinterpret_cast<MainWindowFull *>(__this);
 
-    foreach (const QJsonObject &child, this->projects_hierarchy_getchildren(project_id)) {
-        this->project_display_child(item, child, level+1);
-    }
+    widgetItem->setText(0,
+        item["name"].toString()+
+            " <span style='color: #808080'>("+
+                QString::number(_this->issues_get_byProjectId(item_id).count())+
+            ")</span>");
+
+    return;
 }
 
-void MainWindowFull::project_display_child(QTreeWidgetItem *parent, QJsonObject child, int level)
+bool projectsFilter(QWidget *__this, QJsonObject item)
 {
-    QTreeWidgetItem *item = new QTreeWidgetItem(parent);
-    this->project_display_recursive(item, child, level);
-}
+    MainWindowFull *_this = reinterpret_cast<MainWindowFull *>(__this);
 
-void MainWindowFull::project_display_topone(int pos)
-{
-    QJsonObject project    = this->projects_row2project[pos];
-    QTreeWidgetItem *item = new QTreeWidgetItem(this->ui->projects);
+    (void)_this; (void)item;
 
-    this->project_display_recursive(item, project, 0);
+    return true;
 }
 
 void MainWindowFull::projects_display()
 {
-    int topprojects_count = 0;
+    qDebug("MainWindowFull::projects_display()");
 
-    foreach (const QJsonObject &project, this->projects_hierarchy_getchildren(0)) {
-        this->projects_row2project.insert(topprojects_count, project);
-        this->project_display_topone(topprojects_count);
-
-        topprojects_count++;
-    }
+    this->projects.filter(reinterpret_cast<QWidget *>(this), projectsFilter);
+    this->projects.display(this->ui->projects, reinterpret_cast<QWidget *>(this), projectWidgetItemSetText);
 }
 
 /**** /updateProjects ****/
+
+/**** updateIssues ****/
+
+void issuesWidgetItemSetText(QWidget *__this, QTreeWidgetItem *widgetItem, QJsonObject item, RedmineItemTree *tree, int level) {
+    (void)__this; (void)tree; (void)level;
+    //int item_id = item["id"].toInt();
+    //MainWindowFull *_this = reinterpret_cast<MainWindowFull *>(__this);
+
+    widgetItem->setText(0,
+        item["subject"].toString());
+
+    return;
+}
+
+bool issuesFilter(QWidget *__this, QJsonObject item)
+{
+    MainWindowFull *_this = reinterpret_cast<MainWindowFull *>(__this);
+
+    (void)_this; (void)item;
+
+    return true;
+}
+
+void MainWindowFull::issues_display()
+{
+    qDebug("MainWindowFull::issues_display()");
+
+    this->issues.filter(reinterpret_cast<QWidget *>(this), issuesFilter);
+    this->issues.display(this->ui->issuesTree, reinterpret_cast<QWidget *>(this), issuesWidgetItemSetText);
+
+    return;
+}
+
+/**** /updateIssues ****/
+
+/**** SIGNALS ****/
+
+void MainWindowFull::on_projects_itemSelectionChanged()
+{
+    foreach (const QTreeWidgetItem *selectedProjectItem, this->ui->projects->selectedItems()) {
+        qDebug(selectedProjectItem->text(0).toUtf8().data());
+    }
+}
+
+void MainWindowFull::on_issuesTree_itemSelectionChanged()
+{
+
+}
+
+/**** /SIGNALS ****/

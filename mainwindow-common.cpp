@@ -148,66 +148,30 @@ MainWindowCommon::~MainWindowCommon()
 
 /**** updateProjects ****/
 
-void MainWindowCommon::projects_clear()
-{
-    this->projects_list.clear();
-}
-
-void MainWindowCommon::project_add(QJsonObject project_json)
-{
-    this->projects_list.append(project_json);
-}
-
 void MainWindowCommon::projects_display()
 {
     qFatal("projects_display() is not re-implemented by the derivative object");
 }
 
-QList<QJsonObject> MainWindowCommon::projects_get()
-{
-    return this->projects_list;
-}
-
 void MainWindowCommon::get_projects_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
     (void)reply; (void)arg;
 
+    this->updateProjectsMutex.lock(); // is not a thread-safe function, locking
+
     QJsonObject answer   = json->object();
     QJsonArray  projects = answer["projects"].toArray();
-    QList<QJsonObject> projects_list;
 
-    /* refilling this->projects_list */
-
-    this->projects_clear();
-
-    foreach (const QJsonValue &project_val, projects)
-        this->project_add(project_val.toObject());
-
-    /* rebuilding this->projects_hierarchy */
-
-    projects_list = this->projects_get();
-
-    this->projects_hierarchy.clear();
-
-    foreach (const QJsonObject &project, projects_list) {
-        int parent_id;
-
-        if (project.contains("parent"))
-            parent_id = project["parent"].toObject()["id"].toInt();
-        else
-            parent_id = 0;
-
-        this->projects_hierarchy[parent_id].append(project);
-    }
-
-    /* calling the display function */
+    this->projects.set(projects);
 
     this->projects_display();
+
+    this->updateProjectsMutex.unlock();
     return;
 }
 
-QList<QJsonObject> MainWindowCommon::projects_hierarchy_getchildren(int project_id)
+QList<QJsonObject> MainWindowCommon::issues_get_byProjectId(int project_id)
 {
-    return this->projects_hierarchy[project_id];
+    return this->issues_byProjectId[project_id];
 }
 
 int MainWindowCommon::updateProjects() {
@@ -216,3 +180,35 @@ int MainWindowCommon::updateProjects() {
 }
 
 /**** /updateProjects ****/
+
+
+/**** updateIssues ****/
+
+void MainWindowCommon::issues_display()
+{
+    qFatal("issues_display() is not re-implemented by the derivative object");
+}
+
+void MainWindowCommon::get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
+    (void)reply; (void)arg;
+
+    this->updateIssuesMutex.lock(); // is not a thread-safe function, locking
+
+    QJsonObject answer   = json->object();
+    QJsonArray  projects = answer["issues"].toArray();
+
+    this->issues.set(projects);
+
+    this->issues_display();
+
+    this->updateIssuesMutex.unlock();
+
+    return;
+}
+
+int MainWindowCommon::updateIssues() {
+    redmine->get_issues((Redmine::callback_t)&MainWindowCommon::get_issues_callback, this);
+    return 0;
+}
+
+/**** /updateIssues ****/

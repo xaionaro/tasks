@@ -372,6 +372,9 @@ void MainWindowRector::get_issues_callback(QNetworkReply *reply, QJsonDocument *
     return;
 }
 
+ /* TODO: this function (and related ones) should be replaced with
+  *     MainWindowCommon::updateIssues() [and related]
+  */
 int MainWindowRector::updateTasks() {
     redmine->get_issues((Redmine::callback_t)&MainWindowRector::get_issues_callback, this);
     return 0;

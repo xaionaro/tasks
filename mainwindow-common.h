@@ -3,7 +3,9 @@
 
 #include <QMainWindow>
 #include <QTableWidgetSelectionRange>
+#include <QMutex>
 
+#include <redmineitemtree.h>
 #include "common.h"
 
 class MainWindowCommon : public QMainWindow
@@ -13,6 +15,8 @@ class MainWindowCommon : public QMainWindow
 public:
     explicit MainWindowCommon(QWidget *parent = 0);
     ~MainWindowCommon();
+
+    QList<QJsonObject> issues_get_byProjectId(int project_id);
 
 protected:
 
@@ -48,9 +52,12 @@ protected:
     enum ESortColumn sortColumn[SORT_DEPTH];
     QMap <enum ESortColumn, sortfunct_t> sortFunctMap;
 
+    RedmineItemTree projects;
+    RedmineItemTree issues;
+
+protected slots:
     int updateProjects();
-    QList <QJsonObject> projects_get();
-    QList<QJsonObject> projects_hierarchy_getchildren(int project_id);
+    int updateIssues();
 
 signals:
 
@@ -60,11 +67,14 @@ private:
     /* projects */
 
     virtual void projects_display();
+    virtual void issues_display();
     void get_projects_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
-    void projects_clear();
-    void project_add(QJsonObject project_json);
-    QList <QJsonObject> projects_list;
-    QHash<int, QList<QJsonObject>> projects_hierarchy;
+    void get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
+
+    QHash<int, QList<QJsonObject>> issues_byProjectId;
+
+    QMutex updateProjectsMutex;
+    QMutex updateIssuesMutex;
 };
 
 #endif // MAINWINDOWCOMMON_H

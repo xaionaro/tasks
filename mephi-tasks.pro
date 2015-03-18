@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     mainwindow-rector.cpp \
     mainwindow-full.cpp \
     mainwindow-common.cpp \
-    htmldelegate.cpp
+    htmldelegate.cpp \
+    redmineitemtree.cpp \
+    redmineitemtreedata.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -29,7 +31,9 @@ HEADERS  += \
     mainwindow-rector.h \
     mainwindow-full.h \
     mainwindow-common.h \
-    htmldelegate.h
+    htmldelegate.h \
+    redmineitemtree.h \
+    redmineitemtreedata.h
 
 FORMS    += \
     helpwindow.ui \
