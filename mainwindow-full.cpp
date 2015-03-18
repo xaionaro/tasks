@@ -23,6 +23,7 @@
 #include "ui_mainwindow-full.h"
 
 #include "helpwindow.h"
+#include "htmldelegate.h"
 
 MainWindowFull::MainWindowFull(QWidget *parent) :
     MainWindowCommon(parent),
@@ -50,8 +51,10 @@ MainWindowFull::MainWindowFull(QWidget *parent) :
     this->ui->issueDock->setMinimumHeight(this->issueDockInitialHeight);
 
     QStringList projectsColumns;
-    projectsColumns << "Проект" << "Кол-во";
+    projectsColumns << "Проект";
     this->ui->projects->setHeaderLabels(projectsColumns);
+    HTMLDelegate* delegate = new HTMLDelegate();
+    ui->projects->setItemDelegate(delegate);
 
     QStringList issuesColumns;
     issuesColumns << "Название" << "Исполнитель" << "Срок" << "Статус" << "Обновлено";
@@ -177,59 +180,35 @@ void MainWindowFull::on_toolActionHelp_triggered()
 
 /**** updateProjects ****/
 
-void MainWindowFull::project_display_recursive(QTreeWidgetItem *item, QJsonObject project) {
-    qDebug("MainWindowFull::project_display_recursive()");
-
+void MainWindowFull::project_display_recursive(QTreeWidgetItem *item, QJsonObject project, int level) {
     int project_id = project["id"].toInt();
 
-    item->setText(0, QString::number(project_id));
-    item->setText(1, project["name"].toString());
+    item->setData(0, Qt::EditRole, project["name"].toString()+" <span style='color: #808080'>(314)</span>");
 
-    foreach (const QJsonObject &child, this->projects_hierarchy[project_id]) {
-        this->project_display_child(item, child);
+    foreach (const QJsonObject &child, this->projects_hierarchy_getchildren(project_id)) {
+        this->project_display_child(item, child, level+1);
     }
 }
 
-void MainWindowFull::project_display_child(QTreeWidgetItem *parent, QJsonObject child)
+void MainWindowFull::project_display_child(QTreeWidgetItem *parent, QJsonObject child, int level)
 {
-    qDebug("MainWindowFull::project_display_child()");
-
     QTreeWidgetItem *item = new QTreeWidgetItem(parent);
-    this->project_display_recursive(item, child);
+    this->project_display_recursive(item, child, level);
 }
 
 void MainWindowFull::project_display_topone(int pos)
 {
-    qDebug("pos: %i", pos);
-
     QJsonObject project    = this->projects_row2project[pos];
     QTreeWidgetItem *item = new QTreeWidgetItem(this->ui->projects);
 
-    this->project_display_recursive(item, project);
+    this->project_display_recursive(item, project, 0);
 }
 
 void MainWindowFull::projects_display()
 {
-    qDebug("MainWindowFull::projects_display()");
-
     int topprojects_count = 0;
-    QList<QJsonObject> projects_list = this->projects_get();
 
-    this->projects_hierarchy.clear();
-
-    foreach (const QJsonObject &project, projects_list) {
-        int parent_id;
-
-        if (project.contains("parent"))
-            parent_id = project["parent"].toObject()["id"].toInt();
-        else
-            parent_id = 0;
-
-        qDebug("parent_id == %i", parent_id);
-        this->projects_hierarchy[parent_id].append(project);
-    }
-
-    foreach (const QJsonObject &project, this->projects_hierarchy[0]) {
+    foreach (const QJsonObject &project, this->projects_hierarchy_getchildren(0)) {
         this->projects_row2project.insert(topprojects_count, project);
         this->project_display_topone(topprojects_count);
 

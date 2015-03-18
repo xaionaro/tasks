@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     syntaxwindow.cpp \
     mainwindow-rector.cpp \
     mainwindow-full.cpp \
-    mainwindow-common.cpp
+    mainwindow-common.cpp \
+    htmldelegate.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -27,7 +28,8 @@ HEADERS  += \
     syntaxwindow.h \
     mainwindow-rector.h \
     mainwindow-full.h \
-    mainwindow-common.h
+    mainwindow-common.h \
+    htmldelegate.h
 
 FORMS    += \
     helpwindow.ui \

@@ -50,6 +50,7 @@ protected:
 
     int updateProjects();
     QList <QJsonObject> projects_get();
+    QList<QJsonObject> projects_hierarchy_getchildren(int project_id);
 
 signals:
 
@@ -63,6 +64,7 @@ private:
     void projects_clear();
     void project_add(QJsonObject project_json);
     QList <QJsonObject> projects_list;
+    QHash<int, QList<QJsonObject>> projects_hierarchy;
 };
 
 #endif // MAINWINDOWCOMMON_H

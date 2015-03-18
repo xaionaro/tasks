@@ -156,7 +156,7 @@ QNetworkReply *Redmine::get_issues(callback_t callback,
 QNetworkReply *Redmine::get_projects(callback_t callback,
         void *arg, bool free_arg)
 {
-    return this->request(GET, "projects", NULL, callback, arg, free_arg);
+    return this->request(GET, "projects", NULL, callback, arg, free_arg, "limit=500");
 }
 
 /********* /get_projects *********/

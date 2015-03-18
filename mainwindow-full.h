@@ -46,10 +46,8 @@ private:
     QHash<int, QJsonObject> issues_row2issue;
 
     void project_display_topone(int pos);
-    void project_display_child(QTreeWidgetItem *parent, QJsonObject child);
-    void project_display_recursive(QTreeWidgetItem *item, QJsonObject project);
-
-    QHash<int, QList<QJsonObject>> projects_hierarchy;
+    void project_display_child(QTreeWidgetItem *parent, QJsonObject child, int level);
+    void project_display_recursive(QTreeWidgetItem *item, QJsonObject project, int level);
 };
 
 #endif // MAINWINDOWFULL_H

@@ -173,14 +173,41 @@ void MainWindowCommon::get_projects_callback(QNetworkReply *reply, QJsonDocument
 
     QJsonObject answer   = json->object();
     QJsonArray  projects = answer["projects"].toArray();
+    QList<QJsonObject> projects_list;
+
+    /* refilling this->projects_list */
 
     this->projects_clear();
 
     foreach (const QJsonValue &project_val, projects)
         this->project_add(project_val.toObject());
 
+    /* rebuilding this->projects_hierarchy */
+
+    projects_list = this->projects_get();
+
+    this->projects_hierarchy.clear();
+
+    foreach (const QJsonObject &project, projects_list) {
+        int parent_id;
+
+        if (project.contains("parent"))
+            parent_id = project["parent"].toObject()["id"].toInt();
+        else
+            parent_id = 0;
+
+        this->projects_hierarchy[parent_id].append(project);
+    }
+
+    /* calling the display function */
+
     this->projects_display();
     return;
+}
+
+QList<QJsonObject> MainWindowCommon::projects_hierarchy_getchildren(int project_id)
+{
+    return this->projects_hierarchy[project_id];
 }
 
 int MainWindowCommon::updateProjects() {
