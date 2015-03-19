@@ -64,12 +64,12 @@ MainWindowFull::MainWindowFull(QWidget *parent) :
     this->updateProjects();
 
     this->timerUpdateIssues = new QTimer(this);
-    connect(this->timerUpdateIssues, SIGNAL(timeout()), this, SLOT(updateIssues()));
+    connect(this->timerUpdateIssues, SIGNAL(timeout()),   this, SLOT(updateIssues()));
     this->timerUpdateIssues->start(10000);
 
     this->timerUpdateProjects = new QTimer(this);
     connect(this->timerUpdateProjects, SIGNAL(timeout()), this, SLOT(updateProjects()));
-    this->timerUpdateProjects->start(5000);
+    this->timerUpdateProjects->start(60000);
 
     return;
 }
@@ -118,7 +118,7 @@ void MainWindowFull::on_resize_navigationDock(QResizeEvent *event) {
      );*/
 
     this->ui->navigationTabs->resize(event->size().width(), event->size().height()-20);
-    this->ui->projects->resize(event->size().width(), event->size().height()-60);
+    this->ui->projects->resize(event->size().width(), event->size().height()-80);
 
     return;
 }
@@ -217,8 +217,27 @@ void MainWindowFull::projects_display()
 {
     this->issues_byProjectId.clear();
     foreach (const QJsonObject &issue, this->issues.get()) {
-        int project_id = issue["project"].toObject()["id"].toInt();
+        QJsonObject project    = issue["project"].toObject();
+        int         project_id = project["id"].toInt();
         this->issues_byProjectId[project_id].append(issue);
+
+        if (this->showProjectIssues_recursive) {
+            QJsonObject parent;
+
+            project = this->projects.get(project["id"].toInt());
+            while (true) {
+                int parent_id;
+
+                parent    = this->projects.get(project["parent"].toObject()["id"].toInt());
+                parent_id = parent["id"].toInt();
+
+                if (parent_id == 0)
+                    break;
+
+                this->issues_byProjectId[parent_id].append(issue);
+                project = parent;
+            }
+        }
     }
 
     this->projects.filter(reinterpret_cast<QWidget *>(this), projectsFilter);
@@ -258,11 +277,24 @@ void issuesWidgetItemSetText(QWidget *__this, QTreeWidgetItem *widgetItem, QJson
 bool issuesFilter(QWidget *__this, QJsonObject item)
 {
     MainWindowFull *_this = reinterpret_cast<MainWindowFull *>(__this);
+    int             project_id;
 
     if (_this->selected_projects_id.empty())
         return true;
 
-    return _this->selected_projects_id.contains(item["project"].toObject()["id"].toInt());
+    project_id = item["project"].toObject()["id"].toInt();
+
+    if (_this->selected_projects_id.contains(project_id))
+        return true;
+
+    if (!_this->showProjectIssues_recursive)
+        return false;
+
+    foreach (int selected_project_id, _this->selected_projects_id)
+        if (_this->projects.isDescendant(project_id, selected_project_id))
+            return true;
+
+    return false;
 }
 
 void MainWindowFull::issues_display()
@@ -271,6 +303,8 @@ void MainWindowFull::issues_display()
 
     this->issues.filter(reinterpret_cast<QWidget *>(this), issuesFilter);
     this->issues.display(this->ui->issuesTree, reinterpret_cast<QWidget *>(this), issuesWidgetItemSetText);
+
+    this->projects_display();
 
     return;
 }
@@ -284,8 +318,10 @@ void MainWindowFull::on_projects_itemSelectionChanged()
     this->selected_projects_id.clear();
 
     foreach (QTreeWidgetItem *selectedProjectItem, this->ui->projects->selectedItems()) {
-        QJsonObject project = this->projects.get(selectedProjectItem);
-        this->selected_projects_id.insert(project["id"].toInt(), true);
+        QJsonObject project    = this->projects.get(selectedProjectItem);
+        int         project_id = project["id"].toInt();
+        //qDebug("selected project: %i", project["id"].toInt());
+        this->selected_projects_id.insert(project_id, project_id);
     }
 
     this->issues_display();
@@ -296,6 +332,25 @@ void MainWindowFull::on_projects_itemSelectionChanged()
 void MainWindowFull::on_issuesTree_itemSelectionChanged()
 {
 
+}
+
+
+void MainWindowFull::on_projectsRadio_recursive_off_toggled(bool checked)
+{
+    if (this->ui->projectsRadio_recursive_on->isChecked() == checked)
+        this->ui->projectsRadio_recursive_on->setChecked(!checked);
+}
+
+void MainWindowFull::on_projectsRadio_recursive_on_toggled(bool checked)
+{
+    if (this->ui->projectsRadio_recursive_off->isChecked() == checked)
+        this->ui->projectsRadio_recursive_off->setChecked(!checked);
+
+    if (this->showProjectIssues_recursive != checked) {
+        this->showProjectIssues_recursive = checked;
+//        this->projects_display();
+        this->issues_display();
+    }
 }
 
 /**** /SIGNALS ****/

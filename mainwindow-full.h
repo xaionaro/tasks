@@ -22,7 +22,8 @@ public:
     /*
      *  TODO: the next public stuff should be moved to the private section:
      */
-    QHash<int, bool> selected_projects_id;
+    QHash<int, int> selected_projects_id;
+    bool            showProjectIssues_recursive = false;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
@@ -37,6 +38,10 @@ private slots:
     void on_projects_itemSelectionChanged();
 
     void on_issuesTree_itemSelectionChanged();
+
+    void on_projectsRadio_recursive_off_toggled(bool checked);
+
+    void on_projectsRadio_recursive_on_toggled(bool checked);
 
 private:
     Ui::MainWindowFull *ui;

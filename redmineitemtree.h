@@ -25,6 +25,8 @@ public:
 
     QList<QJsonObject>  getchildren(int item_id);
 
+    bool                isDescendant(int descendant_id, int ancestor_id);
+
     void                filter(QWidget *initiator, itemFilterFunct_t filterFunct);
     void                display(QTreeWidget *widget, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct);
 

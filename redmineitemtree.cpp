@@ -46,6 +46,28 @@ QJsonObject RedmineItemTree::get(QTreeWidgetItem *widgetItem)
     return this->widgetItem2item[widgetItem];
 }
 
+bool RedmineItemTree::isDescendant(int descendant_id, int ancestor_id){
+    QJsonObject descendant = this->get(descendant_id);
+    int parent_id = 0;
+
+    //qDebug("RedmineItemTree::isDescendant(%i, %i)", descendant_id, ancestor_id);
+
+    while (true) {
+        parent_id  = descendant["parent"].toObject()["id"].toInt();
+        if (parent_id == 0)
+            break;
+
+        //qDebug("%i <> %i", parent_id, ancestor_id);
+
+        if (parent_id == ancestor_id)
+            return true;
+
+        descendant = this->get(parent_id);
+    };
+
+    return false;
+}
+
 void RedmineItemTree::set(QJsonArray array)
 {
     /* refilling this->list */
@@ -193,7 +215,6 @@ void RedmineItemTree::display_child(QTreeWidgetItem *parent, QWidget *initiator,
     if (this->id2widgetItem.contains(item_id))
         widgetItem = this->id2widgetItem[item_id];
     else {
-        qDebug("RedmineItemTree::display_child(): %i", item_id);
         widgetItem = new QTreeWidgetItem(parent);
         this->id2widgetItem.insert(item_id, widgetItem);
         this->widgetItem2item.insert(widgetItem, child);
@@ -213,7 +234,6 @@ void RedmineItemTree::display_topOne(QTreeWidget *widget, QWidget *initiator, wi
     if (this->id2widgetItem.contains(item_id))
         widgetItem = this->id2widgetItem[item_id];
     else {
-        qDebug("RedmineItemTree::display_topOne(): %i", item_id);
         widgetItem = new QTreeWidgetItem(widget);
         this->id2widgetItem.insert(item_id, widgetItem);
         this->widgetItem2item.insert(widgetItem, item);

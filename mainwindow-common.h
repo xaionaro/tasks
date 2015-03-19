@@ -18,6 +18,13 @@ public:
 
     QList<QJsonObject> issues_get_byProjectId(int project_id);
 
+    /*
+     *  TODO: the next public stuff (but not slots) should be moved to
+     *  the protected section:
+     */
+    RedmineItemTree projects;
+    RedmineItemTree issues;
+
 protected:
 
     static const int SORT_DEPTH = 3;
@@ -51,9 +58,6 @@ protected:
 
     enum ESortColumn sortColumn[SORT_DEPTH];
     QMap <enum ESortColumn, sortfunct_t> sortFunctMap;
-
-    RedmineItemTree projects;
-    RedmineItemTree issues;
 
     /*
      *  TODO: the next protected stuff (but not slots) should be moved to
