@@ -33,9 +33,21 @@ QString Redmine::apiKey() {
     return this->_apiKey;
 }
 
-void Redmine::init_quit(QNetworkReply *reply, QJsonDocument *statuses, void *_null) {
+void Redmine::init_quitStatuses(QNetworkReply *reply, QJsonDocument *statuses, void *_null) {
     (void)_null; (void)reply; (void)statuses;
-    this->initBarrier.exit();
+
+    this->initBarrier_jobsDone++;
+
+    if (this->initBarrier_jobsDone >= 2)
+        this->initBarrier.exit();
+}
+void Redmine::init_quitMe(QNetworkReply *reply, QJsonDocument *statuses, void *_null) {
+    (void)_null; (void)reply; (void)statuses;
+
+    this->initBarrier_jobsDone++;
+
+    if (this->initBarrier_jobsDone >= 2)
+        this->initBarrier.exit();
 }
 int Redmine::init() {
     this->setAuth(this->_apiKey);
@@ -43,11 +55,18 @@ int Redmine::init() {
     connect(this, SIGNAL(requestFinished(void*, callback_t, QNetworkReply*, QJsonDocument*, void*)),
             this, SLOT(callback_dispatcher(void*, callback_t, QNetworkReply*, QJsonDocument*, void*)));
 
-    QNetworkReply *updateIssueStatusesReply = this->updateIssueStatuses(&Redmine::init_quit);
+    this->initBarrier_jobsDone = 0;
 
+    QNetworkReply *updateIssueStatusesReply = this->updateIssueStatuses();
     // Wait until issue statuses will be received:
     connect(updateIssueStatusesReply, SIGNAL(finished()), &this->initBarrier, SLOT(quit()));
     this->initBarrier.exec();
+
+    QNetworkReply *updateMeReply            = this->updateMe();
+    // Wait until issue statuses will be received:
+    connect(updateMeReply, SIGNAL(finished()), &this->initBarrier, SLOT(quit()));
+    this->initBarrier.exec();
+
     return 0;
 }
 
@@ -64,6 +83,57 @@ QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
     return this->sendRequest(uri, RedmineClient::JSON, mode, obj_ptr,
                       (RedmineClient::callback_t)callback, callback_arg, free_arg, getParams, requestData);
 }
+
+/********* updateMe *********/
+
+struct redmine_updateMe_callback_arg {
+    Redmine::callback_t  real_callback;
+    void                *arg;
+};
+
+void Redmine::updateMe_callback(QNetworkReply *reply, QJsonDocument *me_doc, void *_arg)
+{
+    (void)reply;
+
+    struct redmine_updateMe_callback_arg *arg =
+            (struct redmine_updateMe_callback_arg *)_arg;
+    callback_t  callback;
+    void       *callback_arg;
+
+    this->_me = me_doc->object()["user"].toObject();
+
+    if (_arg != NULL) {
+        callback     = arg->real_callback;
+        callback_arg = arg->arg;
+        this->callback_call(NULL, callback, reply, me_doc, callback_arg);
+    }
+
+    return;
+}
+
+QNetworkReply *Redmine::updateMe(callback_t callback, void *arg)
+{
+    struct redmine_updateMe_callback_arg *wrapper_arg = NULL;
+
+    if (callback != NULL) {
+         wrapper_arg =
+            (struct redmine_updateMe_callback_arg *)
+                calloc(1, sizeof(struct redmine_updateMe_callback_arg));
+
+        wrapper_arg->real_callback = callback;
+        wrapper_arg->arg           = arg;
+    }
+
+    return this->request(
+                GET,
+                "users/current",
+                this,
+                &Redmine::updateMe_callback,
+                wrapper_arg,
+                true);
+}
+
+/********* /updateMe *********/
 
 /********* updateIssueStatuses *********/
 
@@ -100,8 +170,8 @@ void Redmine::updateIssueStatuses_callback(QNetworkReply *reply, QJsonDocument *
 
     struct redmine_updateIssueStatuses_callback_arg *arg =
             (struct redmine_updateIssueStatuses_callback_arg *)_arg;
-    callback_t  callback     = arg->real_callback;
-    void       *callback_arg = arg->arg;
+    callback_t  callback;
+    void       *callback_arg;
 
     int statuses_count = 0;
     QJsonArray statuses = statuses_doc->object()["issue_statuses"].toArray();
@@ -114,7 +184,12 @@ void Redmine::updateIssueStatuses_callback(QNetworkReply *reply, QJsonDocument *
         this->set_issue_status(status["id"].toInt(), status);
     }
 
-    this->callback_call(NULL, callback, reply, statuses_doc, callback_arg);
+    if (arg != NULL) {
+        callback     = arg->real_callback;
+        callback_arg = arg->arg;
+
+        this->callback_call(NULL, callback, reply, statuses_doc, callback_arg);
+    }
     return;
 }
 
@@ -146,7 +221,7 @@ QNetworkReply *Redmine::updateIssueStatuses(callback_t callback, void *arg)
 QNetworkReply *Redmine::get_issues(callback_t callback,
         void *arg, bool free_arg)
 {
-    return this->request(GET, "issues", NULL, callback, arg, free_arg, settings.issuesFilter+"limit=5000");
+    return this->request(GET, "issues", NULL, callback, arg, free_arg, settings.issuesFilter+"limit=2000&status_id=*");
 }
 
 /********* /get_issues *********/

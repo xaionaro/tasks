@@ -65,11 +65,21 @@ MainWindowFull::MainWindowFull(QWidget *parent) :
 
     this->timerUpdateIssues = new QTimer(this);
     connect(this->timerUpdateIssues, SIGNAL(timeout()),   this, SLOT(updateIssues()));
-    this->timerUpdateIssues->start(10000);
+    this->timerUpdateIssues->start(60000);
 
     this->timerUpdateProjects = new QTimer(this);
     connect(this->timerUpdateProjects, SIGNAL(timeout()), this, SLOT(updateProjects()));
     this->timerUpdateProjects->start(60000);
+
+    QDate date;
+    int year_start = 2013;
+    int year_cur   = qMax(2015, date.year());
+
+    int year       = year_cur;
+    while (year >= year_start)
+        this->ui->issuesFilter_year->addItem(QString::number(year--));
+
+    this->ui->issuesTree->setSortingEnabled(true);
 
     return;
 }
@@ -217,6 +227,10 @@ void MainWindowFull::projects_display()
 {
     this->issues_byProjectId.clear();
     foreach (const QJsonObject &issue, this->issues.get()) {
+
+        if (this->issue_isFiltered(issue))
+            continue;
+
         QJsonObject project    = issue["project"].toObject();
         int         project_id = project["id"].toInt();
         this->issues_byProjectId[project_id].append(issue);
@@ -248,6 +262,52 @@ void MainWindowFull::projects_display()
 
 /**** updateIssues ****/
 
+bool MainWindowFull::issue_isFiltered(QJsonObject issue)
+{
+    if (!this->showIssues_showClosed) {
+        QJsonObject issue_status = issue["status"].toObject();
+        bool        isClosed     = redmine->get_issue_status(issue_status["id"].toInt())["is_closed"].toBool();
+
+        if (isClosed)
+            return true;
+    }
+
+    if (this->issuesFilter_queryType != IFQT_ALL) {
+        QJsonObject author   = issue["author"].toObject();
+        QJsonObject assignee = issue["assigned_to"].toObject();
+        QJsonObject me       = redmine->me();
+
+        int author_id   = author["id"].toInt();
+        int assignee_id = assignee["id"].toInt();
+        int me_id       = me["id"].toInt();
+
+        qDebug("me_id == %i, author_id == %i, assignee_id == %i", me_id, author_id, assignee_id);
+
+        switch (this->issuesFilter_queryType) {
+            case IFQT_TOME:
+                if (assignee_id == me_id)
+                    return false;
+                break;
+            case IFQT_FROMME:
+                if (assignee_id != me_id && author_id == me_id)
+                    return false;
+                break;
+            case IFQT_FOLLOWED:
+                if (assignee_id != me_id && author_id != me_id)
+                    return false;
+                break;
+            case IFQT_ALL:
+                qFatal("MainWindowFull::issue_isFiltered(): this shouldn't happend");
+        }
+
+        return true;
+    }
+
+
+
+    return false;
+}
+
 void issuesWidgetItemSetText(QWidget *__this, QTreeWidgetItem *widgetItem, QJsonObject issue, RedmineItemTree *tree, int level) {
     (void)__this; (void)tree; (void)level;
     //int item_id = item["id"].toInt();
@@ -278,6 +338,9 @@ bool issuesFilter(QWidget *__this, QJsonObject item)
 {
     MainWindowFull *_this = reinterpret_cast<MainWindowFull *>(__this);
     int             project_id;
+
+    if (_this->issue_isFiltered(item))
+        return false;
 
     if (_this->selected_projects_id.empty())
         return true;
@@ -348,9 +411,132 @@ void MainWindowFull::on_projectsRadio_recursive_on_toggled(bool checked)
 
     if (this->showProjectIssues_recursive != checked) {
         this->showProjectIssues_recursive = checked;
-//        this->projects_display();
         this->issues_display();
     }
 }
 
+void MainWindowFull::on_issuesFilter_showClosed_yes_toggled(bool checked)
+{
+    if (this->ui->issuesFilter_showClosed_no->isChecked() == checked)
+        this->ui->issuesFilter_showClosed_no->setChecked(!checked);
+
+    if (this->showIssues_showClosed != checked) {
+        this->showIssues_showClosed = checked;
+        this->issues_display();
+    }
+}
+
+void MainWindowFull::on_issuesFilter_showClosed_no_toggled(bool checked)
+{
+    if (this->ui->issuesFilter_showClosed_yes->isChecked() == checked)
+        this->ui->issuesFilter_showClosed_yes->setChecked(!checked);
+}
+
+void MainWindowFull::on_issuesFilter_queryType_all_toggled(bool checked)
+{
+    if (
+            this->ui->issuesFilter_queryType_all->isChecked() == false &&
+            this->ui->issuesFilter_queryType_toMe->isChecked() == false &&
+            this->ui->issuesFilter_queryType_fromMe->isChecked() == false &&
+            this->ui->issuesFilter_queryType_followed->isChecked() == false
+       )
+    {
+        this->ui->issuesFilter_queryType_all->setChecked(true);
+    }
+
+    if (checked == true) {
+        this->ui->issuesFilter_queryType_followed->setChecked(false);
+        this->ui->issuesFilter_queryType_toMe->setChecked(false);
+        this->ui->issuesFilter_queryType_fromMe->setChecked(false);
+    }
+
+    this->issuesFilter_queryType = IFQT_ALL;
+
+    this->issues_display();
+
+    return;
+}
+
+void MainWindowFull::on_issuesFilter_queryType_followed_toggled(bool checked)
+{
+    if (
+            this->ui->issuesFilter_queryType_all->isChecked() == false &&
+            this->ui->issuesFilter_queryType_toMe->isChecked() == false &&
+            this->ui->issuesFilter_queryType_fromMe->isChecked() == false &&
+            this->ui->issuesFilter_queryType_followed->isChecked() == false
+       )
+    {
+        this->ui->issuesFilter_queryType_followed->setChecked(true);
+    }
+
+    if (checked == true) {
+        this->ui->issuesFilter_queryType_all->setChecked(false);
+        this->ui->issuesFilter_queryType_toMe->setChecked(false);
+        this->ui->issuesFilter_queryType_fromMe->setChecked(false);
+    }
+
+    this->issuesFilter_queryType = IFQT_FOLLOWED;
+
+    this->issues_display();
+
+    return;
+}
+
+void MainWindowFull::on_issuesFilter_queryType_fromMe_toggled(bool checked)
+{
+    if (
+            this->ui->issuesFilter_queryType_all->isChecked() == false &&
+            this->ui->issuesFilter_queryType_toMe->isChecked() == false &&
+            this->ui->issuesFilter_queryType_fromMe->isChecked() == false &&
+            this->ui->issuesFilter_queryType_followed->isChecked() == false
+       )
+    {
+        this->ui->issuesFilter_queryType_fromMe->setChecked(true);
+    }
+
+
+    if (checked == true) {
+        this->ui->issuesFilter_queryType_all->setChecked(false);
+        this->ui->issuesFilter_queryType_toMe->setChecked(false);
+        this->ui->issuesFilter_queryType_followed->setChecked(false);
+    }
+
+    this->issuesFilter_queryType = IFQT_FROMME;
+
+    this->issues_display();
+
+    return;
+}
+
+void MainWindowFull::on_issuesFilter_queryType_toMe_toggled(bool checked)
+{
+    if (
+            this->ui->issuesFilter_queryType_all->isChecked() == false &&
+            this->ui->issuesFilter_queryType_toMe->isChecked() == false &&
+            this->ui->issuesFilter_queryType_fromMe->isChecked() == false &&
+            this->ui->issuesFilter_queryType_followed->isChecked() == false
+       )
+    {
+        this->ui->issuesFilter_queryType_toMe->setChecked(true);
+    }
+
+    if (checked == true) {
+        this->ui->issuesFilter_queryType_all->setChecked(false);
+        this->ui->issuesFilter_queryType_fromMe->setChecked(false);
+        this->ui->issuesFilter_queryType_followed->setChecked(false);
+    }
+
+    this->issuesFilter_queryType = IFQT_TOME;
+
+    this->issues_display();
+
+    return;
+}
+
 /**** /SIGNALS ****/
+
+void MainWindowFull::on_issuesFilter_year_currentIndexChanged(int index)
+{
+    this->issuesFilter_yearIdx = index;
+    this->updateIssues();
+}

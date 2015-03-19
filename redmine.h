@@ -24,12 +24,23 @@ private:
             QJsonDocument *statuses,
             void *_arg);
 
-    void init_quit(QNetworkReply *reply, QJsonDocument *statuses, void *_null);
-
     void get_user_callback(QNetworkReply *reply,
             QJsonDocument *user_doc,
             void *_arg);
+
     QEventLoop initBarrier;
+    int        initBarrier_jobsDone;
+
+    QNetworkReply *updateMe(callback_t callback = NULL, void *arg = NULL);
+    QNetworkReply *updateIssueStatuses(Redmine::callback_t callback = NULL, void *arg = NULL);
+
+    QJsonObject _me;
+
+    void updateMe_callback(QNetworkReply *reply, QJsonDocument *me_doc, void *_arg);
+
+    void init_quitStatuses(QNetworkReply *reply, QJsonDocument *statuses, void *_null);
+    void init_quitMe(QNetworkReply *reply, QJsonDocument *statuses, void *_null);
+
 
 public:
 
@@ -48,6 +59,10 @@ public:
             bool                    free_arg     = false,
             const QString          &getParams    = "",
             const QByteArray       &requestData  = "");
+
+    /* Get information about current user
+     */
+    QJsonObject me() { return _me; }
 
     /* Request all issues
      */
@@ -74,9 +89,6 @@ public:
     QDateTime parseDateTime(QJsonValueRef dataTime_json);
 
     Redmine();
-
-private slots:
-    QNetworkReply *updateIssueStatuses(Redmine::callback_t callback = NULL, void *arg = NULL);
 
 };
 

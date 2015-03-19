@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
-    <height>800</height>
+    <width>1833</width>
+    <height>1143</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,11 +28,11 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1161</width>
-      <height>701</height>
+      <width>2971</width>
+      <height>1481</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="issuesLayout">
+    <layout class="QVBoxLayout" name="issuesLayout" stretch="0">
      <item>
       <widget class="QTreeWidget" name="issuesTree">
        <property name="columnCount">
@@ -73,7 +73,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1280</width>
+     <width>1833</width>
      <height>19</height>
     </rect>
    </property>
@@ -159,7 +159,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>191</width>
+         <width>195</width>
          <height>22</height>
         </rect>
        </property>
@@ -202,34 +202,145 @@
       <rect>
        <x>-1</x>
        <y>9</y>
-       <width>211</width>
-       <height>521</height>
+       <width>183</width>
+       <height>651</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="filtersLayout">
       <item>
-       <widget class="QRadioButton" name="radioButton_3">
-        <property name="text">
-         <string>RadioButton</string>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QRadioButton" name="issuesFilter_showClosed_no">
+          <property name="text">
+           <string>Только открытые</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="issuesFilter_showClosed_yes">
+          <property name="text">
+           <string>Все</string>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton_2">
-        <property name="text">
-         <string>RadioButton</string>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QRadioButton" name="issuesFilter_queryType_all">
+          <property name="text">
+           <string>Все</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="issuesFilter_queryType_toMe">
+          <property name="text">
+           <string>Поручено мне</string>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="issuesFilter_queryType_followed">
+          <property name="text">
+           <string>Мной поручено</string>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="issuesFilter_queryType_fromMe">
+          <property name="text">
+           <string>На контроле</string>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton">
-        <property name="text">
-         <string>RadioButton</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QFrame" name="frame">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QComboBox" name="issuesFilter_year">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>30</y>
+             <width>151</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <item>
+            <property name="text">
+             <string>Последние задачи</string>
+            </property>
+           </item>
+          </widget>
+          <widget class="QLabel" name="label">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>10</y>
+             <width>59</width>
+             <height>14</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Архив:</string>
+           </property>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
+    <zorder>verticalLayoutWidget</zorder>
+    <zorder>verticalLayoutWidget_6</zorder>
    </widget>
   </widget>
   <widget class="QDockWidget" name="issueDock">
