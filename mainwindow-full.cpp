@@ -229,13 +229,28 @@ void MainWindowFull::projects_display()
 
 /**** updateIssues ****/
 
-void issuesWidgetItemSetText(QWidget *__this, QTreeWidgetItem *widgetItem, QJsonObject item, RedmineItemTree *tree, int level) {
+void issuesWidgetItemSetText(QWidget *__this, QTreeWidgetItem *widgetItem, QJsonObject issue, RedmineItemTree *tree, int level) {
     (void)__this; (void)tree; (void)level;
     //int item_id = item["id"].toInt();
     //MainWindowFull *_this = reinterpret_cast<MainWindowFull *>(__this);
 
-    widgetItem->setText(0,
-        item["subject"].toString());
+    QJsonObject  issue_status = issue["status"].toObject();
+//    bool         isClosed     = redmine->get_issue_status(issue_status["id"].toInt())["is_closed"].toBool();
+
+
+    widgetItem->setText(0, issue["subject"].toString());
+    widgetItem->setText(1, issue["assigned_to"].toObject()["name"].toString());
+
+    QString due_date_str = issue["due_date"].toString();
+    QDateTime now, date;
+    now  = QDateTime::currentDateTime();
+    date = QDateTime::fromString(due_date_str, "yyyy-MM-dd");
+
+    widgetItem->setText(2, due_date_str);
+    widgetItem->setText(3, issue_status["name"].toString());
+
+    QDateTime updated_on = redmine->parseDateTime(issue["updated_on"]);
+    widgetItem->setText(4, updated_on.toString("yyyy'-'MM'-'dd HH':'MM"));
 
     return;
 }
