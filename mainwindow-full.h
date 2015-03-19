@@ -19,6 +19,11 @@ public:
     explicit MainWindowFull(QWidget *parent = 0);
     ~MainWindowFull();
 
+    /*
+     *  TODO: the next public stuff should be moved to the private section:
+     */
+    QHash<int, bool> selected_projects_id;
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
@@ -61,6 +66,8 @@ private:
 
     void projectResetIfUpdated(int project_id, QJsonObject project);
     void projectResetRecursive(int project_id);
+
+    //QList<QJsonObject> selected_issues;
 
     QTimer *timerUpdateIssues;
     QTimer *timerUpdateProjects;

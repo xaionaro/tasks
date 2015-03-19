@@ -41,6 +41,10 @@ QJsonObject RedmineItemTree::get(int item_id)
 {
     return this->real.get(item_id);
 }
+QJsonObject RedmineItemTree::get(QTreeWidgetItem *widgetItem)
+{
+    return this->widgetItem2item[widgetItem];
+}
 
 void RedmineItemTree::set(QJsonArray array)
 {
@@ -112,6 +116,19 @@ void RedmineItemTree::filter(QWidget *initiator, itemFilterFunct_t filterFunct)
     return;
 }
 
+void RedmineItemTree::widgetItemReset(QJsonObject item) {
+    int item_id = item["id"].toInt();
+
+    QTreeWidgetItem *widgetItem = this->id2widgetItem[item_id];
+
+    this->widgetItem2item.remove(widgetItem);
+    delete widgetItem;
+
+    this->id2widgetItem.remove(item_id);
+
+    return;
+}
+
 void RedmineItemTree::widgetItemResetRecursive(int item_id)
 {
     QList<QJsonObject> children = this->filtered.getchildren(item_id);
@@ -120,10 +137,10 @@ void RedmineItemTree::widgetItemResetRecursive(int item_id)
         int child_project_id = child["id"].toInt();
 
         this->widgetItemResetRecursive(child_project_id);
-
-        delete this->id2widgetItem[child_project_id];
-        this->id2widgetItem.remove(child_project_id);
+        this->widgetItemReset(child);
     }
+
+    this->widgetItemReset(this->get(item_id));
 }
 
 
@@ -142,7 +159,7 @@ void RedmineItemTree::widgetItemsResetIfUpdated(int item_id, QJsonObject item)
     return;
 }
 
-void RedmineItemTree::display_recursive(QTreeWidgetItem *widgetItem, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct, QJsonObject item, int level, QHash <int, bool> &toremove_ids) {
+void RedmineItemTree::display_recursive(QTreeWidgetItem *widgetItem, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct, QJsonObject item, int level, QHash<int, int> &toremove_ids) {
     int item_id = item["id"].toInt();
 
     toremove_ids.remove(item_id);
@@ -154,7 +171,7 @@ void RedmineItemTree::display_recursive(QTreeWidgetItem *widgetItem, QWidget *in
     }
 }
 
-void RedmineItemTree::display_child(QTreeWidgetItem *parent, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct, QJsonObject child, int level, QHash <int, bool> &toremove_ids)
+void RedmineItemTree::display_child(QTreeWidgetItem *parent, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct, QJsonObject child, int level, QHash<int, int> &toremove_ids)
 {
     int item_id = child["id"].toInt();
     QTreeWidgetItem *widgetItem;
@@ -166,12 +183,13 @@ void RedmineItemTree::display_child(QTreeWidgetItem *parent, QWidget *initiator,
     else {
         widgetItem = new QTreeWidgetItem(parent);
         this->id2widgetItem.insert(item_id, widgetItem);
+        this->widgetItem2item.insert(widgetItem, child);
     }
 
     this->display_recursive(widgetItem, initiator, setTextFunct, child, level, toremove_ids);
 }
 
-void RedmineItemTree::display_topOne(QTreeWidget *widget, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct, int pos, QHash <int, bool> &toremove_ids)
+void RedmineItemTree::display_topOne(QTreeWidget *widget, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct, int pos, QHash<int, int> &toremove_ids)
 {
     QJsonObject item    = this->row2item[pos];
     int         item_id = item["id"].toInt();
@@ -184,6 +202,7 @@ void RedmineItemTree::display_topOne(QTreeWidget *widget, QWidget *initiator, wi
     else {
         widgetItem = new QTreeWidgetItem(widget);
         this->id2widgetItem.insert(item_id, widgetItem);
+        this->widgetItem2item.insert(widgetItem, item);
     }
 
     this->display_recursive(widgetItem, initiator, setTextFunct, item, 0, toremove_ids);
@@ -191,8 +210,6 @@ void RedmineItemTree::display_topOne(QTreeWidget *widget, QWidget *initiator, wi
 
 void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct)
 {
-    qDebug("RedmineItemTree::display()");
-
     // TODO: uncomment the next line. This function is not thread-safe
     //this->displayMutex.lock();
 
@@ -200,10 +217,10 @@ void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetIte
      *  Building a table of items' id
     \*/
 
-    QHash <int, bool> toremove_ids;
+    QHash <int, int> toremove_ids;
 
-    foreach (const QJsonObject &item, this->get())
-        toremove_ids.insert(item["id"].toInt(), true);
+    foreach (const QJsonObject &item, this->widgetItem2item)
+        toremove_ids.insert(item["id"].toInt(), item["id"].toInt());
 
 
     /*\
@@ -225,9 +242,8 @@ void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetIte
      *  Removing stale items
     \*/
 
-    foreach (const int &item_id, toremove_ids) {
+    foreach (const int &item_id, toremove_ids)
         this->widgetItemResetRecursive(item_id);
-    }
 
     // TODO: uncomment the next line. This function is not thread-safe
     //this->displayMutex.unlock();

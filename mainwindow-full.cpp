@@ -117,8 +117,8 @@ void MainWindowFull::on_resize_navigationDock(QResizeEvent *event) {
         event->oldSize().height()
      );*/
 
-    this->ui->navigationTabs->resize(event->size());
-    this->ui->projects->resize(event->size());
+    this->ui->navigationTabs->resize(event->size().width(), event->size().height()-20);
+    this->ui->projects->resize(event->size().width(), event->size().height()-60);
 
     return;
 }
@@ -242,7 +242,14 @@ bool issuesFilter(QWidget *__this, QJsonObject item)
 
     (void)_this; (void)item;
 
-    return true;
+    qDebug("issuesFilter");
+
+    if (_this->selected_projects_id.empty())
+        return true;
+
+    qDebug("issuesFilter: %i", _this->selected_projects_id.contains(item["project"].toObject()["id"].toInt()));
+
+    return _this->selected_projects_id.contains(item["project"].toObject()["id"].toInt());
 }
 
 void MainWindowFull::issues_display()
@@ -261,9 +268,16 @@ void MainWindowFull::issues_display()
 
 void MainWindowFull::on_projects_itemSelectionChanged()
 {
-    foreach (const QTreeWidgetItem *selectedProjectItem, this->ui->projects->selectedItems()) {
-        qDebug(selectedProjectItem->text(0).toUtf8().data());
+    this->selected_projects_id.clear();
+
+    foreach (QTreeWidgetItem *selectedProjectItem, this->ui->projects->selectedItems()) {
+        QJsonObject project = this->projects.get(selectedProjectItem);
+        this->selected_projects_id.insert(project["id"].toInt(), true);
     }
+
+    this->issues_display();
+
+    return;
 }
 
 void MainWindowFull::on_issuesTree_itemSelectionChanged()

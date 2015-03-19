@@ -12,6 +12,7 @@ public:
 
     QList<QJsonObject>  get();
     QJsonObject         get(int item_id);
+
     QList<QJsonObject>  getchildren(int item_id);
     void                clear();
     void                add(QJsonObject jsonObj);
@@ -21,8 +22,8 @@ public:
 
 private:
 
-    QList<QJsonObject>              list;
-    QHash<int, QJsonObject>         id2item;
+    QList<QJsonObject>                      list;
+    QHash<int, QJsonObject>                 id2item;
 };
 
 #endif // REDMINEITEMTREEDATA_H
