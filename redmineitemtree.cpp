@@ -116,31 +116,43 @@ void RedmineItemTree::filter(QWidget *initiator, itemFilterFunct_t filterFunct)
     return;
 }
 
-void RedmineItemTree::widgetItemReset(QJsonObject item) {
-    int item_id = item["id"].toInt();
+void RedmineItemTree::widgetItemReset(int item_id)
+{
+
+    if (!this->id2widgetItem.contains(item_id))
+        return;
 
     QTreeWidgetItem *widgetItem = this->id2widgetItem[item_id];
-
-    this->widgetItem2item.remove(widgetItem);
-    delete widgetItem;
-
     this->id2widgetItem.remove(item_id);
+    this->widgetItem2item.remove(widgetItem);
+
+    //this->filtered.removechild(item_id);
 
     return;
 }
 
 void RedmineItemTree::widgetItemResetRecursive(int item_id)
 {
-    QList<QJsonObject> children = this->filtered.getchildren(item_id);
+    QList<QJsonObject> children = this->real.getchildren(item_id);
+
+    if (!this->id2widgetItem.contains(item_id))
+        return;
+
 
     foreach (const QJsonObject &child, children) {
-        int child_project_id = child["id"].toInt();
+        int child_id = child["id"].toInt();
 
-        this->widgetItemResetRecursive(child_project_id);
-        this->widgetItemReset(child);
+        this->widgetItemResetRecursive(child_id);
+        this->widgetItemReset(child_id);
     }
 
-    this->widgetItemReset(this->get(item_id));
+    QTreeWidgetItem *widgetItem = this->id2widgetItem[item_id];
+
+    this->widgetItemReset(item_id);
+
+    delete widgetItem;
+
+    return;
 }
 
 
@@ -181,6 +193,7 @@ void RedmineItemTree::display_child(QTreeWidgetItem *parent, QWidget *initiator,
     if (this->id2widgetItem.contains(item_id))
         widgetItem = this->id2widgetItem[item_id];
     else {
+        qDebug("RedmineItemTree::display_child(): %i", item_id);
         widgetItem = new QTreeWidgetItem(parent);
         this->id2widgetItem.insert(item_id, widgetItem);
         this->widgetItem2item.insert(widgetItem, child);
@@ -200,6 +213,7 @@ void RedmineItemTree::display_topOne(QTreeWidget *widget, QWidget *initiator, wi
     if (this->id2widgetItem.contains(item_id))
         widgetItem = this->id2widgetItem[item_id];
     else {
+        qDebug("RedmineItemTree::display_topOne(): %i", item_id);
         widgetItem = new QTreeWidgetItem(widget);
         this->id2widgetItem.insert(item_id, widgetItem);
         this->widgetItem2item.insert(widgetItem, item);
@@ -211,7 +225,7 @@ void RedmineItemTree::display_topOne(QTreeWidget *widget, QWidget *initiator, wi
 void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct)
 {
     // TODO: uncomment the next line. This function is not thread-safe
-    //this->displayMutex.lock();
+    this->displayMutex.lock();
 
     /*\
      *  Building a table of items' id
@@ -246,5 +260,5 @@ void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetIte
         this->widgetItemResetRecursive(item_id);
 
     // TODO: uncomment the next line. This function is not thread-safe
-    //this->displayMutex.unlock();
+    this->displayMutex.unlock();
 }

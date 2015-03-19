@@ -55,6 +55,12 @@ protected:
     RedmineItemTree projects;
     RedmineItemTree issues;
 
+    /*
+     *  TODO: the next protected stuff (but not slots) should be moved to
+     *  the private section:
+     */
+    QHash<int, QList<QJsonObject>> issues_byProjectId;
+
 protected slots:
     int updateProjects();
     int updateIssues();
@@ -71,7 +77,6 @@ private:
     void get_projects_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
     void get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
 
-    QHash<int, QList<QJsonObject>> issues_byProjectId;
 
     QMutex updateProjectsMutex;
     QMutex updateIssuesMutex;

@@ -215,7 +215,11 @@ bool projectsFilter(QWidget *__this, QJsonObject item)
 
 void MainWindowFull::projects_display()
 {
-    qDebug("MainWindowFull::projects_display()");
+    this->issues_byProjectId.clear();
+    foreach (const QJsonObject &issue, this->issues.get()) {
+        int project_id = issue["project"].toObject()["id"].toInt();
+        this->issues_byProjectId[project_id].append(issue);
+    }
 
     this->projects.filter(reinterpret_cast<QWidget *>(this), projectsFilter);
     this->projects.display(this->ui->projects, reinterpret_cast<QWidget *>(this), projectWidgetItemSetText);
@@ -240,14 +244,8 @@ bool issuesFilter(QWidget *__this, QJsonObject item)
 {
     MainWindowFull *_this = reinterpret_cast<MainWindowFull *>(__this);
 
-    (void)_this; (void)item;
-
-    qDebug("issuesFilter");
-
     if (_this->selected_projects_id.empty())
         return true;
-
-    qDebug("issuesFilter: %i", _this->selected_projects_id.contains(item["project"].toObject()["id"].toInt()));
 
     return _this->selected_projects_id.contains(item["project"].toObject()["id"].toInt());
 }

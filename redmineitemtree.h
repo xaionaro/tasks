@@ -33,7 +33,7 @@ private:
     void                add(QJsonObject jsonObj);
 
     void                widgetItemResetRecursive(int item_id);
-    void                widgetItemReset(QJsonObject item);
+    void                widgetItemReset(int item_id);
     void                widgetItemsResetIfUpdated(int item_id, QJsonObject item);
 
     void                display_recursive(QTreeWidgetItem *widgetItem, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct, QJsonObject item, int level, QHash <int, int> &toremove_ids);

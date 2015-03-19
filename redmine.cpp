@@ -146,7 +146,7 @@ QNetworkReply *Redmine::updateIssueStatuses(callback_t callback, void *arg)
 QNetworkReply *Redmine::get_issues(callback_t callback,
         void *arg, bool free_arg)
 {
-    return this->request(GET, "issues", NULL, callback, arg, free_arg, settings.issuesFilter);
+    return this->request(GET, "issues", NULL, callback, arg, free_arg, settings.issuesFilter+"limit=5000");
 }
 
 /********* /get_issues *********/
