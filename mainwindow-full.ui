@@ -267,7 +267,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="issuesFilter_queryType_followed">
+         <widget class="QRadioButton" name="issuesFilter_queryType_fromMe">
           <property name="text">
            <string>Мной поручено</string>
           </property>
@@ -277,7 +277,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="issuesFilter_queryType_fromMe">
+         <widget class="QRadioButton" name="issuesFilter_queryType_followed">
           <property name="text">
            <string>На контроле</string>
           </property>
