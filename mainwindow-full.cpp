@@ -24,6 +24,7 @@
 
 #include "helpwindow.h"
 #include "htmldelegate.h"
+#include "projectmemberswindow.h"
 
 MainWindowFull::MainWindowFull(QWidget *parent) :
     MainWindowCommon(parent),
@@ -79,7 +80,30 @@ MainWindowFull::MainWindowFull(QWidget *parent) :
     while (year >= year_start)
         this->ui->issuesFilter_year->addItem(QString::number(year--));
 
+    this->ui->projects->setSortingEnabled(true);
+    this->ui->projects->sortByColumn(0, Qt::AscendingOrder);
+    this->ui->projects->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    this->ui->projects->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    this->ui->issuesTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    this->ui->issuesTree->header()->setStretchLastSection(false);
     this->ui->issuesTree->setSortingEnabled(true);
+    this->ui->issuesTree->sortByColumn(4, Qt::DescendingOrder);
+    this->ui->issuesTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    this->ui->issuesTree->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    /*
+    connect(this->ui->projects, SIGNAL(customContextMenuRequested(const QPoint&)),
+        this, SLOT(projectsShowContextMenu(const QPoint&)));
+    connect(this->ui->issuesTree, SIGNAL(customContextMenuRequested(const QPoint&)),
+        this, SLOT(issuesShowContextMenu(const QPoint&)));
+     */
+
+    this->projectsDisplayRetryTimer.setSingleShot(true);
+    connect(&this->projectsDisplayRetryTimer, SIGNAL(timeout()), this, SLOT(projects_display()));
+
+    this->ui->issuesFilter_field_assigned_to->addItem("", 0);
+    this->ui->issuesFilter_field_status     ->addItem("", 0);
 
     return;
 }
@@ -114,6 +138,20 @@ void MainWindowFull::on_resize_centralWidget(QResizeEvent *event) {
 
     this->ui->issuesLayout->setGeometry(QRect(0, 0, event->size().width(), event->size().height()-10));
 
+    QHeaderView *issuesHeader = this->ui->issuesTree->header();
+
+    this->ui->issuesFilter_field_name       ->resize(issuesHeader->sectionSize(0), 24);
+    this->ui->issuesFilter_field_assigned_to->resize(issuesHeader->sectionSize(1), 24);
+    this->ui->issuesFilter_field_due_date   ->resize(issuesHeader->sectionSize(2), 24);
+    this->ui->issuesFilter_field_status     ->resize(issuesHeader->sectionSize(3), 24);
+    this->ui->issuesFilter_field_updated_on ->resize(issuesHeader->sectionSize(4), 24);
+
+    this->ui->issuesFilter_field_name       ->move(issuesHeader->sectionPosition(0), 0);
+    this->ui->issuesFilter_field_assigned_to->move(issuesHeader->sectionPosition(1), 0);
+    this->ui->issuesFilter_field_due_date   ->move(issuesHeader->sectionPosition(2), 0);
+    this->ui->issuesFilter_field_status     ->move(issuesHeader->sectionPosition(3), 0);
+    this->ui->issuesFilter_field_updated_on ->move(issuesHeader->sectionPosition(4), 0);
+
     return;
 }
 
@@ -128,7 +166,7 @@ void MainWindowFull::on_resize_navigationDock(QResizeEvent *event) {
      );*/
 
     this->ui->navigationTabs->resize(event->size().width(), event->size().height()-20);
-    this->ui->projects->resize(event->size().width(), event->size().height()-80);
+    this->ui->projects->resize(event->size().width(), event->size().height()-105);
 
     return;
 }
@@ -199,7 +237,6 @@ void MainWindowFull::on_toolActionHelp_triggered()
 
 /**** updateProjects ****/
 
-
 void projectWidgetItemSetText(QWidget *__this, QTreeWidgetItem *widgetItem, QJsonObject item, RedmineItemTree *tree, int level) {
     (void)tree; (void)level;
     int item_id = item["id"].toInt();
@@ -220,11 +257,24 @@ bool projectsFilter(QWidget *__this, QJsonObject item)
 
     (void)_this; (void)item;
 
+    if (item["name"].toString().indexOf(_this->projectsFilter_namePart, Qt::CaseInsensitive) == -1)
+        return false;
+
     return true;
 }
 
 void MainWindowFull::projects_display()
 {
+    if (!this->projectsDisplayMutex.tryLock()) {
+        if (!this->projectsDisplayExceptionMutex.tryLock())
+            return;
+
+        this->projectsDisplayRetryTimer.start(100);
+
+        this->projectsDisplayExceptionMutex.unlock();
+        return;
+    }
+
     this->issues_byProjectId.clear();
     foreach (const QJsonObject &issue, this->issues.get()) {
 
@@ -256,6 +306,8 @@ void MainWindowFull::projects_display()
 
     this->projects.filter(reinterpret_cast<QWidget *>(this), projectsFilter);
     this->projects.display(this->ui->projects, reinterpret_cast<QWidget *>(this), projectWidgetItemSetText);
+
+    this->projectsDisplayMutex.unlock();
 }
 
 /**** /updateProjects ****/
@@ -281,29 +333,35 @@ bool MainWindowFull::issue_isFiltered(QJsonObject issue)
         int assignee_id = assignee["id"].toInt();
         int me_id       = me["id"].toInt();
 
-        qDebug("me_id == %i, author_id == %i, assignee_id == %i", me_id, author_id, assignee_id);
-
         switch (this->issuesFilter_queryType) {
             case IFQT_TOME:
-                if (assignee_id == me_id)
-                    return false;
+                if (!(assignee_id == me_id))
+                    return true;
                 break;
             case IFQT_FROMME:
-                if (assignee_id != me_id && author_id == me_id)
-                    return false;
+                if (!(assignee_id != me_id && author_id == me_id))
+                    return true;
                 break;
             case IFQT_FOLLOWED:
-                if (assignee_id != me_id && author_id != me_id)
-                    return false;
+                if (!(assignee_id != me_id && author_id != me_id))
+                    return true;
                 break;
             case IFQT_ALL:
                 qFatal("MainWindowFull::issue_isFiltered(): this shouldn't happend");
         }
-
-        return true;
     }
 
+    if (this->issuesFilter_field_assignee_id != 0)
+        if (issue["assigned_to"].toObject()["id"].toInt() != this->issuesFilter_field_assignee_id)
+            return true;
 
+    if (this->issuesFilter_field_status_id != 0)
+        if (issue["status"].toObject()["id"].toInt() != this->issuesFilter_field_status_id)
+            return true;
+
+    if (this->issuesFilter_field_subjectPart.size())
+        if (issue["subject"].toString().indexOf(this->issuesFilter_field_subjectPart, Qt::CaseInsensitive) == -1)
+            return true;
 
     return false;
 }
@@ -360,6 +418,47 @@ bool issuesFilter(QWidget *__this, QJsonObject item)
     return false;
 }
 
+void MainWindowFull::setIssuesFilterItems(QComboBox *box, QHash<int,QJsonObject> table_old, QHash<int,QJsonObject> table, QString keyname) {
+    QHash<int, int> ids_old;
+
+    foreach (const int &item_id, table_old.keys())
+        ids_old.insert(item_id, item_id);
+
+    /*
+     * Adding new items
+     */
+
+    foreach (const int &item_id, table.keys()) {
+        if (ids_old.contains(item_id))
+            ids_old.remove(item_id);
+        else
+             box->addItem(table[item_id][keyname].toString(), item_id);
+    }
+
+    /*
+     * Removing old items
+     */
+
+    int idx = box->count();
+    while (--idx > 0) {
+        int item_id;
+
+        item_id = box->itemData(idx).toInt();
+
+        if (ids_old.contains(item_id))
+            box->removeItem(idx);
+    }
+
+    /*
+     * Sorting
+     */
+
+    box->model()->sort(0);
+
+    return;
+}
+
+
 void MainWindowFull::issues_display()
 {
     qDebug("MainWindowFull::issues_display()");
@@ -367,12 +466,60 @@ void MainWindowFull::issues_display()
     this->issues.filter(reinterpret_cast<QWidget *>(this), issuesFilter);
     this->issues.display(this->ui->issuesTree, reinterpret_cast<QWidget *>(this), issuesWidgetItemSetText);
 
+    QHash<int, QJsonObject> issuesFiltered_statuses_old  = this->issuesFiltered_statuses;
+    QHash<int, QJsonObject> issuesFiltered_assignees_old = this->issuesFiltered_assignees;
+    //QHash<int, QJsonObject> issuesFiltered_author_old    = this->issuesFiltered_author;
+
+    this->issuesFiltered_statuses.clear();
+    this->issuesFiltered_assignees.clear();
+    this->issuesFiltered_authors.clear();
+    foreach (const QJsonObject &issue, this->issues.filtered.get())
+    {
+        QJsonObject status   = issue["status"].toObject();
+        QJsonObject assignee = issue["assigned_to"].toObject();
+        QJsonObject author   = issue["author"].toObject();
+
+        int status_id   = status  ["id"].toInt();
+        int assignee_id = assignee["id"].toInt();
+        int author_id   = author  ["id"].toInt();
+
+        this->issuesFiltered_authors.insert(author_id, author);
+
+        if (status_id   != 0)
+            this->issuesFiltered_statuses. insert(status_id,   status);
+        if (assignee_id != 0)
+            this->issuesFiltered_assignees.insert(assignee_id, assignee);
+    }
+
+    this->setIssuesFilterItems(this->ui->issuesFilter_field_assigned_to,
+                               issuesFiltered_assignees_old,
+                               this->issuesFiltered_assignees,
+                               "name");
+
+    this->setIssuesFilterItems(this->ui->issuesFilter_field_status,
+                               issuesFiltered_statuses_old,
+                               this->issuesFiltered_statuses,
+                               "name");
     this->projects_display();
 
     return;
 }
 
 /**** /updateIssues ****/
+
+/**** issue_display ****/
+
+void MainWindowFull::issue_display(int issue_id)
+{
+    QJsonObject issue;
+
+    if (issue_id != 0)
+        issue = this->issues.get(issue_id);
+
+
+}
+
+/**** /issue_display ****/
 
 /**** SIGNALS ****/
 
@@ -394,7 +541,18 @@ void MainWindowFull::on_projects_itemSelectionChanged()
 
 void MainWindowFull::on_issuesTree_itemSelectionChanged()
 {
+    this->selected_issues_id.clear();
 
+    foreach (QTreeWidgetItem *selectedIssueItem, this->ui->issuesTree->selectedItems()) {
+        QJsonObject issue    = this->issues.get(selectedIssueItem);
+        int         issue_id = issue["id"].toInt();
+        this->selected_issues_id.insert(issue_id, issue_id);
+    }
+
+    if (this->selected_issues_id.count() == 1)
+        this->issue_display(this->selected_issues_id.keys().first());
+    else
+        this->issue_display(0);
 }
 
 
@@ -539,4 +697,60 @@ void MainWindowFull::on_issuesFilter_year_currentIndexChanged(int index)
 {
     this->issuesFilter_yearIdx = index;
     this->updateIssues();
+}
+
+void MainWindowFull::on_projectFilter_field_name_textChanged(const QString &arg1)
+{
+    this->projectsFilter_namePart = arg1;
+    this->issues_display();
+}
+
+void MainWindowFull::projectsShowContextMenu(const QPoint &pos)
+{
+    QList<int> project_ids = this->selected_projects_id.keys();
+    QPoint     globalPos   = this->ui->projects->mapToGlobal(pos);
+
+    QMenu contextMenu;
+    QAction *membersItem = contextMenu.addAction("Участники");
+
+    QAction *selectedItem = contextMenu.exec(globalPos);
+
+    qDebug("%p %p", membersItem, selectedItem);
+    if (selectedItem == membersItem) {
+        ProjectMembersWindow *membersWindow = new ProjectMembersWindow(this, project_ids);
+        membersWindow->show();
+    } else
+    {}
+
+    return;
+}
+
+void MainWindowFull::issuesShowContextMenu(const QPoint &pos)
+{
+    return;
+}
+
+
+void MainWindowFull::on_issuesFilter_field_name_textChanged(const QString &arg1)
+{
+    this->issuesFilter_field_subjectPart = arg1;
+    this->issues_display();
+}
+
+void MainWindowFull::on_issuesFilter_field_assigned_to_currentIndexChanged(int index)
+{
+    int assigned_to_id = this->ui->issuesFilter_field_assigned_to->itemData(index).toInt();
+    if (this->issuesFilter_field_assignee_id != assigned_to_id) {
+        this->issuesFilter_field_assignee_id  = assigned_to_id;
+        this->issues_display();
+    }
+}
+
+void MainWindowFull::on_issuesFilter_field_status_currentIndexChanged(int index)
+{
+    int status_id = this->ui->issuesFilter_field_status->itemData(index).toInt();
+    if (this->issuesFilter_field_status_id != status_id) {
+        this->issuesFilter_field_status_id  = status_id;
+        this->issues_display();
+    }
 }

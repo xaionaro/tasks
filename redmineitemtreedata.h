@@ -7,6 +7,10 @@
 
 class RedmineItemTreeData
 {
+    private:
+    QList<QJsonObject>                      list;
+    QHash<int, QJsonObject>                 id2item;
+
 public:
     RedmineItemTreeData();
 
@@ -16,14 +20,13 @@ public:
     QList<QJsonObject>  getchildren(int item_id);
     void                clear();
     void                add(QJsonObject jsonObj);
+    QHash<int, bool>    isToBeUpdated;
+    QHash<int, int>     parent;
 
     // TODO: hierarchy should me moved to private
     QHash<int, QList<QJsonObject>>  hierarchy;
 
-private:
-
-    QList<QJsonObject>                      list;
-    QHash<int, QJsonObject>                 id2item;
+    RedmineItemTreeData &operator= (const RedmineItemTreeData &);
 };
 
 #endif // REDMINEITEMTREEDATA_H

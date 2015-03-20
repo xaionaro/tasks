@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     mainwindow-common.cpp \
     htmldelegate.cpp \
     redmineitemtree.cpp \
-    redmineitemtreedata.cpp
+    redmineitemtreedata.cpp \
+    projectmemberswindow.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -33,13 +34,15 @@ HEADERS  += \
     mainwindow-common.h \
     htmldelegate.h \
     redmineitemtree.h \
-    redmineitemtreedata.h
+    redmineitemtreedata.h \
+    projectmemberswindow.h
 
 FORMS    += \
     helpwindow.ui \
     syntaxwindow.ui \
     mainwindow-full.ui \
-    mainwindow-rector.ui
+    mainwindow-rector.ui \
+    projectmemberswindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Release/release/ -lqtredmine
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/ -lqtredmine

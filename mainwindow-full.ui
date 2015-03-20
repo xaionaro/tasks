@@ -32,7 +32,102 @@
       <height>1481</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="issuesLayout" stretch="0">
+    <layout class="QVBoxLayout" name="issuesLayout" stretch="0,0">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QWidget" name="widget" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>24</height>
+        </size>
+       </property>
+       <widget class="QLineEdit" name="issuesFilter_field_name">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>251</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="issuesFilter_field_assigned_to">
+        <property name="geometry">
+         <rect>
+          <x>250</x>
+          <y>0</y>
+          <width>72</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QDateEdit" name="issuesFilter_field_due_date">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>0</y>
+          <width>110</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="displayFormat">
+         <string>yyyy-MM-dd</string>
+        </property>
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+        <property name="date">
+         <date>
+          <year>2013</year>
+          <month>1</month>
+          <day>1</day>
+         </date>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="issuesFilter_field_status">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>0</y>
+          <width>72</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QDateEdit" name="issuesFilter_field_updated_on">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>500</x>
+          <y>0</y>
+          <width>110</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="displayFormat">
+         <string>yyyy-MM-dd</string>
+        </property>
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+        <property name="date">
+         <date>
+          <year>2016</year>
+          <month>1</month>
+          <day>1</day>
+         </date>
+        </property>
+       </widget>
+      </widget>
+     </item>
      <item>
       <widget class="QTreeWidget" name="issuesTree">
        <property name="columnCount">
@@ -131,9 +226,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>20</y>
+         <y>50</y>
          <width>271</width>
-         <height>711</height>
+         <height>681</height>
         </rect>
        </property>
        <property name="sortingEnabled">
@@ -182,6 +277,29 @@
          </widget>
         </item>
        </layout>
+      </widget>
+      <widget class="QLineEdit" name="projectFilter_field_name">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>25</y>
+         <width>191</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>29</y>
+         <width>59</width>
+         <height>14</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Фильтр:</string>
+       </property>
       </widget>
      </widget>
      <widget class="QWidget" name="structureTab">
@@ -306,6 +424,9 @@
            <enum>QFrame::Raised</enum>
           </property>
           <widget class="QComboBox" name="issuesFilter_year">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -348,32 +469,65 @@
     <number>8</number>
    </attribute>
    <widget class="QWidget" name="issueDockContents">
-    <widget class="QWidget" name="gridLayoutWidget">
+    <widget class="QWidget" name="verticalLayoutWidget_6">
      <property name="geometry">
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>1271</width>
-       <height>201</height>
+       <width>1831</width>
+       <height>1231</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="issueLayout">
-      <item row="1" column="1">
-       <widget class="QPushButton" name="issueCommitButton">
-        <property name="text">
-         <string>Подтвердить</string>
+     <layout class="QVBoxLayout" name="issueLayout">
+      <item>
+       <widget class="QWidget" name="issueTitleContainer" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>32</height>
+         </size>
+        </property>
+        <widget class="QLabel" name="issueTitle">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>1831</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="comboBox"/>
+      <item>
+       <layout class="QHBoxLayout" name="issueProperties">
+        <item>
+         <layout class="QFormLayout" name="issueLeftColumn"/>
+        </item>
+        <item>
+         <layout class="QFormLayout" name="issueCentralColumn"/>
+        </item>
+        <item>
+         <layout class="QFormLayout" name="issueRightColumn"/>
+        </item>
+       </layout>
       </item>
-      <item row="0" column="0">
-       <widget class="QTextEdit" name="textEdit">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-       </widget>
+      <item>
+       <layout class="QVBoxLayout" name="issueComments"/>
       </item>
      </layout>
     </widget>

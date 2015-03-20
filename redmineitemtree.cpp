@@ -21,6 +21,11 @@
 
 RedmineItemTree::RedmineItemTree()
 {
+    this->displayRetryTimer.setSingleShot(true);
+    connect(&this->displayRetryTimer, SIGNAL(timeout()), this, SLOT(display_retry()));
+
+    this->filterRetryTimer.setSingleShot(true);
+    connect(&this->filterRetryTimer,  SIGNAL(timeout()), this, SLOT(filter_retry()));
 }
 
 void RedmineItemTree::clear()
@@ -99,9 +104,23 @@ void RedmineItemTree::set(QJsonArray array)
 
 void RedmineItemTree::filter(QWidget *initiator, itemFilterFunct_t filterFunct)
 {
+    if (!this->displayMutex.tryLock()) {
+        if (!this->displayExceptionMutex.tryLock())
+            return;
+
+        this->filterRetryArgs.initiator   = initiator;
+        this->filterRetryArgs.filterFunct = filterFunct;
+
+        this->filterRetryTimer.start(70);
+
+        this->displayExceptionMutex.unlock();
+        return;
+    }
+
     QList<QJsonObject> item_list = this->real.get();
     QHash<int, bool> filtered_hash;
 
+    this->filtered_old = this->filtered;
     this->filtered.clear();
 
     foreach (const QJsonObject &item, item_list)
@@ -132,8 +151,18 @@ void RedmineItemTree::filter(QWidget *initiator, itemFilterFunct_t filterFunct)
                 break;
         }
 
+        this->filtered.parent.insert(item["id"].toInt(), parent_id);
         this->filtered.hierarchy[parent_id].append(item);
     }
+
+    this->displayMutex.unlock();
+    return;
+}
+
+void RedmineItemTree::filter_retry()
+{
+    this->filter(this->filterRetryArgs.initiator,
+                 this->filterRetryArgs.filterFunct);
 
     return;
 }
@@ -184,10 +213,12 @@ void RedmineItemTree::widgetItemsResetIfUpdated(int item_id, QJsonObject item)
      *  Remove the project from list if it had been updated
      */
 
-    QJsonObject item_old = this->get(item_id);
+    QJsonObject item_old      = this->get(item_id);
+    int         parent_id     = this->filtered.parent[item_id];
+    int         parent_old_id = this->filtered_old.parent[item_id];
 
     if (item_old["id"].toInt() > 0) // If exists
-        if (item_old != item)
+        if ((item_old != item) || (parent_id != parent_old_id))   // If changed
             this->widgetItemResetRecursive(item_id);
 
     return;
@@ -244,8 +275,26 @@ void RedmineItemTree::display_topOne(QTreeWidget *widget, QWidget *initiator, wi
 
 void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct)
 {
-    // TODO: uncomment the next line. This function is not thread-safe
-    this->displayMutex.lock();
+    //qDebug("RedmineItemTree::display()");
+    if (!this->displayMutex.tryLock()) {
+        if (!this->displayExceptionMutex.tryLock())
+            return;
+
+        this->displayRetryArgs.widget       = widget;
+        this->displayRetryArgs.initiator    = initiator;
+        this->displayRetryArgs.setTextFunct = setTextFunct;
+
+        this->displayRetryTimer.start(100);
+
+        this->displayExceptionMutex.unlock();
+        return;
+    }
+
+    /*\
+     *  Preparing
+    \*/
+
+    widget->setSortingEnabled(false);
 
     /*\
      *  Building a table of items' id
@@ -271,7 +320,6 @@ void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetIte
         topitems_count++;
     }
 
-
     /*\
      *  Removing stale items
     \*/
@@ -279,6 +327,32 @@ void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetIte
     foreach (const int &item_id, toremove_ids)
         this->widgetItemResetRecursive(item_id);
 
-    // TODO: uncomment the next line. This function is not thread-safe
+
+    /*\
+     *  Redisplaying lost items (due to ascentor removing)
+    \*/
+
+    topitems_count = 0;
+    foreach (const QJsonObject &item, this->filtered.getchildren(0))
+        this->display_topOne(widget, initiator, setTextFunct, topitems_count++, toremove_ids);
+
+
+    /*\
+     *  Finishing
+    \*/
+
+    widget->setSortingEnabled(true);
+
     this->displayMutex.unlock();
+    return;
+}
+
+
+void RedmineItemTree::display_retry()
+{
+    this->display(this->displayRetryArgs.widget,
+                  this->displayRetryArgs.initiator,
+                  this->displayRetryArgs.setTextFunct);
+
+    return;
 }

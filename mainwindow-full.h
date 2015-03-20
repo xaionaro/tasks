@@ -3,6 +3,7 @@
 
 #include <QTreeWidget>
 #include <QTimer>
+#include <QComboBox>
 
 #include <mainwindow-common.h>
 
@@ -25,7 +26,9 @@ public:
      *  TODO: the next public stuff should be moved to the private section:
      */
     QHash<int, int> selected_projects_id;
+    QHash<int, int> selected_issues_id;
     bool            showProjectIssues_recursive = false;
+    QString         projectsFilter_namePart = "";
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
@@ -44,14 +47,23 @@ private slots:
     void on_issuesFilter_queryType_followed_toggled(bool checked);
     void on_issuesFilter_queryType_fromMe_toggled(bool checked);
     void on_issuesFilter_queryType_toMe_toggled(bool checked);
-
     void on_issuesFilter_year_currentIndexChanged(int index);
+    void on_projectFilter_field_name_textChanged(const QString &arg1);
+    void projects_display();
+
+    void projectsShowContextMenu(const QPoint &pos);
+    void issuesShowContextMenu(const QPoint &pos);
+
+    void on_issuesFilter_field_name_textChanged(const QString &arg1);
+
+    void on_issuesFilter_field_assigned_to_currentIndexChanged(int index);
+
+    void on_issuesFilter_field_status_currentIndexChanged(int index);
 
 private:
     Ui::MainWindowFull *ui;
 
     QMutex projects_display_mutex;
-    void projects_display();
     QMutex issues_display_mutex;
     void issues_display();
 
@@ -76,6 +88,10 @@ private:
     void projectResetIfUpdated(int project_id, QJsonObject project);
     void projectResetRecursive(int project_id);
 
+    void issue_display(int issue_id);
+
+    void setIssuesFilterItems(QComboBox *box, QHash<int, QJsonObject> table_old, QHash<int, QJsonObject> table, QString keyname);
+
     bool showIssues_showClosed = false;
 
     //QList<QJsonObject> selected_issues;
@@ -93,6 +109,20 @@ private:
     enum issuesFilter_queryType issuesFilter_queryType = IFQT_ALL;
 
     int issuesFilter_yearIdx = 0;
+
+    QMutex projectsDisplayMutex;
+    QMutex projectsDisplayExceptionMutex;
+
+    QTimer projectsDisplayRetryTimer;
+
+    QString issuesFilter_field_subjectPart = "";
+
+    QHash <int, QJsonObject> issuesFiltered_statuses;
+    QHash <int, QJsonObject> issuesFiltered_authors;
+    QHash <int, QJsonObject> issuesFiltered_assignees;
+
+    int issuesFilter_field_assignee_id = 0;
+    int issuesFilter_field_status_id   = 0;
 };
 
 #endif // MAINWINDOWFULL_H
