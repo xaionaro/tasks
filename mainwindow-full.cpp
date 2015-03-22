@@ -509,13 +509,89 @@ void MainWindowFull::issues_display()
 
 /**** issue_display ****/
 
+void MainWindowFull::issue_display_dateField(QString field_name, QString field_value)
+{
+    qDebug("issue_display_dateField: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_display_dateTimeField(QString field_name, QString field_value)
+{
+    qDebug("issue_display_dateTimeField: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_display_stringField(QString field_name, QString field_value)
+{
+    qDebug("issue_display_string: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_display_enumField(QString field_name, int field_value_id)
+{
+    qDebug("issue_display_enumField: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_clear()
+{
+
+}
+
 void MainWindowFull::issue_display(int issue_id)
 {
     QJsonObject issue;
+    //QList<QString> std_simplefields << "description" << "start_date" << "due_date" << "created_on" << "updated_on";
+    //QList<QString> std_arrayfields  << "project" << "tracker" << "status" << "priority" << "author" << "assigned_to";
 
-    if (issue_id != 0)
-        issue = this->issues.get(issue_id);
+    if (issue_id == 0) {
+        this->ui->issueTitle->setText("");
+        return;
+    }
 
+    issue = this->issues.get(issue_id);
+    this->issue_clear();
+
+    this->ui->issueTitle->setText("["+issue["tracker"].toObject()["name"].toString()+" #"+QString::number(issue["id"].toInt())+"] "+issue["subject"].toString());
+
+     QJsonObject::iterator iterator  = issue.begin();
+     QJsonObject::iterator issue_end = issue.end();
+     while (iterator != issue_end)
+     {
+         QString    key   = iterator.key();
+         QJsonValue value = iterator.value();
+
+         iterator++;
+
+         if (key == "custom_fields")
+             continue;
+
+         if (value.isString()) { // String, Date or DateTime
+             /*
+              * Checking if it's a Date
+              */
+
+             if (key.endsWith("_date")) {
+                 this->issue_display_dateField(key, value.toString());
+                 continue;
+             }
+
+             /*
+              * Checking if it's a DateTime
+              */
+
+             if (key.endsWith("_on")) {
+                 this->issue_display_dateTimeField(key, value.toString());
+                 continue;
+             }
+
+             /*
+              * Otherwise it's a String
+              */
+
+             this->issue_display_stringField(key, value.toString());
+
+         } else
+         if (value.isObject()) { // Enum
+             this->issue_display_enumField  (key, value.toObject()["id"].toInt());
+         }
+     }
 
 }
 

@@ -123,6 +123,13 @@ private:
 
     int issuesFilter_field_assignee_id = 0;
     int issuesFilter_field_status_id   = 0;
+
+
+    void issue_display_dateField(QString field_name, QString field_value);
+    void issue_display_stringField(QString field_name, QString field_value);
+    void issue_display_enumField(QString field_name, int field_value_id);
+    void issue_display_dateTimeField(QString field_name, QString field_value);
+    void issue_clear();
 };
 
 #endif // MAINWINDOWFULL_H
