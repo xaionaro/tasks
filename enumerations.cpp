@@ -9,7 +9,7 @@ struct Enumerations::enumeration Enumerations::get(int enumeration_id)
     return this->id2enumeration[enumeration_id];
 }
 
-QHash<QString, struct Enumerations::enumeration> Enumerations::get(Enumerations::item_type item_type)
+QHash<QString, QList<struct Enumerations::enumeration>> Enumerations::get(Enumerations::item_type item_type)
 {
     return this->itemType2enumeration[item_type];
 }
@@ -26,6 +26,7 @@ void Enumerations::add(QJsonObject json_enumeration)
 
     enumeration.id         = json_enumeration["id"].toInt();
     enumeration.name       = json_enumeration["name"].toString();
+    enumeration.position   = json_enumeration["position"].toInt();
 
     QString      enumeration_fulltype = json_enumeration["type"].toString();
     const size_t fulltype_length      = enumeration_fulltype.length();
@@ -48,7 +49,7 @@ void Enumerations::add(QJsonObject json_enumeration)
     }
 
     this->id2enumeration.insert(enumeration.id, enumeration);
-    this->itemType2enumeration[enumeration.item_type].insert(enumeration.field_name, enumeration);
+    this->itemType2enumeration[enumeration.item_type][enumeration.field_name].append(enumeration);
 }
 
 void Enumerations::set(QJsonArray json_array)

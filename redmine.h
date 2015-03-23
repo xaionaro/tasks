@@ -88,6 +88,7 @@ public:
      */
     QJsonObject get_issue_status(int issue_status_id);
     QJsonObject get_issue_status(QJsonValueRef issues_status_json);
+    QHash<int, QJsonObject> get_available_statuses_for(int issue_id);
 
     /* Request user info (with caching). If 2nd argument to callback function
      * is NULL then a cached value is passed.
@@ -98,7 +99,8 @@ public:
 
     /* Parses JSON values like "2015-03-13T21:34:28.000+03:00" to QDateTime
      */
-    QDateTime parseDateTime(QJsonValueRef dataTime_json);
+    QDateTime parseDateTime(QJsonValueRef dateTime_json);
+    QDateTime parseDateTime(QString dateTime_str);
 
     Redmine();
 

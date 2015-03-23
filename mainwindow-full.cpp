@@ -18,6 +18,7 @@
  */
 
 #include <QResizeEvent>
+#include <QtAlgorithms>
 
 #include "mainwindow-full.h"
 #include "ui_mainwindow-full.h"
@@ -176,12 +177,19 @@ void MainWindowFull::on_resize_navigationDock(QResizeEvent *event) {
 
 void MainWindowFull::on_resize_issueDock(QResizeEvent *event) {
     unlockDockHeight(this->ui->issueDock, event, this->issueDockInitialHeight);
-/*
+
     qDebug("issueDock Resized (New Size) - Width: %d Height: %d",
         event->size().width(),
-        event->size().height());*/
+        event->size().height());
 
     this->ui->issueLayout->setGeometry(QRect(0, 0, event->size().width(), event->size().height()-10));
+    this->ui->issueTitleContainer->setGeometry(QRect(0, 0, event->size().width(), 30));
+    this->ui->issueTitle->setGeometry(QRect(0, 0, event->size().width(), 30));
+    this->ui->issueLeftColumnWidget   ->setGeometry(QRect(0,   40, 320, qMin(event->size().height()-70, 270)));
+    this->ui->issueLeftColumn         ->setGeometry(QRect(0,   0,  320, qMin(event->size().height()-70, 270)));
+    this->ui->issueCentralColumnWidget->setGeometry(QRect(320, 40, 400, qMin(event->size().height()-70, 270)));
+    this->ui->issueCentralColumn      ->setGeometry(QRect(0,   0,  400, qMin(event->size().height()-70, 270)));
+    this->ui->issueButtonColumn->setGeometry(QRect(720, 40, 130, qMin(event->size().height()-70, 300)));
 
     return;
 }
@@ -512,20 +520,104 @@ void MainWindowFull::issues_display()
 
 /**** issue_display ****/
 
-void MainWindowFull::issue_display_field(QWidget *label, QWidget *field)
+void fill_combobox(QComboBox *box, QHash<int, QString> values, int current_id) {
+    int idx = 0;
+    foreach (const int id, values.keys()) {
+        box->insertItem(idx, values[id], id);
+        if (id == current_id)
+            box->setCurrentIndex(idx);
+        idx++;
+    }
+
+    box->model()->sort(0);
+    return;
+}
+
+void fill_combobox(QComboBox *box, QHash<int, QPair<int, QString>> values, int current_id) {
+    QList<int> position_list = values.keys();
+
+    qSort(position_list.begin(), position_list.end());
+
+    int idx = 0;
+    foreach (const int id, position_list) {
+        QPair<int, QString> value = values[id];
+
+        box->insertItem(idx, value.second, value.first);
+        if (value.first == current_id)
+            box->setCurrentIndex(idx);
+        idx++;
+    }
+
+    return;
+}
+
+void MainWindowFull::issue_display_field(QWidget *label, QWidget *field, int pos)
 {
-    this->ui->issueLeftColumn->addRow(label, field);
+    QPair<QWidget *, QWidget*> row;
+
+    if (pos == -1)
+        pos = this->issue_field_pos++ + 100;
+
+    row.first  = label;
+    row.second = field;
+    this->issue_fields[pos] = row;
+
     return;
 }
 
 void MainWindowFull::issue_display_dateField(QString field_name, QString field_value)
 {
     qDebug("issue_display_dateField: %s", field_name.toUtf8().data());
+
+    QLabel *label = new QLabel;
+    int pos = -1;
+
+    if (field_name == "start_date") {
+        label->setText("Начать выполнение: ");
+        pos = 20;
+    } else
+    if (field_name == "due_date") {
+        label->setText("Срок выполнения: ");
+        pos = 21;
+    } else
+        label->setText(field_name+": ");
+
+    QDateEdit *field = new QDateEdit;
+    QDate      date  = QDate::fromString(field_value, "yyyy-MM-dd");
+
+    field->setDisplayFormat("yyyy-MM-dd");
+    field->setDate(date);
+    field->setCalendarPopup(true);
+
+    this->issue_display_field(label, field, pos);
+    return;
 }
 
 void MainWindowFull::issue_display_dateTimeField(QString field_name, QString field_value)
 {
     qDebug("issue_display_dateTimeField: %s", field_name.toUtf8().data());
+
+    QDateTime dateTime = redmine->parseDateTime(field_value);
+
+    QLabel *label = new QLabel;
+    int pos = -1;
+
+    if (field_name == "created_on") {
+        label->setText("Создано: ");
+        pos = 10;
+    } else
+    if (field_name == "updated_on") {
+        label->setText("Обновлено: ");
+        pos = 11;
+    } else
+        label->setText(field_name+": ");
+
+    QLabel *field = new QLabel;
+
+    field->setText(dateTime.toString("yyyy-MM-dd HH:MM"));
+
+    this->issue_display_field(label, field, pos);
+    return;
 }
 
 void MainWindowFull::issue_display_multilineStringField(QString field_name, QString field_value)
@@ -546,6 +638,34 @@ void MainWindowFull::issue_display_doneRatioField(QString field_name, QString fi
 void MainWindowFull::issue_display_enumField(QString field_name, int field_value_id)
 {
     qDebug("issue_display_enumField: %s", field_name.toUtf8().data());
+
+    QList<struct Enumerations::enumeration> enumeration = this->enumerations.get(Enumerations::EIT_ISSUE)[field_name];
+
+    QLabel *label = new QLabel;
+
+    if (field_name == "priority")
+        label->setText("Приоритет: ");
+    else
+        label->setText(field_name+": ");
+
+    QComboBox *field = new QComboBox;
+
+    QHash<int, QPair<int, QString>> priorities;
+    foreach (const struct Enumerations::enumeration &e, enumeration) {
+        QPair <int, QString> priority;
+        priority.first  = e.id;
+        priority.second = e.name;
+        priorities.insert(e.position, priority);
+    }
+
+    fill_combobox(field, priorities, field_value_id);
+
+    if (field_name == "priority")
+        this->issue_display_field(label, field, 3);
+    else
+        this->issue_display_field(label, field);
+
+    return;
 }
 
 void MainWindowFull::issue_display_intField(QString field_name, int field_value)
@@ -555,7 +675,29 @@ void MainWindowFull::issue_display_intField(QString field_name, int field_value)
 
 void MainWindowFull::issue_display_statusField(QString field_name, int status_id)
 {
+    (void)status_id;
     qDebug("issue_display_statusField: %s", field_name.toUtf8().data());
+
+    QLabel *label = new QLabel;
+    label->setText("Статус: ");
+
+    QHash<int, QPair<int, QString>> statuses;
+    QJsonArray allowed_statuses = this->issue["status"].toObject()["allowed"].toArray();
+    foreach (const QJsonValue &allowed_status_val, allowed_statuses) {
+        QPair <int, QString> status;
+        QJsonObject allowed_status = allowed_status_val.toObject();
+        status.first  = allowed_status["id"].toInt();
+        status.second = allowed_status["name"].toString();
+        statuses.insert(allowed_status["position"].toInt(), status);
+    }
+
+
+
+    QComboBox *field = new QComboBox;
+    fill_combobox(field, statuses, status_id);
+    this->issue_display_field(label, field, 2);
+
+    return;
 }
 
 void MainWindowFull::issue_display_trackerField(QString field_name, int tracker_id)
@@ -568,9 +710,34 @@ void MainWindowFull::issue_display_projectField(QString field_name, int project_
     qDebug("issue_display_projectField: %s", field_name.toUtf8().data());
 }
 
+void MainWindowFull::issue_display_categoryField(QString field_name, int category_id)
+{
+    qDebug("issue_display_categoryField: %s", field_name.toUtf8().data());
+}
+
 void MainWindowFull::issue_display_assigneeField(QString field_name, int assignee_user_id)
 {
     qDebug("issue_display_assigneeField: %s", field_name.toUtf8().data());
+
+    int project_id = this->issue["project"].toObject()["id"].toInt();
+
+    QHash<int, QString> assignable;
+    QList<struct Memberships::membership> memberships = this->memberships.get_byproject(project_id);
+
+    foreach (const struct Memberships::membership &membership, memberships)
+        foreach (const struct Memberships::membership_role &membership_role, membership.roles)
+            if (this->roles.get(membership_role.role_id).assignable)
+               assignable.insert(membership.user_id, membership.user_name);
+
+    int idx;
+
+    QLabel *label = new QLabel;
+    label->setText("Исполнитель: ");
+
+
+    QComboBox *field = new QComboBox;
+    fill_combobox(field, assignable, assignee_user_id);
+    this->issue_display_field(label, field, 1);
 }
 
 void MainWindowFull::issue_display_authorField(QString field_name, int author_user_id, QString author_user_name)
@@ -584,7 +751,7 @@ void MainWindowFull::issue_display_authorField(QString field_name, int author_us
     QLabel *field = new QLabel;
     field->setText(author_user_name);
 
-    this->issue_display_field(label, field);
+    this->issue_display_field(label, field, 0);
 }
 
 void MainWindowFull::issue_clear()
@@ -599,6 +766,21 @@ void MainWindowFull::issue_clear()
         delete item->widget();
         delete item;
     }
+
+    this->issue_fields.clear();
+    this->issue_field_pos = 100;
+}
+
+void MainWindowFull::issue_display_postproc()
+{
+    QList<int> ids = this->issue_fields.keys();
+
+    qSort(ids.begin(), ids.end());
+
+    foreach (const int &id, ids)
+        this->ui->issueLeftColumn->addRow(this->issue_fields[id].first, this->issue_fields[id].second);
+
+    return;
 }
 
 void MainWindowFull::issue_display(int issue_id)
@@ -677,7 +859,7 @@ void MainWindowFull::issue_display(int issue_id)
              this->issue_display_stringField(key, value_str);
 
          } else
-         if (value.isObject()) { // Int, Enum, Assignee, Author, Status, Tracker, Project
+         if (value.isObject()) { // Int, Enum, Assignee, Author, Status, Tracker, Project, Category
              int     value_int = value.toObject()["id"].toInt();
              QString value_str = value.toObject()["name"].toString();
 
@@ -736,6 +918,15 @@ void MainWindowFull::issue_display(int issue_id)
              }
 
              /*
+              * Checking if it's a project
+              */
+
+             if (key == "category") {
+                 this->issue_display_categoryField(key, value_int);
+                 continue;
+             }
+
+             /*
               * Otherwise it's an integer
               */
 
@@ -743,6 +934,9 @@ void MainWindowFull::issue_display(int issue_id)
          }
      }
 
+     this->issue_display_postproc();
+
+     return;
 }
 
 /**** /issue_display ****/

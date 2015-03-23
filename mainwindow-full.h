@@ -124,7 +124,7 @@ private:
     int issuesFilter_field_assignee_id = 0;
     int issuesFilter_field_status_id   = 0;
 
-    void issue_display_field(QWidget *label, QWidget *field);
+    void issue_display_field(QWidget *label, QWidget *field, int pos = -1);
 
     void issue_display_dateField(QString field_name, QString field_value);
     void issue_display_stringField(QString field_name, QString field_value);
@@ -138,7 +138,12 @@ private:
     void issue_display_statusField(QString field_name, int status_id);
     void issue_display_trackerField(QString field_name, int tracker_id);
     void issue_display_projectField(QString field_name, int project_id);
+    void issue_display_categoryField(QString field_name, int category_id);
 
+    void issue_display_postproc();
+
+    int issue_field_pos;
+    QHash<int ,QPair<QWidget *, QWidget*>> issue_fields;
 
     void issue_clear();
 
