@@ -216,12 +216,42 @@ QNetworkReply *Redmine::updateIssueStatuses(callback_t callback, void *arg)
 
 /********* /updateIssueStatuses *********/
 
+/********* get_memberships *********/
+
+QNetworkReply *Redmine::get_memberships(callback_t callback,
+        void *arg, bool free_arg)
+{
+    return this->request(GET, "memberships", NULL, callback, arg, free_arg, "limit=5000");
+}
+
+/********* /get_memberships *********/
+
+/********* get_enumerations *********/
+
+QNetworkReply *Redmine::get_enumerations(callback_t callback,
+        void *arg, bool free_arg)
+{
+    return this->request(GET, "enumerations", NULL, callback, arg, free_arg, "limit=5000");
+}
+
+/********* /get_enumerations *********/
+
+/********* get_roles *********/
+
+QNetworkReply *Redmine::get_roles(callback_t callback,
+        void *arg, bool free_arg)
+{
+    return this->request(GET, "roles", NULL, callback, arg, free_arg, "limit=5000");
+}
+
+/********* /get_roles *********/
+
 /********* get_issues *********/
 
 QNetworkReply *Redmine::get_issues(callback_t callback,
         void *arg, bool free_arg)
 {
-    return this->request(GET, "issues", NULL, callback, arg, free_arg, settings.issuesFilter+"limit=2000&status_id=*");
+    return this->request(GET, "issues", NULL, callback, arg, free_arg, settings.issuesFilter+"limit=200&status_id=*");
 }
 
 /********* /get_issues *********/

@@ -5,7 +5,11 @@
 #include <QTableWidgetSelectionRange>
 #include <QMutex>
 
-#include <redmineitemtree.h>
+#include "redmineitemtree.h"
+#include "roles.h"
+#include "memberships.h"
+#include "enumerations.h"
+
 #include "common.h"
 
 class MainWindowCommon : public QMainWindow
@@ -65,9 +69,16 @@ protected:
      */
     QHash<int, QList<QJsonObject>> issues_byProjectId;
 
+    Roles roles;
+    Memberships memberships;
+    Enumerations enumerations;
+
 protected slots:
+    int updateEnumerations();
+    int updateMemberships();
     int updateProjects();
     int updateIssues();
+    int updateRoles();
 
 signals:
 
@@ -78,8 +89,11 @@ private:
 
     virtual void projects_display();
     virtual void issues_display();
+    void get_enumerations_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
+    void get_memberships_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
     void get_projects_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
     void get_issues_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
+    void get_roles_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
 
 
     QMutex updateProjectsMutex;

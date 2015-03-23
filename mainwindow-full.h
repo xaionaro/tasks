@@ -124,12 +124,28 @@ private:
     int issuesFilter_field_assignee_id = 0;
     int issuesFilter_field_status_id   = 0;
 
+    void issue_display_field(QWidget *label, QWidget *field);
 
     void issue_display_dateField(QString field_name, QString field_value);
     void issue_display_stringField(QString field_name, QString field_value);
     void issue_display_enumField(QString field_name, int field_value_id);
     void issue_display_dateTimeField(QString field_name, QString field_value);
+    void issue_display_assigneeField(QString field_name, int assignee_user_id);
+    void issue_display_authorField(QString field_name, int assignee_user_id, QString author_user_name);
+    void issue_display_multilineStringField(QString field_name, QString field_value);
+    void issue_display_doneRatioField(QString field_name, QString field_value);
+    void issue_display_intField(QString field_name, int field_value);
+    void issue_display_statusField(QString field_name, int status_id);
+    void issue_display_trackerField(QString field_name, int tracker_id);
+    void issue_display_projectField(QString field_name, int project_id);
+
+
     void issue_clear();
+
+    int issue_columns    = 3;
+    int issue_column_cur = 0;
+
+    QJsonObject issue;
 };
 
 #endif // MAINWINDOWFULL_H

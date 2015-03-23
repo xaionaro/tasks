@@ -146,6 +146,59 @@ MainWindowCommon::~MainWindowCommon()
     return;
 }
 
+/**** updateRoles ****/
+
+void MainWindowCommon::get_roles_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
+    (void)reply; (void)arg;
+
+    QJsonArray  roles   = json->object()["roles"].toArray();
+
+    this->roles.set(roles);
+    return;
+}
+
+int MainWindowCommon::updateRoles() {
+    redmine->get_roles((Redmine::callback_t)&MainWindowCommon::get_roles_callback, this);
+    return 0;
+}
+
+/**** updateMemberships ****/
+
+void MainWindowCommon::get_memberships_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
+    (void)reply; (void)arg;
+
+    QJsonArray  memberships = json->object()["memberships"].toArray();
+
+    this->memberships.set(memberships);
+    return;
+}
+
+int MainWindowCommon::updateMemberships() {
+    redmine->get_memberships((Redmine::callback_t)&MainWindowCommon::get_memberships_callback, this);
+    return 0;
+}
+
+/**** /updateMemberships ****/
+
+
+/**** updateEnumerations ****/
+
+void MainWindowCommon::get_enumerations_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {
+    (void)reply; (void)arg;
+
+    QJsonArray enumerations = json->object()["enumerations"].toArray();
+
+    this->enumerations.set(enumerations);
+    return;
+}
+
+int MainWindowCommon::updateEnumerations() {
+    redmine->get_enumerations((Redmine::callback_t)&MainWindowCommon::get_enumerations_callback, this);
+    return 0;
+}
+
+/**** /updateEnumerations ****/
+
 /**** updateProjects ****/
 
 void MainWindowCommon::projects_display()

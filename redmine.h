@@ -64,6 +64,10 @@ public:
      */
     QJsonObject me() { return _me; }
 
+    /* Request all roles
+     */
+    QNetworkReply *get_roles(callback_t callback, void *arg, bool free_arg = false);
+
     /* Request all issues
      */
     QNetworkReply *get_issues(callback_t callback, void *arg, bool free_arg = false);
@@ -71,6 +75,14 @@ public:
     /* Request all projects
      */
     QNetworkReply *get_projects(callback_t callback, void *arg, bool free_arg = false);
+
+    /* Request all memberships
+     */
+    QNetworkReply *get_memberships(callback_t callback, void *arg, bool free_arg = false);
+
+    /* Request all field values enumerations
+     */
+    QNetworkReply *get_enumerations(callback_t callback, void *arg, bool free_arg = false);
 
     /* Get issue status info
      */

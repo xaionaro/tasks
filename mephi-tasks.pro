@@ -22,7 +22,10 @@ SOURCES += main.cpp\
     htmldelegate.cpp \
     redmineitemtree.cpp \
     redmineitemtreedata.cpp \
-    projectmemberswindow.cpp
+    projectmemberswindow.cpp \
+    roles.cpp \
+    memberships.cpp \
+    enumerations.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -35,7 +38,10 @@ HEADERS  += \
     htmldelegate.h \
     redmineitemtree.h \
     redmineitemtreedata.h \
-    projectmemberswindow.h
+    projectmemberswindow.h \
+    roles.h \
+    memberships.h \
+    enumerations.h
 
 FORMS    += \
     helpwindow.ui \

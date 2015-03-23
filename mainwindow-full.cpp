@@ -61,8 +61,11 @@ MainWindowFull::MainWindowFull(QWidget *parent) :
     issuesColumns << "Название" << "Исполнитель" << "Срок" << "Статус" << "Обновлено";
     this->ui->issuesTree->setHeaderLabels(issuesColumns);
 
+    this->updateRoles();
     this->updateIssues();
     this->updateProjects();
+    this->updateMemberships();
+    this->updateEnumerations();
 
     this->timerUpdateIssues = new QTimer(this);
     connect(this->timerUpdateIssues, SIGNAL(timeout()),   this, SLOT(updateIssues()));
@@ -509,6 +512,12 @@ void MainWindowFull::issues_display()
 
 /**** issue_display ****/
 
+void MainWindowFull::issue_display_field(QWidget *label, QWidget *field)
+{
+    this->ui->issueLeftColumn->addRow(label, field);
+    return;
+}
+
 void MainWindowFull::issue_display_dateField(QString field_name, QString field_value)
 {
     qDebug("issue_display_dateField: %s", field_name.toUtf8().data());
@@ -519,9 +528,19 @@ void MainWindowFull::issue_display_dateTimeField(QString field_name, QString fie
     qDebug("issue_display_dateTimeField: %s", field_name.toUtf8().data());
 }
 
+void MainWindowFull::issue_display_multilineStringField(QString field_name, QString field_value)
+{
+    qDebug("issue_display_multilineStringField: %s", field_name.toUtf8().data());
+}
+
 void MainWindowFull::issue_display_stringField(QString field_name, QString field_value)
 {
     qDebug("issue_display_string: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_display_doneRatioField(QString field_name, QString field_value)
+{
+    qDebug("issue_display_doneRatioField: %s", field_name.toUtf8().data());
 }
 
 void MainWindowFull::issue_display_enumField(QString field_name, int field_value_id)
@@ -529,9 +548,57 @@ void MainWindowFull::issue_display_enumField(QString field_name, int field_value
     qDebug("issue_display_enumField: %s", field_name.toUtf8().data());
 }
 
+void MainWindowFull::issue_display_intField(QString field_name, int field_value)
+{
+    qDebug("issue_display_intField: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_display_statusField(QString field_name, int status_id)
+{
+    qDebug("issue_display_statusField: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_display_trackerField(QString field_name, int tracker_id)
+{
+    qDebug("issue_display_trackerField: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_display_projectField(QString field_name, int project_id)
+{
+    qDebug("issue_display_projectField: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_display_assigneeField(QString field_name, int assignee_user_id)
+{
+    qDebug("issue_display_assigneeField: %s", field_name.toUtf8().data());
+}
+
+void MainWindowFull::issue_display_authorField(QString field_name, int author_user_id, QString author_user_name)
+{
+    (void)field_name; (void)author_user_id;
+
+    qDebug("issue_display_authorField: %s", field_name.toUtf8().data());
+    QLabel *label = new QLabel;
+    label->setText("Автор: ");
+
+    QLabel *field = new QLabel;
+    field->setText(author_user_name);
+
+    this->issue_display_field(label, field);
+}
+
 void MainWindowFull::issue_clear()
 {
+    QLayoutItem *item;
+    while (this->ui->issueLeftColumn->count())
+    {
+        item = this->ui->issueLeftColumn->takeAt(0);
+        if (!item->widget())
+            qFatal("MainWindowFull::issue_clear(): Caught not implemented case");
 
+        delete item->widget();
+        delete item;
+    }
 }
 
 void MainWindowFull::issue_display(int issue_id)
@@ -548,6 +615,8 @@ void MainWindowFull::issue_display(int issue_id)
     issue = this->issues.get(issue_id);
     this->issue_clear();
 
+    this->issue = issue;
+
     this->ui->issueTitle->setText("["+issue["tracker"].toObject()["name"].toString()+" #"+QString::number(issue["id"].toInt())+"] "+issue["subject"].toString());
 
      QJsonObject::iterator iterator  = issue.begin();
@@ -562,13 +631,24 @@ void MainWindowFull::issue_display(int issue_id)
          if (key == "custom_fields")
              continue;
 
-         if (value.isString()) { // String, Date or DateTime
+         if (value.isString()) { // Description, String, Date, DateTime or done_ratio
+             QString value_str = value.toString();
+
+             /*
+              * Checking if it's a Description
+              */
+
+             if (key == "description") {
+                 this->issue_display_multilineStringField(key, value_str);
+                 continue;
+             }
+
              /*
               * Checking if it's a Date
               */
 
              if (key.endsWith("_date")) {
-                 this->issue_display_dateField(key, value.toString());
+                 this->issue_display_dateField(key, value_str);
                  continue;
              }
 
@@ -577,7 +657,16 @@ void MainWindowFull::issue_display(int issue_id)
               */
 
              if (key.endsWith("_on")) {
-                 this->issue_display_dateTimeField(key, value.toString());
+                 this->issue_display_dateTimeField(key, value_str);
+                 continue;
+             }
+
+             /*
+              * Checking if it's a "done_ratio"
+              */
+
+             if (key == "done_ratio") {
+                 this->issue_display_doneRatioField(key, value_str);
                  continue;
              }
 
@@ -585,11 +674,72 @@ void MainWindowFull::issue_display(int issue_id)
               * Otherwise it's a String
               */
 
-             this->issue_display_stringField(key, value.toString());
+             this->issue_display_stringField(key, value_str);
 
          } else
-         if (value.isObject()) { // Enum
-             this->issue_display_enumField  (key, value.toObject()["id"].toInt());
+         if (value.isObject()) { // Int, Enum, Assignee, Author, Status, Tracker, Project
+             int     value_int = value.toObject()["id"].toInt();
+             QString value_str = value.toObject()["name"].toString();
+
+             /*
+              * Checking if it's an enumeration
+              */
+
+             if (this->enumerations.get(Enumerations::EIT_ISSUE).contains(key)) {
+                 this->issue_display_enumField(key, value_int);
+                 continue;
+             }
+
+             /*
+              * Checking if it's an assignee
+              */
+
+             if (key == "assigned_to") {
+                 this->issue_display_assigneeField(key, value_int);
+                 continue;
+             }
+
+             /*
+              * Checking if it's an author
+              */
+
+             if (key == "author") {
+                 this->issue_display_authorField(key, value_int, value_str);
+                 continue;
+             }
+
+             /*
+              * Checking if it's a status
+              */
+
+             if (key == "status") {
+                 this->issue_display_statusField(key, value_int);
+                 continue;
+             }
+
+             /*
+              * Checking if it's a tracker
+              */
+
+             if (key == "tracker") {
+                 this->issue_display_trackerField(key, value_int);
+                 continue;
+             }
+
+             /*
+              * Checking if it's a project
+              */
+
+             if (key == "project") {
+                 this->issue_display_projectField(key, value_int);
+                 continue;
+             }
+
+             /*
+              * Otherwise it's an integer
+              */
+
+             this->issue_display_intField(key, value_int);
          }
      }
 
