@@ -27,7 +27,9 @@ SOURCES += main.cpp\
     memberships.cpp \
     enumerations.cpp \
     signingwindow.cpp \
-    loginwindow.cpp
+    loginwindow.cpp \
+    mainwindowandroid.cpp \
+    logtimewindow.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -45,7 +47,9 @@ HEADERS  += \
     memberships.h \
     enumerations.h \
     signingwindow.h \
-    loginwindow.h
+    loginwindow.h \
+    mainwindowandroid.h \
+    logtimewindow.h
 
 FORMS    += \
     helpwindow.ui \
@@ -54,7 +58,9 @@ FORMS    += \
     mainwindow-rector.ui \
     projectmemberswindow.ui \
     signingwindow.ui \
-    loginwindow.ui
+    loginwindow.ui \
+    mainwindowandroid.ui \
+    logtimewindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Release/release/ -lqtredmine
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/ -lqtredmine

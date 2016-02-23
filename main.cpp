@@ -17,8 +17,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//#define __ANDROID__
+
 #include "mainwindow-rector.h"
 #include "mainwindow-full.h"
+#include "mainwindowandroid.h"
 #include "loginwindow.h"
 #include "syntaxwindow.h"
 #include "common.h"
@@ -100,6 +103,12 @@ int main(int argc, char *argv[])
         redmine = &_redmine;
         redmine->apiKey(settings.apiKey);
         redmine->init();
+
+#ifdef __ANDROID__
+        MainWindowAndroid w;
+        w.show();
+        return a.exec();
+#else
         switch (settings.mode) {
             case MODE_RECTOR:
                 {
@@ -118,5 +127,6 @@ int main(int argc, char *argv[])
                     return a.exec();
                 }
         }
+#endif
     }
 }
