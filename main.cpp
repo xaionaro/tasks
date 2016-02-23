@@ -19,10 +19,13 @@
 
 #include "mainwindow-rector.h"
 #include "mainwindow-full.h"
+#include "loginwindow.h"
 #include "syntaxwindow.h"
 #include "common.h"
 #include <QSettings>
 #include <QDir>
+#include <QEventLoop>
+#include <errno.h>
 
 Redmine      *redmine     = NULL;
 QApplication *application = NULL;
@@ -77,6 +80,17 @@ int main(int argc, char *argv[])
 
     if (arglst.count() > 1)
         settings.apiKey = arglst[1];
+
+    if (settings.apiKey.length() == 0) {
+        LoginWindow w;
+        w.show();
+        w.exec();
+        settings.apiKey = w.resultApiKey;
+    }
+
+    if (settings.apiKey.length() == 0) {
+        return EINVAL;
+    }
 
     /* We need to follow the important next order of objects initialization:
      * QApplication, Redmine, MainWindowRector

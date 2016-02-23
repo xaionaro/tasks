@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     roles.cpp \
     memberships.cpp \
     enumerations.cpp \
-    signingwindow.cpp
+    signingwindow.cpp \
+    loginwindow.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -43,7 +44,8 @@ HEADERS  += \
     roles.h \
     memberships.h \
     enumerations.h \
-    signingwindow.h
+    signingwindow.h \
+    loginwindow.h
 
 FORMS    += \
     helpwindow.ui \
@@ -51,7 +53,8 @@ FORMS    += \
     mainwindow-full.ui \
     mainwindow-rector.ui \
     projectmemberswindow.ui \
-    signingwindow.ui
+    signingwindow.ui \
+    loginwindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Release/release/ -lqtredmine
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/ -lqtredmine

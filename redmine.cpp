@@ -50,7 +50,9 @@ void Redmine::init_quitMe(QNetworkReply *reply, QJsonDocument *statuses, void *_
         this->initBarrier.exit();
 }
 int Redmine::init() {
-    this->setAuth(this->_apiKey);
+    if (this->apiKey().length() > 0) {
+        this->setAuth(this->_apiKey);
+    }
 
     connect(this, SIGNAL(requestFinished(void*, callback_t, QNetworkReply*, QJsonDocument*, void*)),
             this, SLOT(callback_dispatcher(void*, callback_t, QNetworkReply*, QJsonDocument*, void*)));
