@@ -302,9 +302,9 @@ QNetworkReply *Redmine::get_time_entries(callback_t callback,
 /********* get_projects *********/
 
 QNetworkReply *Redmine::get_projects(callback_t callback,
-        void *arg, bool free_arg)
+        void *arg, bool free_arg, QString filterOptions)
 {
-    return this->request(GET, "projects", NULL, callback, arg, free_arg, "limit=500");
+    return this->request(GET, "projects", NULL, callback, arg, free_arg, "limit=500&"+filterOptions);
 }
 
 /********* /get_projects *********/

@@ -7,7 +7,8 @@ MainWindowAndroid::MainWindowAndroid(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::MainWindowAndroid)
 {
-    ui->setupUi(this);
+    this->ui->setupUi(this);
+    this->setWindowTitle("Система «Задачи» НИЯУ МИФИ");
 }
 
 MainWindowAndroid::~MainWindowAndroid()

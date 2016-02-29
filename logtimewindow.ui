@@ -65,7 +65,7 @@
            </sizepolicy>
           </property>
           <property name="currentSection">
-           <enum>QDateTimeEdit::MinuteSection</enum>
+           <enum>QDateTimeEdit::HourSection</enum>
           </property>
           <property name="displayFormat">
            <string>hh:mm</string>
@@ -75,7 +75,7 @@
         <item row="1" column="1">
          <widget class="QTimeEdit" name="untilInput">
           <property name="currentSection">
-           <enum>QDateTimeEdit::MinuteSection</enum>
+           <enum>QDateTimeEdit::HourSection</enum>
           </property>
           <property name="displayFormat">
            <string>hh:mm</string>
@@ -85,10 +85,68 @@
        </layout>
       </item>
       <item>
-       <widget class="QComboBox" name="project"/>
+       <widget class="QComboBox" name="project">
+        <item>
+         <property name="text">
+          <string>По всем проектам</string>
+         </property>
+        </item>
+       </widget>
       </item>
       <item>
-       <widget class="QListView" name="issue"/>
+       <widget class="QTreeWidget" name="issue">
+        <property name="columnCount">
+         <number>2</number>
+        </property>
+        <column>
+         <property name="text">
+          <string>№</string>
+         </property>
+         <property name="foreground">
+          <brush brushstyle="NoBrush">
+           <color alpha="255">
+            <red>111</red>
+            <green>111</green>
+            <blue>111</blue>
+           </color>
+          </brush>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Задача</string>
+         </property>
+        </column>
+        <item>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="foreground">
+          <brush brushstyle="NoBrush">
+           <color alpha="255">
+            <red>121</red>
+            <green>121</green>
+            <blue>121</blue>
+           </color>
+          </brush>
+         </property>
+         <property name="text">
+          <string>Другое</string>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+        </item>
+       </widget>
       </item>
       <item>
        <widget class="QPlainTextEdit" name="comment">

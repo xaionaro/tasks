@@ -92,7 +92,7 @@ public:
 
     /* Request all projects
      */
-    QNetworkReply *get_projects(callback_t callback, void *arg, bool free_arg = false);
+    QNetworkReply *get_projects(callback_t callback, void *arg, bool free_arg = false, QString filterOptions="");
 
     /* Request all memberships
      */
