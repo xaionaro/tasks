@@ -16,7 +16,7 @@ private:
     QHash <int, QJsonDocument> users;
     QHash <int, QJsonObject>   issue_statuses;
 
-    void set_issue_status(int status_id, QJsonObject status);
+    void   set_issue_status(int status_id, QJsonObject status);
     void clear_issue_status();
 
     // Callbacks:
@@ -59,6 +59,24 @@ public:
             bool                    free_arg     = false,
             const QString          &getParams    = "",
             const QByteArray       &requestData  = "");
+
+    QNetworkReply *request(RedmineClient::EMode    mode,
+            QString                 uri,
+            void                   *obj_ptr,
+            callback_t              callback,
+            void                   *callback_arg,
+            bool                    free_arg,
+            const QString          &getParams,
+            const QJsonObject      &requestJSON);
+
+    QNetworkReply *request(RedmineClient::EMode    mode,
+            QString                 uri,
+            void                   *obj_ptr,
+            callback_t              callback,
+            void                   *callback_arg,
+            bool                    free_arg,
+            const QString          &getParams,
+            const QVariantMap      &requestVMap);
 
     /* Get information about current user
      */

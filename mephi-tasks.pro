@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     signingwindow.cpp \
     loginwindow.cpp \
     mainwindowandroid.cpp \
-    logtimewindow.cpp
+    logtimewindow.cpp \
+    redmineclass_time_entry.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -50,7 +51,8 @@ HEADERS  += \
     signingwindow.h \
     loginwindow.h \
     mainwindowandroid.h \
-    logtimewindow.h
+    logtimewindow.h \
+    redmineclass_time_entry.h
 
 FORMS    += \
     helpwindow.ui \

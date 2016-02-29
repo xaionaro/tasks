@@ -86,6 +86,32 @@ QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
                       (RedmineClient::callback_t)callback, callback_arg, free_arg, getParams, requestData);
 }
 
+QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
+        QString                 uri,
+        void                   *obj_ptr,
+        callback_t              callback,
+        void                   *callback_arg,
+        bool                    free_arg,
+        const QString          &getParams,
+        const QJsonObject      &requestJSON
+) {
+
+    return this->request(mode, uri, obj_ptr, callback, callback_arg, free_arg, getParams, QJsonDocument(requestJSON).toJson());
+}
+
+QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
+        QString                 uri,
+        void                   *obj_ptr,
+        callback_t              callback,
+        void                   *callback_arg,
+        bool                    free_arg,
+        const QString          &getParams,
+        const QVariantMap      &requestVMap
+) {
+
+    return this->request(mode, uri, obj_ptr, callback, callback_arg, free_arg, getParams, QJsonObject::fromVariantMap(requestVMap));
+}
+
 /********* updateMe *********/
 
 struct redmine_updateMe_callback_arg {
