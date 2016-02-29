@@ -263,6 +263,16 @@ QNetworkReply *Redmine::get_issues(callback_t callback,
 
 /********* /get_issues *********/
 
+/********* get_time_entries *********/
+
+QNetworkReply *Redmine::get_time_entries(callback_t callback,
+        void *arg, bool free_arg, QString filterOptions)
+{
+    return this->request(GET, "time_entries", NULL, callback, arg, free_arg, filterOptions);
+}
+
+/********* /get_time_entries *********/
+
 /********* get_projects *********/
 
 QNetworkReply *Redmine::get_projects(callback_t callback,

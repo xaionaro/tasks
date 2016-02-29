@@ -3,6 +3,8 @@
 
 #include <QScrollArea>
 
+#include "common.h"
+
 namespace Ui {
 class LogTimeWindow;
 }
@@ -21,6 +23,9 @@ private slots:
     void on_accept_clicked();
 
 private:
+    int updateLastLogTime();
+    void get_time_entries_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
+
     Ui::LogTimeWindow *ui;
 };
 

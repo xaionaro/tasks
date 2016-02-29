@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#define __ANDROID__
+#define __ANDROID__
 
 #include "mainwindow-rector.h"
 #include "mainwindow-full.h"
@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
      * QApplication, Redmine, MainWindowRector
      */
     {
+        int rc = EINVAL;
         Redmine    _redmine;
         redmine = &_redmine;
         redmine->apiKey(settings.apiKey);
@@ -107,7 +108,7 @@ int main(int argc, char *argv[])
 #ifdef __ANDROID__
         MainWindowAndroid w;
         w.show();
-        return a.exec();
+        rc = a.exec();
 #else
         switch (settings.mode) {
             case MODE_RECTOR:
@@ -116,7 +117,8 @@ int main(int argc, char *argv[])
                     w.show();
 
                     a.setQuitOnLastWindowClosed(false);
-                    return a.exec();
+                    rc = a.exec();
+                    break;
                 }
             default:
                 {
@@ -124,9 +126,12 @@ int main(int argc, char *argv[])
                     w.show();
 
                     //a.setQuitOnLastWindowClosed(false);
-                    return a.exec();
+                    rc = a.exec();
+                    break;
                 }
         }
 #endif
+        saveSettings();
+        return rc;
     }
 }

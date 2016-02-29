@@ -382,7 +382,7 @@ int MainWindowRector::updateTasks() {
 
 MainWindowRector::~MainWindowRector()
 {
-    saveSettings();
+    //saveSettings();
     delete this->ui;
     delete this->timerUpdateTasks;
 }

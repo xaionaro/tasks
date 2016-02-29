@@ -84,6 +84,10 @@ public:
      */
     QNetworkReply *get_enumerations(callback_t callback, void *arg, bool free_arg = false);
 
+    /* Request all issues
+     */
+    QNetworkReply *get_time_entries(callback_t callback, void *arg, bool free_arg = false, QString filterOptions="");
+
     /* Get issue status info
      */
     QJsonObject get_issue_status(int issue_status_id);

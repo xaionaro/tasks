@@ -10,6 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = mephi-tasks
 TEMPLATE = app
+QMAKE_CXX = ccache g++
 QMAKE_CXXFLAGS += -std=c++11 -O0 -march=native
 
 SOURCES += main.cpp\
@@ -64,7 +65,7 @@ FORMS    += \
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Release/release/ -lqtredmine
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/ -lqtredmine
-else:unix: LIBS += -L$$PWD/build-qtredmine-Desktop-Debug/ -lqtredmine
+else:unix: LIBS += -L$$PWD/build-qtredmine-Desktop/ -lqtredmine
 
 INCLUDEPATH += $$PWD/qtredmine
 DEPENDPATH += $$PWD/qtredmine

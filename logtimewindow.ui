@@ -44,7 +44,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="untilLavel">
+         <widget class="QLabel" name="untilLabel">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -65,7 +65,7 @@
            </sizepolicy>
           </property>
           <property name="currentSection">
-           <enum>QDateTimeEdit::HourSection</enum>
+           <enum>QDateTimeEdit::MinuteSection</enum>
           </property>
           <property name="displayFormat">
            <string>hh:mm</string>
@@ -75,7 +75,7 @@
         <item row="1" column="1">
          <widget class="QTimeEdit" name="untilInput">
           <property name="currentSection">
-           <enum>QDateTimeEdit::HourSection</enum>
+           <enum>QDateTimeEdit::MinuteSection</enum>
           </property>
           <property name="displayFormat">
            <string>hh:mm</string>
