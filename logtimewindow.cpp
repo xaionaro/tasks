@@ -83,7 +83,7 @@ void LogTimeWindow::on_accept_clicked()
 void LogTimeWindow::projects_display()
 {
     qDebug("LogTimeWindow::projects_display()");
-    /*
+
     if (!this->projectsDisplayMutex.tryLock()) {
         if (!this->projectsDisplayExceptionMutex.tryLock())
             return;
@@ -97,37 +97,18 @@ void LogTimeWindow::projects_display()
     this->issues_byProjectId.clear();
     foreach (const QJsonObject &issue, this->issues.get()) {
 
-        if (this->issue_isFiltered(issue))
-            continue;
+/*        if (this->issue_isFiltered(issue))
+            continue;*/
 
         QJsonObject project    = issue["project"].toObject();
         int         project_id = project["id"].toInt();
         this->issues_byProjectId[project_id].append(issue);
-
-        if (this->showProjectIssues_recursive) {
-            QJsonObject parent;
-
-            project = this->projects.get(project["id"].toInt());
-            while (true) {
-                int parent_id;
-
-                parent    = this->projects.get(project["parent"].toObject()["id"].toInt());
-                parent_id = parent["id"].toInt();
-
-                if (parent_id == 0)
-                    break;
-
-                this->issues_byProjectId[parent_id].append(issue);
-                project = parent;
-            }
-        }
     }
 
-    this->projects.filter(reinterpret_cast<QWidget *>(this), projectsFilter);
-    this->projects.display(this->ui->projects, reinterpret_cast<QWidget *>(this), projectWidgetItemSetText);
+    //this->projects.filter(reinterpret_cast<QWidget *>(this), projectsFilter);
+    this->projects.display(this->ui->project, reinterpret_cast<QWidget *>(this));
 
     this->projectsDisplayMutex.unlock();
-    */
 }
 
 void LogTimeWindow::get_projects_callback(QNetworkReply *reply, QJsonDocument *json, void *arg) {

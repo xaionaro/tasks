@@ -52,6 +52,11 @@ private:
     void get_projects_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
     void projects_display();
 
+    QMutex projectsDisplayMutex;
+    QMutex projectsDisplayExceptionMutex;
+
+    QTimer projectsDisplayRetryTimer;
+
     Ui::LogTimeWindow *ui;
 };
 

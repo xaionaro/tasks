@@ -82,7 +82,7 @@ void RedmineItemTree::set(QJsonArray array)
     foreach (const QJsonValue &val, array)
         this->add(val.toObject());
 
-    /* rebuilding this->hierarchy */
+    /* rebuilding this->real.hierarchy */
 
     QList<QJsonObject> item_list;
 
@@ -342,6 +342,55 @@ void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetIte
     \*/
 
     widget->setSortingEnabled(true);
+
+    this->displayMutex.unlock();
+    return;
+}
+
+
+
+void RedmineItemTree::display(QComboBox *widget, QWidget *initiator)
+{
+    qDebug("RedmineItemTree::display()");
+    this->displayMutex.lock();
+
+    /*\
+     *  Building a table of items' id
+    \*/
+
+    QHash <int, int> toremove_ids;
+
+    foreach (const QJsonObject &item, this->widgetItem2item)
+        toremove_ids.insert(item["id"].toInt(), item["id"].toInt());
+
+
+    /*\
+     *  Displaying new items
+    \*/
+
+    int itemIdx = 0;
+    this->row2item.clear();
+
+    foreach (const QJsonObject &item, this->real.get()) {
+        this->row2item.insert(itemIdx++, item);
+        int itemId = item["id"].toInt();
+        QString caption = QString("#%1 -- %2").arg(item["id"].toInt()).arg(item["name"].toString());
+        qDebug(QString("displaying %1: %2").arg(itemId).arg(caption).toStdString().c_str());
+        widget->addItem(caption, itemId);
+        // display item
+        //this->display_topOne(widget, initiator, setTextFunct, topitems_count, toremove_ids);
+    }
+
+    /*\
+     *  Removing stale items
+    \*/
+
+    foreach (const int &item_id, toremove_ids)
+        this->widgetItemResetRecursive(item_id);
+
+    /*\
+     *  Finishing
+    \*/
 
     this->displayMutex.unlock();
     return;

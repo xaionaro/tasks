@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QJsonArray>
 #include <QTreeWidgetItem>
+#include <QComboBox>
 #include <QMutex>
 #include <QTimer>
 
@@ -30,6 +31,7 @@ public:
     bool                isDescendant(int descendant_id, int ancestor_id);
     void                filter(QWidget *initiator, itemFilterFunct_t filterFunct);
     void                display(QTreeWidget *widget, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct);
+    void                display(QComboBox   *widget, QWidget *initiator);
 
     RedmineItemTreeData filtered;
 

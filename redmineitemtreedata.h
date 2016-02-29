@@ -7,9 +7,9 @@
 
 class RedmineItemTreeData
 {
-    private:
-    QList<QJsonObject>                      list;
-    QHash<int, QJsonObject>                 id2item;
+private:
+    QList<QJsonObject>        list;
+    QHash<int, QJsonObject>   id2item;
 
 public:
     RedmineItemTreeData();
