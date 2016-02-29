@@ -3,17 +3,22 @@
 
 RedmineClass_TimeEntry::RedmineClass_TimeEntry()
 {
+    this->id      = 0;
     this->redmine = NULL;
+    return;
 }
 
 int RedmineClass_TimeEntry::setRedmine(Redmine *redmine)
 {
     this->redmine = redmine;
+    return 0;
 }
 
 RedmineClass_TimeEntry::RedmineClass_TimeEntry(Redmine *redmine)
 {
+    this->id = 0;
     this->setRedmine(redmine);
+    return;
 }
 
 int RedmineClass_TimeEntry::save() {
@@ -21,10 +26,15 @@ int RedmineClass_TimeEntry::save() {
         return EHOSTUNREACH;
 
     QVariantMap timeEntries, timeEntry;
+    QString uri;
     RedmineClient::EMode mode = (this->id != 0 ? RedmineClient::EMode::PUT : RedmineClient::EMode::POST);
 
-    if (this->id != 0)
-        timeEntry["id"]   = QVariant(this->id);
+    if (this->id != 0) {
+        uri = "time_entries/"+QString(this->id);
+        timeEntry["id"]    = QVariant(this->id);
+    } else {
+        uri = "time_entries";
+    }
 
     timeEntry["hours"]    = QVariant(this->hours);
     timeEntry["endtime"]  = QVariant(this->endtime);
