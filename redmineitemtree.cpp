@@ -349,7 +349,7 @@ void RedmineItemTree::display(QTreeWidget *widget, QWidget *initiator, widgetIte
 
 
 
-void RedmineItemTree::display(QComboBox *widget, QWidget *initiator)
+void RedmineItemTree::display(QComboBox *widget, QWidget *initiator, comboBoxAddItemFunct_t addItemFunct)
 {
     qDebug("RedmineItemTree::display()");
     this->displayMutex.lock();
@@ -373,10 +373,7 @@ void RedmineItemTree::display(QComboBox *widget, QWidget *initiator)
 
     foreach (const QJsonObject &item, this->real.get()) {
         this->row2item.insert(itemIdx++, item);
-        int itemId = item["id"].toInt();
-        QString caption = QString("#%1 -- %2").arg(item["id"].toInt()).arg(item["name"].toString());
-        qDebug(QString("displaying %1: %2").arg(itemId).arg(caption).toStdString().c_str());
-        widget->addItem(caption, itemId);
+        addItemFunct(widget, item);
         // display item
         //this->display_topOne(widget, initiator, setTextFunct, topitems_count, toremove_ids);
     }

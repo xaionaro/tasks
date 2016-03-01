@@ -14,6 +14,7 @@
 class RedmineItemTree;
 
 typedef void (*widgetItemSetTextFunct_t)(QWidget *initiator, QTreeWidgetItem *widgetItem, QJsonObject item, RedmineItemTree *tree, int level);
+typedef void (*comboBoxAddItemFunct_t  )(QComboBox *widgetItem, QJsonObject item);
 typedef bool (*itemFilterFunct_t)(QWidget *initiator, QJsonObject item);
 
 class RedmineItemTree : public QObject
@@ -31,7 +32,7 @@ public:
     bool                isDescendant(int descendant_id, int ancestor_id);
     void                filter(QWidget *initiator, itemFilterFunct_t filterFunct);
     void                display(QTreeWidget *widget, QWidget *initiator, widgetItemSetTextFunct_t setTextFunct);
-    void                display(QComboBox   *widget, QWidget *initiator);
+    void                display(QComboBox   *widget, QWidget *initiator, comboBoxAddItemFunct_t   addItemFunct);
 
     RedmineItemTreeData filtered;
 

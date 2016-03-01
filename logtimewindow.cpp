@@ -80,6 +80,17 @@ void LogTimeWindow::on_accept_clicked()
 
 /**** updateProjects ****/
 
+void projectsAddItemFunct(QComboBox *projects, QJsonObject project)
+{
+    int projectId = project["id"].toInt();
+    QString projectIdentifier = project["identifier"].toString();
+    QString projectName       = project["name"].toString();
+    QString caption = QString("%1: %2").arg(projectIdentifier).arg(projectName);
+    projects->addItem(caption, projectId);
+
+    return;
+}
+
 void LogTimeWindow::projects_display()
 {
     qDebug("LogTimeWindow::projects_display()");
@@ -106,7 +117,7 @@ void LogTimeWindow::projects_display()
     }
 
     //this->projects.filter(reinterpret_cast<QWidget *>(this), projectsFilter);
-    this->projects.display(this->ui->project, reinterpret_cast<QWidget *>(this));
+    this->projects.display(this->ui->project, reinterpret_cast<QWidget *>(this), projectsAddItemFunct);
 
     this->projectsDisplayMutex.unlock();
 }
@@ -133,7 +144,7 @@ QList<QJsonObject> LogTimeWindow::issues_get_byProjectId(int project_id)
 }
 
 int LogTimeWindow::updateProjects() {
-    redmine->get_projects((Redmine::callback_t)&LogTimeWindow::get_projects_callback, this);
+    redmine->get_projects(this, (Redmine::callback_t)&LogTimeWindow::get_projects_callback, NULL);
     return 0;
 }
 

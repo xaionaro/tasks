@@ -40,7 +40,9 @@ private:
 
     void init_quitStatuses(QNetworkReply *reply, QJsonDocument *statuses, void *_null);
     void init_quitMe(QNetworkReply *reply, QJsonDocument *statuses, void *_null);
+    QHash<QString, QJsonDocument> cache;
 
+    void callback_cache(QNetworkReply *reply, QJsonDocument *obj, void *_real_callback_info);
 
 public:
 
@@ -93,6 +95,7 @@ public:
     /* Request all projects
      */
     QNetworkReply *get_projects(callback_t callback, void *arg, bool free_arg = false, QString filterOptions="");
+    QNetworkReply *get_projects(void *obj_ptr, callback_t callback, void *arg, bool free_arg = false, QString filterOptions="");
 
     /* Request all memberships
      */
@@ -124,8 +127,19 @@ public:
     QDateTime parseDateTime(QJsonValueRef dateTime_json);
     QDateTime parseDateTime(QString dateTime_str);
 
-    Redmine();
+    /* Load prevously saved cache into memory (disk -> mem)
+     */
+    void cacheLoad();
 
+    /* Save cache into disk (mem -> disk)
+     */
+    void cacheSave();
+
+    /* Constructor/destructor
+     */
+
+    Redmine();
+    ~Redmine();
 };
 
 #endif // REDMINE_H

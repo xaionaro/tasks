@@ -20,9 +20,17 @@
 #include "redmine.h"
 #include "common.h"
 
+#include <QDir>
+#include <QFile>
+
 Redmine::Redmine()
 {
     this->setBaseUrl(SERVER_URL);
+}
+
+Redmine::~Redmine()
+{
+    this->cacheSave();
 }
 
 QString Redmine::apiKey(QString apiKey) {
@@ -69,7 +77,99 @@ int Redmine::init() {
     connect(updateMeReply, SIGNAL(finished()), &this->initBarrier, SLOT(quit()));
     this->initBarrier.exec();
 
+    this->cacheLoad();
+
     return 0;
+}
+
+/********* cache{Load,Save} *********/
+
+void Redmine::cacheLoad()
+{
+    QDir dir = QDir("cache");
+
+    QFileInfoList fileInfoList = dir.entryInfoList(QDir::Files);
+
+    for (int i = 0; i < fileInfoList.size(); ++i) {
+        QFileInfo fileInfo = fileInfoList.at(i);
+        QString filePath = fileInfo.absoluteFilePath();
+        QString fileName = fileInfo.fileName();
+        QFile *file = new QFile(filePath);
+
+        if (!file->open(QIODevice::ReadOnly)) {
+            qDebug("cannot open file \"%s\" for reading", filePath.toUtf8().data());
+            continue;
+        }
+        QByteArray jsonText = qUncompress(file->readAll());
+        QString    uri      = fileName.replace("!", "/");
+        this->cache[uri]    = QJsonDocument::fromJson(jsonText);
+        delete file;
+    }
+
+    return;
+}
+
+void Redmine::cacheSave()
+{
+    QHash<QString, QJsonDocument>::iterator i;
+
+    QDir dir = QDir();
+    if (!dir.mkpath("cache")) {
+        qDebug("cannot create cache directory");
+        return;
+    }
+
+    for (i = this->cache.begin(); i != this->cache.end(); ++i) {
+        QByteArray jsonText = qCompress(i.value().toJson());
+
+        QString fileName = i.key();
+        fileName = fileName.replace("/", "!");
+        QString filePath = "cache/"+fileName;
+        QFile *file = new QFile(dir.filePath(filePath));
+
+        if (!file->open(QIODevice::WriteOnly)) {
+            qDebug("cannot open file \"%s\" for writting", fileName.toUtf8().data());
+            continue;
+        }
+        file->write(jsonText);
+        file->close();
+        delete file;
+    }
+    return;
+}
+
+/********* /cache{Load,Save} *********/
+
+/********* request *********/
+
+struct redmine_request_callback_arg {
+    void                *obj_ptr;
+    Redmine::callback_t  callback;
+    void                *arg;
+    bool                 free_arg;
+    QString              signature;
+};
+
+
+void Redmine::callback_cache(QNetworkReply *reply, QJsonDocument *obj, void *_real_callback_info)
+{
+    struct redmine_request_callback_arg *real_callback_info =
+            (struct redmine_request_callback_arg *)_real_callback_info;
+
+    qDebug("Got a reply for \"%s\"", real_callback_info->signature.toStdString().c_str());
+
+    if (real_callback_info->callback != NULL)
+        this->callback_call(real_callback_info->obj_ptr, real_callback_info->callback, reply, obj, real_callback_info->arg);
+        //real_callback_info->callback(reply, obj, real_callback_info->arg);
+
+    if (real_callback_info->free_arg)
+        free(real_callback_info->arg);
+
+    this->cache.insert(real_callback_info->signature, *obj);
+
+    delete real_callback_info;
+
+    return;
 }
 
 QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
@@ -81,9 +181,39 @@ QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
         const QString          &getParams,
         const QByteArray       &requestData
 ) {
-    //qDebug("request: URI: %s", uri.toUtf8().data());
-    return this->sendRequest(uri, RedmineClient::JSON, mode, obj_ptr,
+    if (mode != RedmineClient::EMode::GET) {
+        return this->sendRequest(uri, RedmineClient::JSON, mode, obj_ptr,
                       (RedmineClient::callback_t)callback, callback_arg, free_arg, getParams, requestData);
+    }
+
+    qDebug("obj_ptr == %p", obj_ptr);
+
+    QString signature = uri+"?"+getParams;
+    if (!this->cache[signature].isEmpty()) {
+        qDebug("Found cache for \"%s\"", signature.toStdString().c_str());
+        this->callback_call(obj_ptr, callback, NULL, &this->cache[signature], callback_arg);
+    }
+
+    /*
+    QPair <QByteArray, QByteArray> hashes;
+    hashes.first  = QCryptographicHash::hash(signature, QCryptographicHash::Md5);
+    hashes.second = QCryptographicHash::hash(signature, QCryptographicHash::Sha1);
+    */
+
+    {
+        struct redmine_request_callback_arg *real_callback_info = new struct redmine_request_callback_arg;
+                //(struct redmine_request_callback_arg *)calloc(1, sizeof(*real_callback_info));
+
+        real_callback_info->obj_ptr   = obj_ptr;
+        real_callback_info->callback  = callback;
+        real_callback_info->arg       = callback_arg;
+        real_callback_info->free_arg  = free_arg;
+        real_callback_info->signature = signature;
+
+        qDebug("Makeing a request for \"%s\"", signature.toStdString().c_str());
+        return this->sendRequest(uri, RedmineClient::JSON, mode, this,
+                          (RedmineClient::callback_t)&Redmine::callback_cache, real_callback_info, false, getParams, requestData);
+    }
 }
 
 QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
@@ -111,6 +241,8 @@ QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
 
     return this->request(mode, uri, obj_ptr, callback, callback_arg, free_arg, getParams, QJsonObject::fromVariantMap(requestVMap));
 }
+
+/********* /request *********/
 
 /********* updateMe *********/
 
@@ -301,10 +433,16 @@ QNetworkReply *Redmine::get_time_entries(callback_t callback,
 
 /********* get_projects *********/
 
+QNetworkReply *Redmine::get_projects(void *obj_ptr, callback_t callback,
+        void *arg, bool free_arg, QString filterOptions)
+{
+    return this->request(GET, "projects", obj_ptr, callback, arg, free_arg, "limit=500&"+filterOptions);
+}
+
 QNetworkReply *Redmine::get_projects(callback_t callback,
         void *arg, bool free_arg, QString filterOptions)
 {
-    return this->request(GET, "projects", NULL, callback, arg, free_arg, "limit=500&"+filterOptions);
+    return this->get_projects(NULL, callback, arg, free_arg, filterOptions);
 }
 
 /********* /get_projects *********/

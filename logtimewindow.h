@@ -14,7 +14,7 @@ class LogTimeWindow;
 class LogTimeWindow : public QScrollArea
 {
     Q_OBJECT
-    CALLBACK_DISPATCHER(Redmine, LogTimeWindow, NULL)
+    CALLBACK_DISPATCHER(Redmine, LogTimeWindow, this)
 
 public:
     explicit LogTimeWindow(QWidget *parent = 0);
