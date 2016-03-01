@@ -22,6 +22,12 @@ RedmineClass_TimeEntry::RedmineClass_TimeEntry(Redmine *redmine)
     return;
 }
 
+int RedmineClass_TimeEntry::setProjectId(int projectId)
+{
+    this->projectId = projectId;
+    return 0;
+}
+
 int RedmineClass_TimeEntry::setIssueId(int issueId)
 {
     this->issueId = issueId;
@@ -50,8 +56,19 @@ int RedmineClass_TimeEntry::save() {
 
     timeEntry["hours"]    = QVariant(this->hours);
     timeEntry["endtime"]  = QVariant(this->endtime);
-    timeEntry["issue_id"] = QVariant(this->issueId);
+    if (this->issueId) {
+        timeEntry["issue_id"] = QVariant(this->issueId);
+    } else {
+        if (!this->projectId) {
+            qDebug("RedmineClass_TimeEntry::save(): ERROR: this->issueId == 0; this->projectId == 0");
+            return EINVAL;
+        }
+
+        timeEntry["project_id"] = QVariant(this->projectId);
+    }
     timeEntry["comment"]  = QVariant(this->comment);
+    timeEntry["spent_on"] = QVariant(this->endtime.date());
+    timeEntry["activity_id"] = QVariant(this->activityId);
 
     timeEntries["time_entry"] = timeEntry;
 
@@ -60,12 +77,15 @@ int RedmineClass_TimeEntry::save() {
 
 }
 
-int RedmineClass_TimeEntry::set(QDateTime timeFrom, QDateTime timeTo, int issueId, QString comment) {
-    this->hours   = ((float)((time_t)(timeTo.toTime_t() - timeFrom.toTime_t()))) / 3600;
-    this->endtime =  timeTo;
+int RedmineClass_TimeEntry::set(QDateTime timeFrom, QDateTime timeTo, int projectId, int issueId, QString comment, int activityId) {
+    this->hours       = ((float)((time_t)(timeTo.toTime_t() - timeFrom.toTime_t()))) / 3600;
+    this->endtime     =  timeTo;
     if (issueId != -1)
         this->issueId = issueId;
-    this->comment = comment;
+    if (projectId != -1)
+        this->projectId = projectId;
+    this->comment     = comment;
+    this->activityId  = activityId;
 
     if (issueId == 0) {
         qDebug("RedmineClass_TimeEntry::set(): issueId is not set. Trying the default.");
