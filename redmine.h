@@ -60,7 +60,8 @@ public:
             void                   *callback_arg = NULL,
             bool                    free_arg     = false,
             const QString          &getParams    = "",
-            const QByteArray       &requestData  = "");
+            const QByteArray       &requestData  = "",
+            bool                    useCache     = true);
 
     QNetworkReply *request(RedmineClient::EMode    mode,
             QString                 uri,
@@ -91,6 +92,7 @@ public:
     /* Request all issues
      */
     QNetworkReply *get_issues(callback_t callback, void *arg, bool free_arg = false);
+    QNetworkReply *get_issues(void *obj_ptr, callback_t callback, void *arg, bool free_arg = false);
 
     /* Request all projects
      */

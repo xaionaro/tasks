@@ -73,7 +73,7 @@ int Redmine::init() {
     this->initBarrier.exec();
 
     QNetworkReply *updateMeReply            = this->updateMe();
-    // Wait until issue statuses will be received:
+    // Wait until infomation about current user will be received:
     connect(updateMeReply, SIGNAL(finished()), &this->initBarrier, SLOT(quit()));
     this->initBarrier.exec();
 
@@ -179,9 +179,10 @@ QNetworkReply *Redmine::request(RedmineClient::EMode    mode,
         void                   *callback_arg,
         bool                    free_arg,
         const QString          &getParams,
-        const QByteArray       &requestData
+        const QByteArray       &requestData,
+        bool                    useCache
 ) {
-    if (mode != RedmineClient::EMode::GET) {
+    if (mode != RedmineClient::EMode::GET || useCache == false) {
         return this->sendRequest(uri, RedmineClient::JSON, mode, obj_ptr,
                       (RedmineClient::callback_t)callback, callback_arg, free_arg, getParams, requestData);
     }
@@ -290,7 +291,10 @@ QNetworkReply *Redmine::updateMe(callback_t callback, void *arg)
                 this,
                 &Redmine::updateMe_callback,
                 wrapper_arg,
-                true);
+                true,
+                NULL,
+                NULL,
+                false);
 }
 
 /********* /updateMe *********/
@@ -376,7 +380,10 @@ QNetworkReply *Redmine::updateIssueStatuses(callback_t callback, void *arg)
                          this,
                          &Redmine::updateIssueStatuses_callback,
                          wrapper_arg,
-                         true);
+                         true,
+                         NULL,
+                         NULL,
+                         false);
 }
 
 /********* /updateIssueStatuses *********/
@@ -413,10 +420,16 @@ QNetworkReply *Redmine::get_roles(callback_t callback,
 
 /********* get_issues *********/
 
+QNetworkReply *Redmine::get_issues(void *obj_ptr, callback_t callback,
+        void *arg, bool free_arg)
+{
+    return this->request(GET, "issues", obj_ptr, callback, arg, free_arg, settings.issuesFilter+"limit=200&status_id=*");
+}
+
 QNetworkReply *Redmine::get_issues(callback_t callback,
         void *arg, bool free_arg)
 {
-    return this->request(GET, "issues", NULL, callback, arg, free_arg, settings.issuesFilter+"limit=200&status_id=*");
+    return this->get_issues(NULL, callback, arg, free_arg);
 }
 
 /********* /get_issues *********/
@@ -498,7 +511,10 @@ QNetworkReply *Redmine::get_user(int user_id,
                 this,
                 &Redmine::get_user_callback,
                 get_user_callback_arg_p,
-                true);
+                true,
+                NULL,
+                NULL,
+                false);
 }
 
 /********* /get_user *********/

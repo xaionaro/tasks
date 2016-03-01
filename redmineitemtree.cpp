@@ -371,7 +371,7 @@ void RedmineItemTree::display(QComboBox *widget, QWidget *initiator, comboBoxAdd
     int itemIdx = 0;
     this->row2item.clear();
 
-    foreach (const QJsonObject &item, this->real.get()) {
+    foreach (const QJsonObject &item, this->filtered.get()) {
         this->row2item.insert(itemIdx++, item);
         addItemFunct(widget, item);
         // display item

@@ -10,8 +10,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = mephi-tasks
 TEMPLATE = app
-QMAKE_CXX = ccache g++
-QMAKE_CXXFLAGS += -std=c++11 -O0 -march=native
+#QMAKE_CXX = ccache g++
+QMAKE_CXXFLAGS += -std=c++11 -O0 #-march=native
 
 SOURCES += main.cpp\
     helpwindow.cpp \

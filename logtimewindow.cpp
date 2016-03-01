@@ -91,6 +91,20 @@ void projectsAddItemFunct(QComboBox *projects, QJsonObject project)
     return;
 }
 
+
+bool LogTimeWindow_projectsFilter(QWidget *__this, QJsonObject item)
+{
+    LogTimeWindow *_this = reinterpret_cast<LogTimeWindow *>(__this);
+
+    (void)_this; (void)item;
+
+    //if (item["name"].toString().indexOf(_this->projectsFilter_namePart, Qt::CaseInsensitive) == -1)
+    //    return false;
+
+    return true;
+}
+
+
 void LogTimeWindow::projects_display()
 {
     qDebug("LogTimeWindow::projects_display()");
@@ -116,7 +130,7 @@ void LogTimeWindow::projects_display()
         this->issues_byProjectId[project_id].append(issue);
     }
 
-    //this->projects.filter(reinterpret_cast<QWidget *>(this), projectsFilter);
+    this->projects.filter(reinterpret_cast<QWidget *>(this), LogTimeWindow_projectsFilter);
     this->projects.display(this->ui->project, reinterpret_cast<QWidget *>(this), projectsAddItemFunct);
 
     this->projectsDisplayMutex.unlock();
@@ -152,36 +166,16 @@ int LogTimeWindow::updateProjects() {
 
 /**** updateIssues ****/
 
-/*
-void issuesWidgetItemSetText2(QWidget *__this, QTreeWidgetItem *widgetItem, QJsonObject issue, RedmineItemTree *tree, int level) {
+void LogTimeWindow_issuesWidgetItemSetText(QWidget *__this, QTreeWidgetItem *widgetItem, QJsonObject issue, RedmineItemTree *tree, int level) {
     (void)__this; (void)tree; (void)level;
-    //int item_id = item["id"].toInt();
-    //LogTimeWindow *_this = reinterpret_cast<LogTimeWindow *>(__this);
 
-    QJsonObject  issue_status = issue["status"].toObject();
-//    bool         isClosed     = redmine->get_issue_status(issue_status["id"].toInt())["is_closed"].toBool();
-
-
-    widgetItem->setText(0, issue["subject"].toString());
-    widgetItem->setText(1, issue["assigned_to"].toObject()["name"].toString());
-
-    QString due_date_str = issue["due_date"].toString();
-    QDateTime now, date;
-    now  = QDateTime::currentDateTime();
-    date = QDateTime::fromString(due_date_str, "yyyy-MM-dd");
-
-    widgetItem->setText(2, due_date_str);
-    widgetItem->setText(3, issue_status["name"].toString());
-
-    QDateTime updated_on = redmine->parseDateTime(issue["updated_on"]);
-    widgetItem->setText(4, updated_on.toString("yyyy'-'MM'-'dd HH':'MM"));
+    widgetItem->setText(0, QString::number(issue["id"].toInt()));
+    widgetItem->setText(1, issue["subject"].toString());
 
     return;
 }
-*/
 
-#if 0
-bool issuesFilter2(QWidget *__this, QJsonObject item)
+bool LogTimeWindow_issuesFilter(QWidget *__this, QJsonObject item)
 {
     LogTimeWindow  *_this = reinterpret_cast<LogTimeWindow *>(__this);
     int             project_id;
@@ -203,8 +197,6 @@ bool issuesFilter2(QWidget *__this, QJsonObject item)
 */
     return false;
 }
-
-#endif
 
 void LogTimeWindow::setIssuesFilterItems(QComboBox *box, QHash<int,QJsonObject> table_old, QHash<int,QJsonObject> table, QString keyname) {
     QHash<int, int> ids_old;
@@ -250,46 +242,8 @@ void LogTimeWindow::setIssuesFilterItems(QComboBox *box, QHash<int,QJsonObject> 
 void LogTimeWindow::issues_display()
 {
     qDebug("LogTimeWindow::issues_display()");
-/*
-    this->issues.filter(reinterpret_cast<QWidget *>(this), issuesFilter2);
-    this->issues.display(this->ui->issuesTree, reinterpret_cast<QWidget *>(this), issuesWidgetItemSetText2);
-
-    QHash<int, QJsonObject> issuesFiltered_statuses_old  = this->issuesFiltered_statuses;
-    QHash<int, QJsonObject> issuesFiltered_assignees_old = this->issuesFiltered_assignees;
-    //QHash<int, QJsonObject> issuesFiltered_author_old    = this->issuesFiltered_author;
-
-    this->issuesFiltered_statuses.clear();
-    this->issuesFiltered_assignees.clear();
-    this->issuesFiltered_authors.clear();
-    foreach (const QJsonObject &issue, this->issues.filtered.get())
-    {
-        QJsonObject status   = issue["status"].toObject();
-        QJsonObject assignee = issue["assigned_to"].toObject();
-        QJsonObject author   = issue["author"].toObject();
-
-        int status_id   = status  ["id"].toInt();
-        int assignee_id = assignee["id"].toInt();
-        int author_id   = author  ["id"].toInt();
-
-        this->issuesFiltered_authors.insert(author_id, author);
-
-        if (status_id   != 0)
-            this->issuesFiltered_statuses. insert(status_id,   status);
-        if (assignee_id != 0)
-            this->issuesFiltered_assignees.insert(assignee_id, assignee);
-    }
-
-    this->setIssuesFilterItems(this->ui->issuesFilter_field_assigned_to,
-                               issuesFiltered_assignees_old,
-                               this->issuesFiltered_assignees,
-                               "name");
-
-    this->setIssuesFilterItems(this->ui->issuesFilter_field_status,
-                               issuesFiltered_statuses_old,
-                               this->issuesFiltered_statuses,
-                               "name");
-    this->projects_display();
-*/
+    this->issues.filter(reinterpret_cast<QWidget *>(this), LogTimeWindow_issuesFilter);
+    this->issues.display(this->ui->issue, reinterpret_cast<QWidget *>(this), LogTimeWindow_issuesWidgetItemSetText);
     return;
 }
 
@@ -299,9 +253,9 @@ void LogTimeWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *jso
     this->updateIssuesMutex.lock(); // is not a thread-safe function, locking
 
     QJsonObject answer   = json->object();
-    QJsonArray  projects = answer["issues"].toArray();
+    QJsonArray  issues = answer["issues"].toArray();
 
-    this->issues.set(projects);
+    this->issues.set(issues);
 
     this->issues_display();
 
@@ -311,7 +265,7 @@ void LogTimeWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *jso
 }
 
 int LogTimeWindow::updateIssues() {
-    redmine->get_issues((Redmine::callback_t)&LogTimeWindow::get_issues_callback, this);
+    redmine->get_issues(this, (Redmine::callback_t)&LogTimeWindow::get_issues_callback, this);
     return 0;
 }
 

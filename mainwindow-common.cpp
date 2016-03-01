@@ -247,10 +247,10 @@ void MainWindowCommon::get_issues_callback(QNetworkReply *reply, QJsonDocument *
 
     this->updateIssuesMutex.lock(); // is not a thread-safe function, locking
 
-    QJsonObject answer   = json->object();
-    QJsonArray  projects = answer["issues"].toArray();
+    QJsonObject answer = json->object();
+    QJsonArray  issues = answer["issues"].toArray();
 
-    this->issues.set(projects);
+    this->issues.set(issues);
 
     this->issues_display();
 

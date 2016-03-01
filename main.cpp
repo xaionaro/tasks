@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define __ANDROID__
+//#define __ANDROID__
 
 #include "mainwindow-rector.h"
 #include "mainwindow-full.h"
@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
     }
 
     if (settings.apiKey.length() == 0) {
+        qDebug("apiKey/password is not set or wrong");
         return EINVAL;
     }
 
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
         }
 #endif
         saveSettings();
-        redmine->cacheSave();
+        //redmine->cacheSave();
         return rc;
     }
 }

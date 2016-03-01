@@ -1,5 +1,6 @@
 #include "redmineclass_time_entry.h"
 
+#include "errno.h"
 
 RedmineClass_TimeEntry::RedmineClass_TimeEntry()
 {
