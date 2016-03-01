@@ -22,6 +22,11 @@ RedmineClass_TimeEntry::RedmineClass_TimeEntry(Redmine *redmine)
     return;
 }
 
+int RedmineClass_TimeEntry::setIssueId(int issueId)
+{
+    this->issueId = issueId;
+}
+
 int RedmineClass_TimeEntry::save() {
     if (this->redmine == NULL)
         return EHOSTUNREACH;

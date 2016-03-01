@@ -1,8 +1,6 @@
 #include "logtimewindow.h"
 #include "ui_logtimewindow.h"
 
-#include "redmineclass_time_entry.h"
-
 LogTimeWindow::LogTimeWindow(QWidget *parent) :
     QScrollArea(parent),
     ui(new Ui::LogTimeWindow)
@@ -18,6 +16,9 @@ LogTimeWindow::LogTimeWindow(QWidget *parent) :
     this->updateLastLogTime();
     this->updateIssues();
     this->updateProjects();
+
+    this->ui->issue->setSortingEnabled(true);
+    this->ui->issue->sortByColumn(0, Qt::AscendingOrder);
 }
 
 LogTimeWindow::~LogTimeWindow()
@@ -68,11 +69,9 @@ void LogTimeWindow::on_cancel_clicked()
 
 void LogTimeWindow::on_accept_clicked()
 {
-    RedmineClass_TimeEntry timeEntry;
-
-    timeEntry.setRedmine(redmine);
-    timeEntry.set(this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), 0, this->ui->comment->toPlainText());
-    timeEntry.save();
+    this->timeEntry.setRedmine(redmine);
+    this->timeEntry.set(this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), 0, this->ui->comment->toPlainText());
+    this->timeEntry.save();
 
     delete this;
 }
@@ -180,10 +179,27 @@ bool LogTimeWindow_issuesFilter(QWidget *__this, QJsonObject item)
     LogTimeWindow  *_this = reinterpret_cast<LogTimeWindow *>(__this);
     int             project_id;
 
-    //if (_this->selected_projects_id.empty())
+    int status_id = item["status"].toObject()["id"].toInt();
+
+    if (status_id != 2 /* В НИЯУ МИФИ это статус «Выполняется» */)
+        return false;
+
+    int assigned_to_id = item["assigned_to"].toObject()["id"].toInt();
+    if (assigned_to_id != redmine->me()["id"].toInt())
+        return false;
+
+    if (_this->selected_project_id == 0)
+        return true;
+
+    if (_this->projects.isDescendant(project_id, _this->selected_project_id))
+        return true;
+
+    project_id = item["project"].toObject()["id"].toInt();
+
+    if (project_id == _this->selected_project_id)
         return true;
 /*
-    project_id = item["project"].toObject()["id"].toInt();
+
 
     if (_this->selected_projects_id.contains(project_id))
         return true;
@@ -191,9 +207,6 @@ bool LogTimeWindow_issuesFilter(QWidget *__this, QJsonObject item)
     if (!_this->showProjectIssues_recursive)
         return false;
 
-    foreach (int selected_project_id, _this->selected_projects_id)
-        if (_this->projects.isDescendant(project_id, selected_project_id))
-            return true;
 */
     return false;
 }
@@ -243,7 +256,8 @@ void LogTimeWindow::issues_display()
 {
     qDebug("LogTimeWindow::issues_display()");
     this->issues.filter(reinterpret_cast<QWidget *>(this), LogTimeWindow_issuesFilter);
-    this->issues.display(this->ui->issue, reinterpret_cast<QWidget *>(this), LogTimeWindow_issuesWidgetItemSetText);
+    this->issues.display(this->ui->issue, reinterpret_cast<QWidget *>(this),
+                         LogTimeWindow_issuesWidgetItemSetText);
     return;
 }
 
@@ -270,3 +284,34 @@ int LogTimeWindow::updateIssues() {
 }
 
 /**** /updateIssues ****/
+
+void LogTimeWindow::on_issue_itemClicked(QTreeWidgetItem *item, int column)
+{
+    this->ui->comment->setFocus();
+
+    return;
+}
+
+void LogTimeWindow::on_issue_itemSelectionChanged()
+{
+    this->selected_issues_id.clear();
+
+    foreach (QTreeWidgetItem *selectedIssueItem, this->ui->issue->selectedItems()) {
+        QJsonObject issue    = this->issues.get(selectedIssueItem);
+        int         issue_id = issue["id"].toInt();
+        this->selected_issues_id.insert(issue_id, issue_id);
+    }
+
+    this->timeEntry.setIssueId(this->selected_issues_id.keys().first());
+
+    return;
+}
+
+void LogTimeWindow::on_project_currentIndexChanged(int index)
+{
+    QComboBox *comboBox       = this->ui->project;
+    this->selected_project_id = comboBox->itemData(index).toInt();
+
+    issues_display();
+    return;
+}

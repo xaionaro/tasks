@@ -423,7 +423,7 @@ QNetworkReply *Redmine::get_roles(callback_t callback,
 QNetworkReply *Redmine::get_issues(void *obj_ptr, callback_t callback,
         void *arg, bool free_arg)
 {
-    return this->request(GET, "issues", obj_ptr, callback, arg, free_arg, settings.issuesFilter+"limit=200&status_id=*");
+    return this->request(GET, "issues", obj_ptr, callback, arg, free_arg, "status_id=*&"+settings.issuesFilter);
 }
 
 QNetworkReply *Redmine::get_issues(callback_t callback,

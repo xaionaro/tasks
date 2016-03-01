@@ -7,6 +7,9 @@
 #include "common.h"
 #include "redmineitemtree.h"
 
+#include "redmineclass_time_entry.h"
+
+
 namespace Ui {
 class LogTimeWindow;
 }
@@ -27,12 +30,20 @@ public:
      *  the protected section:
      */
     RedmineItemTree projects;
-    RedmineItemTree issues;
+    RedmineItemTree issues;    
+    int selected_project_id;
+
 
 private slots:
     void on_cancel_clicked();
 
     void on_accept_clicked();
+
+    void on_issue_itemClicked(QTreeWidgetItem *item, int column);
+
+    void on_issue_itemSelectionChanged();
+
+    void on_project_currentIndexChanged(int index);
 
 private:
     int updateLastLogTime();
@@ -56,6 +67,9 @@ private:
     QMutex projectsDisplayExceptionMutex;
 
     QTimer projectsDisplayRetryTimer;
+
+    QHash<int, int> selected_issues_id;
+    RedmineClass_TimeEntry timeEntry;
 
     Ui::LogTimeWindow *ui;
 };
