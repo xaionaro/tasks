@@ -66,7 +66,7 @@ int RedmineClass_TimeEntry::save() {
 
         timeEntry["project_id"] = QVariant(this->projectId);
     }
-    timeEntry["comment"]  = QVariant(this->comment);
+    timeEntry["comments"] = QVariant(this->comment);
     timeEntry["spent_on"] = QVariant(this->endtime.date());
     timeEntry["activity_id"] = QVariant(this->activityId);
 
