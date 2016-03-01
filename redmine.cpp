@@ -436,10 +436,16 @@ QNetworkReply *Redmine::get_issues(callback_t callback,
 
 /********* get_time_entries *********/
 
+QNetworkReply *Redmine::get_time_entries(void *obj_ptr, callback_t callback,
+        void *arg, bool free_arg, QString filterOptions)
+{
+    return this->request(GET, "time_entries", obj_ptr, callback, arg, free_arg, filterOptions);
+}
+
 QNetworkReply *Redmine::get_time_entries(callback_t callback,
         void *arg, bool free_arg, QString filterOptions)
 {
-    return this->request(GET, "time_entries", NULL, callback, arg, free_arg, filterOptions);
+    return this->get_time_entries(NULL, callback, arg, free_arg, filterOptions);
 }
 
 /********* /get_time_entries *********/

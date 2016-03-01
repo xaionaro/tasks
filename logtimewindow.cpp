@@ -62,7 +62,7 @@ void LogTimeWindow::get_time_entries_callback(QNetworkReply *reply, QJsonDocumen
 
 int LogTimeWindow::updateLastLogTime() {
     qDebug("updateLastLogTime()");
-    redmine->get_time_entries((Redmine::callback_t)&LogTimeWindow::get_time_entries_callback, this, false, "user_id=me&limit=1");
+    redmine->get_time_entries(this, (Redmine::callback_t)&LogTimeWindow::get_time_entries_callback, this, false, "user_id=me&limit=1");
     return 0;
 }
 

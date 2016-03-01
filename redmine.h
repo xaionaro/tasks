@@ -109,6 +109,7 @@ public:
 
     /* Request all issues
      */
+    QNetworkReply *get_time_entries(void *obj_ptr, callback_t callback, void *arg, bool free_arg = false, QString filterOptions="");
     QNetworkReply *get_time_entries(callback_t callback, void *arg, bool free_arg = false, QString filterOptions="");
 
     /* Get issue status info
