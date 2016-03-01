@@ -260,7 +260,7 @@ void MainWindowCommon::get_issues_callback(QNetworkReply *reply, QJsonDocument *
 }
 
 int MainWindowCommon::updateIssues() {
-    redmine->get_issues((Redmine::callback_t)&MainWindowCommon::get_issues_callback, this);
+    redmine->get_issues((Redmine::callback_t)&MainWindowCommon::get_issues_callback, this, false, "status=*&limit=10000");
     return 0;
 }
 

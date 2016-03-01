@@ -1,6 +1,8 @@
 #include "logtimewindow.h"
 #include "ui_logtimewindow.h"
 
+#include <QDesktopServices>
+
 LogTimeWindow::LogTimeWindow(QWidget *parent) :
     QScrollArea(parent),
     ui(new Ui::LogTimeWindow)
@@ -12,6 +14,8 @@ LogTimeWindow::LogTimeWindow(QWidget *parent) :
     this->setWindowTitle("Система «Задачи» НИЯУ МИФИ: Учёт времени");
     connect(redmine, SIGNAL(callback_call      (void*,callback_t,QNetworkReply*,QJsonDocument*,void*)),
             this,    SLOT(  callback_dispatcher(void*,callback_t,QNetworkReply*,QJsonDocument*,void*)) );
+
+    this->selected_project_id = 0;
 
     this->updateLastLogTime();
     this->updateIssues();
@@ -70,7 +74,7 @@ void LogTimeWindow::on_cancel_clicked()
 void LogTimeWindow::on_accept_clicked()
 {
     this->timeEntry.setRedmine(redmine);
-    this->timeEntry.set(this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), 0, this->ui->comment->toPlainText());
+    this->timeEntry.set(this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), -1, this->ui->comment->toPlainText());
     this->timeEntry.save();
 
     delete this;
@@ -100,6 +104,12 @@ bool LogTimeWindow_projectsFilter(QWidget *__this, QJsonObject item)
     //if (item["name"].toString().indexOf(_this->projectsFilter_namePart, Qt::CaseInsensitive) == -1)
     //    return false;
 
+    int project_id = item["id"].toInt();
+
+    //qDebug("LogTimeWindow_projectsFilter(): %i, %i", project_id, _this->issuesFiltered_byProjectId[project_id].count());
+    if (_this->issuesFiltered_byProjectId[project_id].count() == 0)
+        return false;
+
     return true;
 }
 
@@ -107,7 +117,8 @@ bool LogTimeWindow_projectsFilter(QWidget *__this, QJsonObject item)
 void LogTimeWindow::projects_display()
 {
     qDebug("LogTimeWindow::projects_display()");
-
+    this->projectsDisplayMutex.lock();
+/*
     if (!this->projectsDisplayMutex.tryLock()) {
         if (!this->projectsDisplayExceptionMutex.tryLock())
             return;
@@ -116,17 +127,19 @@ void LogTimeWindow::projects_display()
 
         this->projectsDisplayExceptionMutex.unlock();
         return;
-    }
+    }*/
 
+/*
     this->issues_byProjectId.clear();
     foreach (const QJsonObject &issue, this->issues.get()) {
-
-/*        if (this->issue_isFiltered(issue))
-            continue;*/
-
         QJsonObject project    = issue["project"].toObject();
         int         project_id = project["id"].toInt();
         this->issues_byProjectId[project_id].append(issue);
+    }*/
+
+    if (this->projects.filtered.get().count() > 0) { // TODO: remove this if. It's added only to forbid updating of the ComboBox due to buggy this process implementation above. The bug is duplicating projects in the ComboBox on each update.
+        this->projectsDisplayMutex.unlock();
+        return;
     }
 
     this->projects.filter(reinterpret_cast<QWidget *>(this), LogTimeWindow_projectsFilter);
@@ -184,9 +197,11 @@ bool LogTimeWindow_issuesFilter(QWidget *__this, QJsonObject item)
     if (status_id != 2 /* В НИЯУ МИФИ это статус «Выполняется» */)
         return false;
 
+    /*
     int assigned_to_id = item["assigned_to"].toObject()["id"].toInt();
     if (assigned_to_id != redmine->me()["id"].toInt())
         return false;
+    */
 
     if (_this->selected_project_id == 0)
         return true;
@@ -211,53 +226,31 @@ bool LogTimeWindow_issuesFilter(QWidget *__this, QJsonObject item)
     return false;
 }
 
-void LogTimeWindow::setIssuesFilterItems(QComboBox *box, QHash<int,QJsonObject> table_old, QHash<int,QJsonObject> table, QString keyname) {
-    QHash<int, int> ids_old;
-
-    foreach (const int &item_id, table_old.keys())
-        ids_old.insert(item_id, item_id);
-
-    /*
-     * Adding new items
-     */
-
-    foreach (const int &item_id, table.keys()) {
-        if (ids_old.contains(item_id))
-            ids_old.remove(item_id);
-        else
-             box->addItem(table[item_id][keyname].toString(), item_id);
-    }
-
-    /*
-     * Removing old items
-     */
-
-    int idx = box->count();
-    while (--idx > 0) {
-        int item_id;
-
-        item_id = box->itemData(idx).toInt();
-
-        if (ids_old.contains(item_id))
-            box->removeItem(idx);
-    }
-
-    /*
-     * Sorting
-     */
-
-    box->model()->sort(0);
-
-    return;
-}
-
-
 void LogTimeWindow::issues_display()
 {
     qDebug("LogTimeWindow::issues_display()");
+    this->projectsDisplayMutex.lock();
+
+    int selected_project_id = this->selected_project_id;
+    this->selected_project_id = 0;
+    this->issues.filter(reinterpret_cast<QWidget *>(this), LogTimeWindow_issuesFilter);
+    this->selected_project_id = selected_project_id;
+
+    this->issuesFiltered_byProjectId.clear();
+    foreach (const QJsonObject &issue, this->issues.filtered.get())
+    {
+        QJsonObject project = issue["project"].toObject();
+        int project_id = project["id"].toInt();
+
+        this->issuesFiltered_byProjectId[project_id].append(issue);
+    }
+
     this->issues.filter(reinterpret_cast<QWidget *>(this), LogTimeWindow_issuesFilter);
     this->issues.display(this->ui->issue, reinterpret_cast<QWidget *>(this),
                          LogTimeWindow_issuesWidgetItemSetText);
+
+    this->projectsDisplayMutex.unlock();
+    this->projects_display();
     return;
 }
 
@@ -279,7 +272,7 @@ void LogTimeWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *jso
 }
 
 int LogTimeWindow::updateIssues() {
-    redmine->get_issues(this, (Redmine::callback_t)&LogTimeWindow::get_issues_callback, this);
+    redmine->get_issues(this, (Redmine::callback_t)&LogTimeWindow::get_issues_callback, this, false, "status_id=2&assigned_to_id=me&limit=100");
     return 0;
 }
 
@@ -314,4 +307,9 @@ void LogTimeWindow::on_project_currentIndexChanged(int index)
 
     issues_display();
     return;
+}
+
+void LogTimeWindow::on_issue_doubleClicked(const QModelIndex &index)
+{
+    QDesktopServices::openUrl(QUrl(redmine->getUrl("issue", this->timeEntry.getIssueId())));
 }

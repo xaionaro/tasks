@@ -91,8 +91,8 @@ public:
 
     /* Request all issues
      */
-    QNetworkReply *get_issues(callback_t callback, void *arg, bool free_arg = false);
-    QNetworkReply *get_issues(void *obj_ptr, callback_t callback, void *arg, bool free_arg = false);
+    QNetworkReply *get_issues(callback_t callback, void *arg, bool free_arg = false, QString customFilters = "");
+    QNetworkReply *get_issues(void *obj_ptr, callback_t callback, void *arg, bool free_arg = false, QString customFilters = "");
 
     /* Request all projects
      */
@@ -136,6 +136,10 @@ public:
     /* Save cache into disk (mem -> disk)
      */
     void cacheSave();
+
+    /*
+     */
+    QUrl getUrl(QString objectType, int objectId);
 
     /* Constructor/destructor
      */

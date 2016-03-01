@@ -18,6 +18,7 @@ public:
     //int set(QJsonObject *json);
     int set(QDateTime timeFrom, QDateTime timeTo, int issueId, QString comment);
     int setIssueId(int issueId);
+    int getIssueId();
     int setRedmine(Redmine *redmine);
 
     RedmineClass_TimeEntry();

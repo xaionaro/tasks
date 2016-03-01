@@ -32,26 +32,22 @@ public:
     RedmineItemTree projects;
     RedmineItemTree issues;    
     int selected_project_id;
-
+    QHash<int, QList<QJsonObject>> issues_byProjectId;
+    QHash<int, QList<QJsonObject>> issuesFiltered_byProjectId;
 
 private slots:
     void on_cancel_clicked();
-
     void on_accept_clicked();
-
     void on_issue_itemClicked(QTreeWidgetItem *item, int column);
-
     void on_issue_itemSelectionChanged();
-
     void on_project_currentIndexChanged(int index);
+    void on_issue_doubleClicked(const QModelIndex &index);
 
 private:
     int updateLastLogTime();
     void get_time_entries_callback(QNetworkReply *reply, QJsonDocument *json, void *arg);
     QMutex updateProjectsMutex;
     QMutex updateIssuesMutex;
-
-    QHash<int, QList<QJsonObject>> issues_byProjectId;
 
     int updateIssues();
     int updateProjects();

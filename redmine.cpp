@@ -421,15 +421,15 @@ QNetworkReply *Redmine::get_roles(callback_t callback,
 /********* get_issues *********/
 
 QNetworkReply *Redmine::get_issues(void *obj_ptr, callback_t callback,
-        void *arg, bool free_arg)
+        void *arg, bool free_arg, QString customFilters)
 {
-    return this->request(GET, "issues", obj_ptr, callback, arg, free_arg, "status_id=*&"+settings.issuesFilter);
+    return this->request(GET, "issues", obj_ptr, callback, arg, free_arg, customFilters+"&"+settings.issuesFilter);
 }
 
 QNetworkReply *Redmine::get_issues(callback_t callback,
-        void *arg, bool free_arg)
+        void *arg, bool free_arg, QString customFilters)
 {
-    return this->get_issues(NULL, callback, arg, free_arg);
+    return this->get_issues(NULL, callback, arg, free_arg, customFilters);
 }
 
 /********* /get_issues *********/
@@ -540,3 +540,12 @@ QDateTime Redmine::parseDateTime(QJsonValueRef dataTime_json) {
 }
 
 /********* /parseDateTime *********/
+
+/********* getUrl *********/
+
+QUrl Redmine::getUrl(QString objectType, int objectId)
+{
+    return QUrl(this->getBaseUrl()+"/"+objectType+"s/"+QString::number(objectId));
+}
+
+/********* /getUrl *********/
