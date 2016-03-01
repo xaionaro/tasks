@@ -32,14 +32,19 @@ private:
     int        initBarrier_jobsDone;
 
     QNetworkReply *updateMe(callback_t callback = NULL, void *arg = NULL);
+    QNetworkReply *updateMyProject(callback_t callback = NULL, void *arg = NULL);
     QNetworkReply *updateIssueStatuses(Redmine::callback_t callback = NULL, void *arg = NULL);
 
     QJsonObject _me;
+    QJsonObject _myProject;
 
     void updateMe_callback(QNetworkReply *reply, QJsonDocument *me_doc, void *_arg);
-
-    void init_quitStatuses(QNetworkReply *reply, QJsonDocument *statuses, void *_null);
-    void init_quitMe(QNetworkReply *reply, QJsonDocument *statuses, void *_null);
+    void updateMyProject_callback(QNetworkReply *reply, QJsonDocument *myProject_doc, void *_arg);
+    /*
+    void init_quitStatuses (QNetworkReply *reply, QJsonDocument *statuses,  void *_null);
+    void init_quitMe       (QNetworkReply *reply, QJsonDocument *me,        void *_null);
+    void init_quitMyProject(QNetworkReply *reply, QJsonDocument *myProject, void *_null);
+    */
     QHash<QString, QJsonDocument> cache;
 
     void callback_cache(QNetworkReply *reply, QJsonDocument *obj, void *_real_callback_info);
@@ -84,6 +89,7 @@ public:
     /* Get information about current user
      */
     QJsonObject me() { return _me; }
+    QJsonObject myProject() { return _myProject; }
 
     /* Request all roles
      */

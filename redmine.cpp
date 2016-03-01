@@ -41,22 +41,33 @@ QString Redmine::apiKey() {
     return this->_apiKey;
 }
 
+/*
 void Redmine::init_quitStatuses(QNetworkReply *reply, QJsonDocument *statuses, void *_null) {
     (void)_null; (void)reply; (void)statuses;
 
     this->initBarrier_jobsDone++;
 
-    if (this->initBarrier_jobsDone >= 2)
+    if (this->initBarrier_jobsDone >= 3)
         this->initBarrier.exit();
 }
-void Redmine::init_quitMe(QNetworkReply *reply, QJsonDocument *statuses, void *_null) {
+void Redmine::init_quitMe(QNetworkReply *reply, QJsonDocument *me, void *_null) {
     (void)_null; (void)reply; (void)statuses;
 
     this->initBarrier_jobsDone++;
 
-    if (this->initBarrier_jobsDone >= 2)
+    if (this->initBarrier_jobsDone >= 3)
         this->initBarrier.exit();
 }
+void Redmine::init_quitMyProject(QNetworkReply *reply, QJsonDocument *myProject, void *_null) {
+    (void)_null; (void)reply; (void)statuses;
+
+    this->initBarrier_jobsDone++;
+
+    if (this->initBarrier_jobsDone >= 3)
+        this->initBarrier.exit();
+}
+*/
+
 int Redmine::init() {
     if (this->apiKey().length() > 0) {
         this->setAuth(this->_apiKey);
@@ -76,6 +87,12 @@ int Redmine::init() {
     // Wait until infomation about current user will be received:
     connect(updateMeReply, SIGNAL(finished()), &this->initBarrier, SLOT(quit()));
     this->initBarrier.exec();
+
+    QNetworkReply *updateMyProjectReply     = this->updateMyProject();
+    // Wait until infomation about current user will be received:
+    connect(updateMyProjectReply, SIGNAL(finished()), &this->initBarrier, SLOT(quit()));
+    this->initBarrier.exec();
+
 
     this->cacheLoad();
 
@@ -298,6 +315,61 @@ QNetworkReply *Redmine::updateMe(callback_t callback, void *arg)
 }
 
 /********* /updateMe *********/
+
+
+/********* updateMyProject *********/
+
+struct redmine_updateMyProject_callback_arg {
+    Redmine::callback_t  real_callback;
+    void                *arg;
+};
+
+void Redmine::updateMyProject_callback(QNetworkReply *reply, QJsonDocument *myProject_doc, void *_arg)
+{
+    (void)reply;
+
+    struct redmine_updateMyProject_callback_arg *arg =
+            (struct redmine_updateMyProject_callback_arg *)_arg;
+    callback_t  callback;
+    void       *callback_arg;
+
+    this->_myProject = myProject_doc->object()["project"].toObject();
+
+    if (_arg != NULL) {
+        callback     = arg->real_callback;
+        callback_arg = arg->arg;
+        this->callback_call(NULL, callback, reply, myProject_doc, callback_arg);
+    }
+
+    return;
+}
+
+QNetworkReply *Redmine::updateMyProject(callback_t callback, void *arg)
+{
+    struct redmine_updateMyProject_callback_arg *wrapper_arg = NULL;
+
+    if (callback != NULL) {
+         wrapper_arg =
+            (struct redmine_updateMyProject_callback_arg *)
+                calloc(1, sizeof(struct redmine_updateMyProject_callback_arg));
+
+        wrapper_arg->real_callback = callback;
+        wrapper_arg->arg           = arg;
+    }
+
+    return this->request(
+                GET,
+                "projects/"+this->me()["login"].toString(),
+                this,
+                &Redmine::updateMyProject_callback,
+                wrapper_arg,
+                true,
+                NULL,
+                NULL,
+                false);
+}
+
+/********* /updateMyProject *********/
 
 /********* updateIssueStatuses *********/
 

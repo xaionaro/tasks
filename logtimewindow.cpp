@@ -8,6 +8,8 @@ LogTimeWindow::LogTimeWindow(QWidget *parent) :
     ui(new Ui::LogTimeWindow)
 {
     this->ui->setupUi(this);
+    this->ui->untilInput->setDate(QDate::currentDate());
+    this->ui->sinceInput->setDate(QDate::currentDate());
     this->ui->untilInput->setTime(QTime::currentTime());
     this->ui->sinceInput->setTime(QTime::fromString("09:00", "hh':'mm"));
 
@@ -16,6 +18,7 @@ LogTimeWindow::LogTimeWindow(QWidget *parent) :
             this,    SLOT(  callback_dispatcher(void*,callback_t,QNetworkReply*,QJsonDocument*,void*)) );
 
     this->selected_project_id = 0;
+    this->timeEntry.setProjectId(redmine->myProject()["id"].toInt());
 
     this->updateLastLogTime();
     this->updateIssues();
@@ -73,8 +76,21 @@ void LogTimeWindow::on_cancel_clicked()
 
 void LogTimeWindow::on_accept_clicked()
 {
+    int activityId = 0;
+    switch (this->ui->activityType->currentIndex()) { // This values are from source code of https://tasks.mephi.ru/issues/47429/time_entries/new. You can fix it manually
+    case 0:
+        activityId = 8;
+        break;
+    case 1:
+        activityId = 9;
+        break;
+    case 2:
+        activityId=10;
+        break;
+    }
+
     this->timeEntry.setRedmine(redmine);
-    this->timeEntry.set(this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), -1, this->ui->comment->toPlainText());
+    this->timeEntry.set(this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), -1, -1, this->ui->comment->toPlainText(), activityId);
     this->timeEntry.save();
 
     delete this;
@@ -157,9 +173,7 @@ void LogTimeWindow::get_projects_callback(QNetworkReply *reply, QJsonDocument *j
     QJsonArray  projects = answer["projects"].toArray();
 
     this->projects.set(projects);
-
     this->projects_display();
-
     this->updateProjectsMutex.unlock();
     return;
 }
@@ -263,9 +277,7 @@ void LogTimeWindow::get_issues_callback(QNetworkReply *reply, QJsonDocument *jso
     QJsonArray  issues = answer["issues"].toArray();
 
     this->issues.set(issues);
-
     this->issues_display();
-
     this->updateIssuesMutex.unlock();
 
     return;
@@ -304,6 +316,12 @@ void LogTimeWindow::on_project_currentIndexChanged(int index)
 {
     QComboBox *comboBox       = this->ui->project;
     this->selected_project_id = comboBox->itemData(index).toInt();
+
+    qDebug("this->selected_project_id == %i", this->selected_project_id);
+    if (this->selected_project_id)
+        this->timeEntry.setProjectId(this->selected_project_id);
+    else
+        this->timeEntry.setProjectId(redmine->myProject()["id"].toInt());
 
     issues_display();
     return;

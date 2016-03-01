@@ -149,6 +149,34 @@
        </widget>
       </item>
       <item>
+       <widget class="QComboBox" name="activityType">
+        <property name="editable">
+         <bool>false</bool>
+        </property>
+        <property name="currentText">
+         <string>Разработка</string>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Проектирование</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Разработка</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Отчётность</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <widget class="QPlainTextEdit" name="comment">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
