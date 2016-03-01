@@ -29,14 +29,19 @@
     <item>
      <layout class="QHBoxLayout" name="loginLayout">
       <item>
-       <widget class="QPlainTextEdit" name="login">
+       <widget class="QLineEdit" name="login">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
-          <pointsize>16</pointsize>
+          <pointsize>36</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
          </font>
-        </property>
-        <property name="tabChangesFocus">
-         <bool>true</bool>
         </property>
         <property name="placeholderText">
          <string>LOGIN</string>
@@ -48,14 +53,19 @@
     <item>
      <layout class="QHBoxLayout" name="passwordLayout">
       <item>
-       <widget class="QPlainTextEdit" name="password">
+       <widget class="QLineEdit" name="password">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
-          <pointsize>16</pointsize>
+          <pointsize>36</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
          </font>
-        </property>
-        <property name="tabChangesFocus">
-         <bool>true</bool>
         </property>
         <property name="placeholderText">
          <string>PASSWORD</string>

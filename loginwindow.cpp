@@ -25,6 +25,7 @@ LoginWindow::LoginWindow ( QDialog *parent ) : QDialog ( parent ),
 	ui ( new Ui::LoginWindow )
 {
 	this->ui->setupUi ( this );
+	this->ui->password->setEchoMode(QLineEdit::Password);
 	this->resultApiKey = "";
 }
 
@@ -37,7 +38,7 @@ LoginWindow::~LoginWindow()
 void LoginWindow::on_buttonBox_accepted()
 {
 	Redmine redmine;
-	redmine.setAuth ( this->ui->login->toPlainText(), this->ui->password->toPlainText() );
+	redmine.setAuth ( this->ui->login->text(), this->ui->password->text() );
 	redmine.init();
 
 	if ( !redmine.me().isEmpty() ) {

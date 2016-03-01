@@ -86,7 +86,7 @@ void LogTimeWindow::on_accept_clicked()
 	}
 
 	this->timeEntry.setRedmine ( redmine );
-	this->timeEntry.set ( this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), -1, -1, this->ui->comment->toPlainText(), activityId );
+	this->timeEntry.set ( this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), -1, -1, this->ui->comment->text(), activityId );
 	this->timeEntry.save();
 	delete this;
 }
@@ -315,4 +315,11 @@ void LogTimeWindow::on_issue_doubleClicked ( const QModelIndex &index )
 	( void ) index;
 
 	QDesktopServices::openUrl ( QUrl ( redmine->getUrl ( "issue", this->timeEntry.getIssueId() ) ) );
+}
+
+void LogTimeWindow::on_comment_editingFinished()
+{
+	this->ui->accept->click();
+
+	return;
 }

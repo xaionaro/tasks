@@ -44,6 +44,8 @@ private slots:
 	void on_project_currentIndexChanged ( int index );
 	void on_issue_doubleClicked ( const QModelIndex &index );
 
+	void on_comment_editingFinished();
+
 private:
 	int updateLastLogTime();
 	void get_time_entries_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg );
