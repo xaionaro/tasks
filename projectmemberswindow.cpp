@@ -6,10 +6,11 @@ ProjectMembersWindow::ProjectMembersWindow ( MainWindowFull *parent, QList<int> 
 	ui ( new Ui::ProjectMembersWindow )
 {
 	this->ui->setupUi ( this );
-	foreach ( const int &project_id, project_ids ) {
+	( void ) project_ids;
+	//foreach ( const int &project_id, project_ids ) {
 		//QJsonObject project = parent->projects.get(project_id);
 		//redmine->get_members(project_id);
-	}
+	//}
 }
 
 ProjectMembersWindow::~ProjectMembersWindow()

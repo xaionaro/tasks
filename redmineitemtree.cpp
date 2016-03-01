@@ -305,6 +305,8 @@ void RedmineItemTree::display ( QTreeWidget *widget, QWidget *initiator, widgetI
 
 void RedmineItemTree::display ( QComboBox *widget, QWidget *initiator, comboBoxAddItemFunct_t addItemFunct )
 {
+	( void ) initiator;
+
 	qDebug ( "RedmineItemTree::display()" );
 	this->displayMutex.lock();
 	/*\

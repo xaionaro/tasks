@@ -573,17 +573,19 @@ void MainWindowFull::issue_display_dateTimeField ( QString field_name, QString f
 
 void MainWindowFull::issue_display_multilineStringField ( QString field_name, QString field_value )
 {
-	( void ) field_name;
+	( void ) field_name; ( void ) field_value;
 	qDebug ( "issue_display_multilineStringField: %s", field_name.toUtf8().data() );
 }
 
 void MainWindowFull::issue_display_stringField ( QString field_name, QString field_value )
 {
+	( void ) field_name; ( void ) field_value;
 	qDebug ( "issue_display_string: %s", field_name.toUtf8().data() );
 }
 
 void MainWindowFull::issue_display_doneRatioField ( QString field_name, QString field_value )
 {
+	( void ) field_name; ( void ) field_value;
 	qDebug ( "issue_display_doneRatioField: %s", field_name.toUtf8().data() );
 }
 
@@ -645,16 +647,19 @@ void MainWindowFull::issue_display_statusField ( QString field_name, int status_
 
 void MainWindowFull::issue_display_trackerField ( QString field_name, int tracker_id )
 {
+	( void ) tracker_id;
 	qDebug ( "issue_display_trackerField: %s", field_name.toUtf8().data() );
 }
 
 void MainWindowFull::issue_display_projectField ( QString field_name, int project_id )
 {
+	( void ) project_id;
 	qDebug ( "issue_display_projectField: %s", field_name.toUtf8().data() );
 }
 
 void MainWindowFull::issue_display_categoryField ( QString field_name, int category_id )
 {
+	( void ) category_id;
 	qDebug ( "issue_display_categoryField: %s", field_name.toUtf8().data() );
 }
 
@@ -670,7 +675,7 @@ void MainWindowFull::issue_display_assigneeField ( QString field_name, int assig
 	if ( this->roles.get ( membership_role.role_id ).assignable )
 		assignable.insert ( membership.user_id, membership.user_name );
 
-	int idx;
+	//int idx;
 	QLabel *label = new QLabel;
 	label->setText ( "Исполнитель: " );
 	QComboBox *field = new QComboBox;
@@ -1053,6 +1058,7 @@ void MainWindowFull::projectsShowContextMenu ( const QPoint &pos )
 
 void MainWindowFull::issuesShowContextMenu ( const QPoint &pos )
 {
+	( void ) pos;
 	return;
 }
 

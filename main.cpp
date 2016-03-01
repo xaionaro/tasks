@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define __ANDROID__
+#ifndef __ANDROID__
+#	define __ANDROID__
+#endif
 
 #include "mainwindow-rector.h"
 #include "mainwindow-full.h"

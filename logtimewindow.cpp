@@ -211,10 +211,10 @@ bool LogTimeWindow_issuesFilter ( QWidget *__this, QJsonObject item )
 	if ( _this->selected_project_id == 0 )
 		return true;
 
+	project_id = item["project"].toObject() ["id"].toInt();
+
 	if ( _this->projects.isDescendant ( project_id, _this->selected_project_id ) )
 		return true;
-
-	project_id = item["project"].toObject() ["id"].toInt();
 
 	if ( project_id == _this->selected_project_id )
 		return true;
@@ -277,6 +277,8 @@ int LogTimeWindow::updateIssues()
 
 void LogTimeWindow::on_issue_itemClicked ( QTreeWidgetItem *item, int column )
 {
+	( void ) item; ( void ) column;
+
 	this->ui->comment->setFocus();
 	return;
 }
@@ -310,5 +312,7 @@ void LogTimeWindow::on_project_currentIndexChanged ( int index )
 
 void LogTimeWindow::on_issue_doubleClicked ( const QModelIndex &index )
 {
+	( void ) index;
+
 	QDesktopServices::openUrl ( QUrl ( redmine->getUrl ( "issue", this->timeEntry.getIssueId() ) ) );
 }
