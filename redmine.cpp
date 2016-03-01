@@ -86,7 +86,7 @@ int Redmine::init() {
 
 void Redmine::cacheLoad()
 {
-    QDir dir = QDir("cache");
+    QDir dir = QDir("cache/"+this->apiKey());
 
     QFileInfoList fileInfoList = dir.entryInfoList(QDir::Files);
 
@@ -114,7 +114,7 @@ void Redmine::cacheSave()
     QHash<QString, QJsonDocument>::iterator i;
 
     QDir dir = QDir();
-    if (!dir.mkpath("cache")) {
+    if (!dir.mkpath("cache/"+this->apiKey())) {
         qDebug("cannot create cache directory");
         return;
     }
@@ -124,7 +124,7 @@ void Redmine::cacheSave()
 
         QString fileName = i.key();
         fileName = fileName.replace("/", "!");
-        QString filePath = "cache/"+fileName;
+        QString filePath = "cache/"+this->apiKey()+"/"+fileName;
         QFile *file = new QFile(dir.filePath(filePath));
 
         if (!file->open(QIODevice::WriteOnly)) {
