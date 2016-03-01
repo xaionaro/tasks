@@ -319,7 +319,8 @@ void LogTimeWindow::on_issue_doubleClicked ( const QModelIndex &index )
 
 void LogTimeWindow::on_comment_editingFinished()
 {
-	this->ui->accept->click();
+	//this->ui->accept->click();
+	this->ui->accept->setFocus();
 
 	return;
 }
