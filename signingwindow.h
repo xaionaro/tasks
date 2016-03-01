@@ -3,20 +3,21 @@
 
 #include <QDialog>
 
-namespace Ui {
+namespace Ui
+{
 class SigningWindow;
 }
 
 class SigningWindow : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit SigningWindow(QWidget *parent = 0);
-    ~SigningWindow();
+	explicit SigningWindow ( QWidget *parent = 0 );
+	~SigningWindow();
 
 private:
-    Ui::SigningWindow *ui;
+	Ui::SigningWindow *ui;
 };
 
 #endif // SIGNINGWINDOW_H

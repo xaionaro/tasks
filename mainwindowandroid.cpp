@@ -3,26 +3,26 @@
 
 #include "logtimewindow.h"
 
-MainWindowAndroid::MainWindowAndroid(QWidget *parent) :
-    QFrame(parent),
-    ui(new Ui::MainWindowAndroid)
+MainWindowAndroid::MainWindowAndroid ( QWidget *parent ) :
+	QFrame ( parent ),
+	ui ( new Ui::MainWindowAndroid )
 {
-    this->ui->setupUi(this);
-    this->setWindowTitle("Система «Задачи» НИЯУ МИФИ");
+	this->ui->setupUi ( this );
+	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ" );
 }
 
 MainWindowAndroid::~MainWindowAndroid()
 {
-    delete ui;
+	delete ui;
 }
 
 void MainWindowAndroid::on_quitButton_clicked()
 {
-    qApp->quit();
+	qApp->quit();
 }
 
 void MainWindowAndroid::on_logTimeWindowButton_clicked()
 {
-    LogTimeWindow *w = new LogTimeWindow();
-    w->show();
+	LogTimeWindow *w = new LogTimeWindow();
+	w->show();
 }

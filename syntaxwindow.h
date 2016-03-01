@@ -3,23 +3,24 @@
 
 #include <QDialog>
 
-namespace Ui {
+namespace Ui
+{
 class SyntaxWindow;
 }
 
 class SyntaxWindow : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit SyntaxWindow(QWidget *parent = 0);
-    ~SyntaxWindow();
+	explicit SyntaxWindow ( QWidget *parent = 0 );
+	~SyntaxWindow();
 
 private slots:
-    void on_closeButton_clicked();
+	void on_closeButton_clicked();
 
 private:
-    Ui::SyntaxWindow *ui;
+	Ui::SyntaxWindow *ui;
 };
 
 #endif // SYNTAXWINDOW_H

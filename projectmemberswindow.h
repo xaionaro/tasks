@@ -6,23 +6,24 @@
 
 #include <mainwindow-full.h>
 
-namespace Ui {
+namespace Ui
+{
 class ProjectMembersWindow;
 }
 
 class ProjectMembersWindow : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit ProjectMembersWindow(MainWindowFull *parent, QList<int> project_ids);
-    ~ProjectMembersWindow();
+	explicit ProjectMembersWindow ( MainWindowFull *parent, QList<int> project_ids );
+	~ProjectMembersWindow();
 
 private slots:
-    void on_closeButton_clicked();
+	void on_closeButton_clicked();
 
 private:
-    Ui::ProjectMembersWindow *ui;
+	Ui::ProjectMembersWindow *ui;
 };
 
 #endif // PROJECTMEMBERSWINDOW_H

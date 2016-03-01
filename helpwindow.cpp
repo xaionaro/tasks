@@ -21,19 +21,19 @@
 #include "helpwindow.h"
 #include "ui_helpwindow.h"
 
-HelpWindow::HelpWindow(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::HelpWindow)
+HelpWindow::HelpWindow ( QWidget *parent ) :
+	QDialog ( parent ),
+	ui ( new Ui::HelpWindow )
 {
-    ui->setupUi(this);
+	ui->setupUi ( this );
 }
 
 HelpWindow::~HelpWindow()
 {
-    delete ui;
+	delete ui;
 }
 
 void HelpWindow::on_pushButton_clicked()
 {
-    delete this;
+	delete this;
 }

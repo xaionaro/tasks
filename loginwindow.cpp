@@ -21,31 +21,31 @@
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
 
-LoginWindow::LoginWindow(QDialog *parent) : QDialog(parent),
-    ui(new Ui::LoginWindow)
+LoginWindow::LoginWindow ( QDialog *parent ) : QDialog ( parent ),
+	ui ( new Ui::LoginWindow )
 {
-    this->ui->setupUi(this);
-    this->resultApiKey = "";
+	this->ui->setupUi ( this );
+	this->resultApiKey = "";
 }
 
 
 LoginWindow::~LoginWindow()
 {
-    //delete ui;
+	//delete ui;
 }
 
 void LoginWindow::on_buttonBox_accepted()
 {
-    Redmine redmine;
-    redmine.setAuth(this->ui->login->toPlainText(), this->ui->password->toPlainText());
-    redmine.init();
-    if (!redmine.me().isEmpty()) {
-        this->resultApiKey = redmine.me()["api_key"].toString();
-        qDebug("Received information about me. Result apiKey: %s", this->resultApiKey.toStdString().c_str());
-    }
+	Redmine redmine;
+	redmine.setAuth ( this->ui->login->toPlainText(), this->ui->password->toPlainText() );
+	redmine.init();
+
+	if ( !redmine.me().isEmpty() ) {
+		this->resultApiKey = redmine.me() ["api_key"].toString();
+		qDebug ( "Received information about me. Result apiKey: %s", this->resultApiKey.toStdString().c_str() );
+	}
 }
 
 void LoginWindow::on_buttonBox_rejected()
 {
-
 }

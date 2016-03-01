@@ -3,25 +3,26 @@
 
 #include <QFrame>
 
-namespace Ui {
+namespace Ui
+{
 class MainWindowAndroid;
 }
 
 class MainWindowAndroid : public QFrame
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit MainWindowAndroid(QWidget *parent = 0);
-    ~MainWindowAndroid();
+	explicit MainWindowAndroid ( QWidget *parent = 0 );
+	~MainWindowAndroid();
 
 private slots:
-    void on_quitButton_clicked();
+	void on_quitButton_clicked();
 
-    void on_logTimeWindowButton_clicked();
+	void on_logTimeWindowButton_clicked();
 
 private:
-    Ui::MainWindowAndroid *ui;
+	Ui::MainWindowAndroid *ui;
 };
 
 #endif // MAINWINDOWANDROID_H

@@ -35,105 +35,99 @@ QApplication *application = NULL;
 
 struct settings settings;
 
-void loadSettings() {
-    QSettings qsettings(settings.settingsFilePath, QSettings::IniFormat);
-    settings.apiKey       = qsettings.value("apiKey").toString();
-    settings.issuesFilter = qsettings.value("issuesFilter").toString();
-
-    QString mode          = qsettings.value("mode").toString();
-
-    if (mode == "rector") {
-        settings.mode = MODE_RECTOR;
-    } else {
-        settings.mode = MODE_FULL;
-    }
-
-    return;
-}
-
-void saveSettings() {
-    QSettings qsettings(settings.settingsFilePath, QSettings::IniFormat);
-    qsettings.setValue("apiKey",        settings.apiKey);
-    qsettings.setValue("issuesFilter",  settings.issuesFilter);
-    qsettings.setValue("mode",         (settings.mode == MODE_RECTOR) ? "rector" : "full");
-
-    return;
-}
-
-int main(int argc, char *argv[])
+void loadSettings()
 {
-    qDebug("Starting");
+	QSettings qsettings ( settings.settingsFilePath, QSettings::IniFormat );
+	settings.apiKey       = qsettings.value ( "apiKey" ).toString();
+	settings.issuesFilter = qsettings.value ( "issuesFilter" ).toString();
+	QString mode          = qsettings.value ( "mode" ).toString();
 
-    QApplication a(argc, argv);
+	if ( mode == "rector" ) {
+		settings.mode = MODE_RECTOR;
+	} else {
+		settings.mode = MODE_FULL;
+	}
 
-    application = &a;
+	return;
+}
 
-    QStringList arglst = a.arguments();
+void saveSettings()
+{
+	QSettings qsettings ( settings.settingsFilePath, QSettings::IniFormat );
+	qsettings.setValue ( "apiKey",        settings.apiKey );
+	qsettings.setValue ( "issuesFilter",  settings.issuesFilter );
+	qsettings.setValue ( "mode",         ( settings.mode == MODE_RECTOR ) ? "rector" : "full" );
+	return;
+}
 
-    settings.settingsFilePath = QDir::toNativeSeparators( QApplication::applicationDirPath() + "/mephi-tasks.ini" );
-    qDebug("Settings path is: %s", settings.settingsFilePath.toUtf8().data());
-    loadSettings();
-/*
-    if (arglst.count() <= 1) {
-        SyntaxWindow synWin;
-        synWin.show();
-        return a.exec();
-    }
-*/
+int main ( int argc, char *argv[] )
+{
+	qDebug ( "Starting" );
+	QApplication a ( argc, argv );
+	application = &a;
+	QStringList arglst = a.arguments();
+	settings.settingsFilePath = QDir::toNativeSeparators ( QApplication::applicationDirPath() + "/mephi-tasks.ini" );
+	qDebug ( "Settings path is: %s", settings.settingsFilePath.toUtf8().data() );
+	loadSettings();
+	/*
+	    if (arglst.count() <= 1) {
+	        SyntaxWindow synWin;
+	        synWin.show();
+	        return a.exec();
+	    }
+	*/
 
-    if (arglst.count() > 1)
-        settings.apiKey = arglst[1];
+	if ( arglst.count() > 1 )
+		settings.apiKey = arglst[1];
 
-    if (settings.apiKey.length() == 0) {
-        LoginWindow w;
-        w.show();
-        w.exec();
-        settings.apiKey = w.resultApiKey;
-    }
+	if ( settings.apiKey.length() == 0 ) {
+		LoginWindow w;
+		w.show();
+		w.exec();
+		settings.apiKey = w.resultApiKey;
+	}
 
-    if (settings.apiKey.length() == 0) {
-        qDebug("apiKey/password is not set or wrong");
-        return EINVAL;
-    }
+	if ( settings.apiKey.length() == 0 ) {
+		qDebug ( "apiKey/password is not set or wrong" );
+		return EINVAL;
+	}
 
-    /* We need to follow the important next order of objects initialization:
-     * QApplication, Redmine, MainWindowRector
-     */
-    {
-        int rc = EINVAL;
-        Redmine    _redmine;
-        redmine = &_redmine;
-        redmine->apiKey(settings.apiKey);
-        redmine->init();
-
+	/* We need to follow the important next order of objects initialization:
+	 * QApplication, Redmine, MainWindowRector
+	 */
+	{
+		int rc = EINVAL;
+		Redmine    _redmine;
+		redmine = &_redmine;
+		redmine->apiKey ( settings.apiKey );
+		redmine->init();
 #ifdef __ANDROID__
-        MainWindowAndroid w;
-        w.show();
-        rc = a.exec();
+		MainWindowAndroid w;
+		w.show();
+		rc = a.exec();
 #else
-        switch (settings.mode) {
-            case MODE_RECTOR:
-                {
-                    MainWindowRector w;
-                    w.show();
 
-                    a.setQuitOnLastWindowClosed(false);
-                    rc = a.exec();
-                    break;
-                }
-            default:
-                {
-                    MainWindowFull w;
-                    w.show();
+		switch ( settings.mode ) {
+			case MODE_RECTOR: {
+					MainWindowRector w;
+					w.show();
+					a.setQuitOnLastWindowClosed ( false );
+					rc = a.exec();
+					break;
+				}
 
-                    //a.setQuitOnLastWindowClosed(false);
-                    rc = a.exec();
-                    break;
-                }
-        }
+			default: {
+					MainWindowFull w;
+					w.show();
+					//a.setQuitOnLastWindowClosed(false);
+					rc = a.exec();
+					break;
+				}
+		}
+
 #endif
-        saveSettings();
-        //redmine->cacheSave();
-        return rc;
-    }
+		saveSettings();
+		//redmine->cacheSave();
+		return rc;
+	}
 }

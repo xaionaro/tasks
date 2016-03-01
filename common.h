@@ -11,15 +11,15 @@ extern QApplication *application;
 extern QString       issues_filter;
 
 enum mode {
-    MODE_FULL,
-    MODE_RECTOR,
+	MODE_FULL,
+	MODE_RECTOR,
 };
 
 struct settings {
-    QString settingsFilePath;
-    QString apiKey;
-    QString issuesFilter;
-    enum mode mode;
+	QString settingsFilePath;
+	QString apiKey;
+	QString issuesFilter;
+	enum mode mode;
 };
 extern struct settings settings;
 extern void loadSettings();
