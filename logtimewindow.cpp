@@ -59,8 +59,11 @@ void LogTimeWindow::on_saveFailure ( QNetworkReply *reply )
 
 	qDebug ( "LogTimeWindow::on_saveFailure()" );
 
+	QString techInfo = QString("issueId == %1; projectId == %2").arg(this->timeEntry.getIssueId()).arg(this->timeEntry.getProjectId());
 	QMessageBox messageBox;
-	messageBox.critical(0, "Error", "Внутренняя ошибка. Рекомендуем связаться с технической поддержкой по адресу <tasks@mephi.ru>.");
+	messageBox.critical(0, "Error", "Внутренняя ошибка. Рекомендуем связаться с технической поддержкой по адресу <tasks@mephi.ru>. Техническая информация: "+techInfo);
+
+	return;
 }
 
 void LogTimeWindow::get_time_entries_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg )

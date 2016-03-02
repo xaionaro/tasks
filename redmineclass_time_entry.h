@@ -38,6 +38,7 @@ public:
 	int setIssueId ( int issueId );
 	int getIssueId();
 	int setProjectId ( int projectId );
+	int getProjectId();
 	int setRedmine ( Redmine *redmine );
 	void saveCallback(QNetworkReply *reply, QJsonDocument *timeEntry_doc, void *_null );
 

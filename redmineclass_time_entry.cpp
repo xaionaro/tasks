@@ -49,6 +49,11 @@ int RedmineClass_TimeEntry::setProjectId ( int projectId )
 	return 0;
 }
 
+int RedmineClass_TimeEntry::getProjectId()
+{
+	return this->projectId;
+}
+
 int RedmineClass_TimeEntry::setIssueId ( int issueId )
 {
 	this->issueId = issueId;
