@@ -18,7 +18,7 @@
  */
 
 #ifndef __ANDROID__
-#	define __ANDROID__
+//#	define __ANDROID__
 #endif
 
 #include "mainwindow-rector.h"
@@ -121,7 +121,7 @@ int main ( int argc, char *argv[] )
 			default: {
 					MainWindowFull w;
 					w.show();
-					//a.setQuitOnLastWindowClosed(false);
+					a.setQuitOnLastWindowClosed ( false );
 					rc = a.exec();
 					break;
 				}

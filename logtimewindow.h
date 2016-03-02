@@ -36,6 +36,9 @@ public:
 	QHash<int, QList<QJsonObject>> issues_byProjectId;
 	QHash<int, QList<QJsonObject>> issuesFiltered_byProjectId;
 
+signals:
+	void on_destructor();
+
 private slots:
 	void on_cancel_clicked();
 	void on_accept_clicked();

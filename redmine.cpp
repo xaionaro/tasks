@@ -205,7 +205,8 @@ QNetworkReply *Redmine::request ( RedmineClient::EMode    mode,
 
 	if ( !this->cache[signature].isEmpty() ) {
 		qDebug ( "Found cache for \"%s\"", signature.toStdString().c_str() );
-		this->callback_call ( obj_ptr, callback, NULL, &this->cache[signature], callback_arg );
+		if (obj_ptr != NULL && callback != NULL)
+			this->callback_call ( obj_ptr, callback, NULL, &this->cache[signature], callback_arg );
 	}
 
 	/*

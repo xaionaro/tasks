@@ -4,11 +4,13 @@
 #include <QMainWindow>
 #include <QTableWidgetSelectionRange>
 #include <QMutex>
+#include <QSystemTrayIcon>
 
 #include "redmineitemtree.h"
 #include "roles.h"
 #include "memberships.h"
 #include "enumerations.h"
+#include "logtimewindow.h"
 
 #include "common.h"
 
@@ -28,6 +30,27 @@ public:
 	 */
 	RedmineItemTree projects;
 	RedmineItemTree issues;
+
+	enum EIcon {
+		GOOD = 0,
+		BAD
+	};
+	typedef EIcon EStatus;
+
+	EStatus status        ()
+	{
+		return this->_status;
+	}
+	EStatus status        ( EStatus newstatus )
+	{
+		return this->_status = newstatus;
+	}
+	EStatus statusWorsenTo ( EStatus newstatus )
+	{
+		return this->_status = qMax ( this->_status, newstatus );
+	}
+
+	void setIcon ( EIcon index );
 
 protected:
 
@@ -73,12 +96,25 @@ protected:
 	Memberships memberships;
 	Enumerations enumerations;
 
+	QComboBox iconComboBox;
+	QSystemTrayIcon *trayIcon;
+	QMenu *trayIconMenu;
+
+	void createIconComboBox();
+	void createTrayIcon();
+
+	void showOnTop();
+
+	//virtual void createTrayActions();
+
 protected slots:
 	int updateEnumerations();
 	int updateMemberships();
 	int updateProjects();
 	int updateIssues();
 	int updateRoles();
+	void openLogTimeWindow();
+	void on_closeLogTimeWindow();
 
 signals:
 
@@ -98,6 +134,10 @@ private:
 
 	QMutex updateProjectsMutex;
 	QMutex updateIssuesMutex;
+
+
+	EStatus _status;
+	LogTimeWindow *logTimeWindow;
 };
 
 #endif // MAINWINDOWCOMMON_H

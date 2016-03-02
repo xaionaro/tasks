@@ -18,6 +18,7 @@
  */
 
 #include <QSettings>
+#include <QMenu>
 
 #include "mainwindow-common.h"
 
@@ -111,9 +112,18 @@ MainWindowCommon::MainWindowCommon ( QWidget *parent ) :
 	this->sortFunctMap.insert ( SORT_UPDATED_ON_DESC,     issueCmpFunct_updatedOn_gt );
 	this->sortFunctMap.insert ( SORT_STATUS_ISCLOSED_ASC, issueCmpFunct_statusIsClosed_lt );
 	memset ( this->sortColumn, 0, sizeof ( this->sortColumn ) );
-	this->sortColumn[0] = ( MainWindowCommon::ESortColumn ) qsettings.value ( "sortcode"  ).toInt();
-	this->sortLogicalIndex =                             qsettings.value ( "sortcolumn" ).toInt();
-	this->sortOrder        =              ( Qt::SortOrder ) qsettings.value ( "sortorder" ).toInt();
+	this->sortColumn[0] = ( MainWindowCommon::ESortColumn ) qsettings.value ( "sortcode"   ).toInt();
+	this->sortLogicalIndex =                                qsettings.value ( "sortcolumn" ).toInt();
+	this->sortOrder        =              ( Qt::SortOrder ) qsettings.value ( "sortorder"  ).toInt();
+
+	this->createIconComboBox();
+	this->createTrayIcon();
+	this->status ( GOOD );
+	this->setIcon ( GOOD );
+	this->trayIcon->show();
+
+	this->logTimeWindow = NULL;
+
 	return;
 }
 
@@ -244,3 +254,70 @@ int MainWindowCommon::updateIssues()
 }
 
 /**** /updateIssues ****/
+
+/**** tray-related stuff ****/
+
+void MainWindowCommon::createTrayIcon()
+{
+	this->trayIconMenu = new QMenu ( this );
+	this->trayIcon = new QSystemTrayIcon ( this );
+	this->trayIcon->setContextMenu ( trayIconMenu );
+
+	return;
+}
+
+void MainWindowCommon::setIcon ( EIcon index )
+{
+	//qDebug("icon: %i", index);
+	QIcon icon = this->iconComboBox.itemIcon ( index );
+	this->trayIcon->setIcon ( icon );
+	this->setWindowIcon ( icon );
+	this->trayIcon->setToolTip ( this->iconComboBox.itemText ( index ) );
+}
+
+void MainWindowCommon::createIconComboBox()
+{
+	this->iconComboBox.addItem ( QIcon ( ":/images/good.png" ), tr ( "Просроченных задач нет" ) );
+	this->iconComboBox.addItem ( QIcon ( ":/images/bad.png" ),  tr ( "Есть просроченные задачи" ) );
+	return;
+}
+
+void MainWindowCommon::on_closeLogTimeWindow()
+{
+	this->logTimeWindow = NULL;
+
+	return;
+}
+
+void MainWindowCommon::openLogTimeWindow()
+{
+	if (this->logTimeWindow != NULL)
+		delete this->logTimeWindow;
+	this->logTimeWindow = new LogTimeWindow;
+
+	connect ( this->logTimeWindow, SIGNAL ( on_destructor() ), this, SLOT ( on_closeLogTimeWindow() ) );
+
+	this->logTimeWindow->show();
+
+	return;
+}
+
+void MainWindowCommon::showOnTop()
+{
+#ifdef Q_OS_WIN32
+	// raise() doesn't work :(
+	Qt::WindowFlags flags_old   = this->windowFlags();
+	Qt::WindowFlags flags_ontop = flags_old | Qt::WindowStaysOnTopHint;
+	this->setWindowFlags ( flags_ontop );
+	this->show();
+	this->setWindowFlags ( flags_old );
+	this->show();
+#else
+	this->show();
+	this->raise();
+#endif
+	return;
+}
+
+
+/**** /tray-related stuff ****/

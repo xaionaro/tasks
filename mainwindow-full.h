@@ -34,6 +34,9 @@ public:
 protected:
 	bool eventFilter ( QObject *obj, QEvent *event );
 
+protected slots:
+	void toggleShowHide();
+
 private slots:
 	void on_actionHelp_triggered();
 	void on_actionQuit_triggered();
@@ -152,6 +155,14 @@ private:
 	int issue_column_cur = 0;
 
 	QJsonObject issue;
+
+	void createTrayActions();
+
+	QAction *showHideAction;
+	QAction *quitAction;
+	QAction *openLogTimeWindowAction;
+
+	void iconActivated ( QSystemTrayIcon::ActivationReason reason );
 };
 
 #endif // MAINWINDOWFULL_H
