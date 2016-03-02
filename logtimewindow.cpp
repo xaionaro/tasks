@@ -2,19 +2,27 @@
 #include "ui_logtimewindow.h"
 
 #include <QDesktopServices>
+#include <QMessageBox>
 
 LogTimeWindow::LogTimeWindow ( QWidget *parent ) :
 	QScrollArea ( parent ),
 	ui ( new Ui::LogTimeWindow )
 {
 	this->ui->setupUi ( this );
+
+	connect ( &this->timeEntry, SIGNAL ( on_saveSuccess() ), this, SLOT ( on_saveSuccess() ) );
+	connect ( &this->timeEntry, SIGNAL ( on_saveTimeout() ), this, SLOT ( on_saveTimeout() ) );
+	connect ( &this->timeEntry, SIGNAL ( on_saveFailure(QNetworkReply *) ), this, SLOT ( on_saveFailure(QNetworkReply *) ) );
+
+	this->timeEntry.setRedmine ( redmine );
+
 	this->ui->untilInput->setDate ( QDate::currentDate() );
 	this->ui->sinceInput->setDate ( QDate::currentDate() );
 	this->ui->untilInput->setTime ( QTime::currentTime() );
 	this->ui->sinceInput->setTime ( QTime::fromString ( "09:00", "hh':'mm" ) );
 	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ: Учёт времени" );
-	connect ( redmine, SIGNAL ( callback_call      ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
-	          this,    SLOT (  callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
+	connect ( redmine, SIGNAL ( callback_call       ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
+		  this,    SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 	this->selected_project_id = 0;
 	this->timeEntry.setProjectId ( redmine->myProject() ["id"].toInt() );
 	this->updateLastLogTime();
@@ -27,6 +35,32 @@ LogTimeWindow::LogTimeWindow ( QWidget *parent ) :
 LogTimeWindow::~LogTimeWindow()
 {
 	delete ui;
+}
+
+void LogTimeWindow::on_saveSuccess()
+{
+	qDebug ( "LogTimeWindow::on_saveSuccess()" );
+	redmine->get_time_entries ( NULL, NULL, NULL, false, "user_id=me&limit=1" ); // Just to update the cache
+	delete this;
+}
+
+
+void LogTimeWindow::on_saveTimeout()
+{
+	qDebug ( "LogTimeWindow::on_saveTimeout()" );
+	QMessageBox messageBox;
+	messageBox.critical(0, "Error", "Превышен интервал ожидания ответа. Проверьте качество подключения к сети «Интернет».");
+}
+
+
+void LogTimeWindow::on_saveFailure ( QNetworkReply *reply )
+{
+	( void ) reply;
+
+	qDebug ( "LogTimeWindow::on_saveFailure()" );
+
+	QMessageBox messageBox;
+	messageBox.critical(0, "Error", "Внутренняя ошибка. Рекомендуем связаться с технической поддержкой по адресу <tasks@mephi.ru>.");
 }
 
 void LogTimeWindow::get_time_entries_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg )
@@ -85,10 +119,9 @@ void LogTimeWindow::on_accept_clicked()
 			break;
 	}
 
-	this->timeEntry.setRedmine ( redmine );
 	this->timeEntry.set ( this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), -1, -1, this->ui->comment->text(), activityId );
 	this->timeEntry.save();
-	delete this;
+//	this->initBarrier.exec();
 }
 
 

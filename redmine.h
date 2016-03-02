@@ -4,6 +4,7 @@
 #include <RedmineClient.hpp>
 #include <QEventLoop>
 
+#define REDMINE_BASETIMEOUT 5000
 
 class Redmine : public RedmineClient
 {

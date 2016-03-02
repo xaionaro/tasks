@@ -2,25 +2,46 @@
 
 #include "errno.h"
 
+void RedmineClass_TimeEntry::init()
+{
+	this->redmine   = NULL;
+	this->id        = 0;
+	this->saveReply = NULL;
+	return;
+}
+
 RedmineClass_TimeEntry::RedmineClass_TimeEntry()
 {
-	this->id      = 0;
-	this->redmine = NULL;
+	this->init();
 	return;
 }
 
 int RedmineClass_TimeEntry::setRedmine ( Redmine *redmine )
 {
+	if (this->redmine != NULL) {
+		qCritical("This case is not implemented, yet.");
+		return ECANCELED;
+	}
+
 	this->redmine = redmine;
+
+	connect ( this->redmine, SIGNAL ( callback_call       ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
+		  this,          SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 	return 0;
 }
 
 RedmineClass_TimeEntry::RedmineClass_TimeEntry ( Redmine *redmine )
 {
-	this->id = 0;
+	this->init();
 	this->setRedmine ( redmine );
 	return;
 }
+
+RedmineClass_TimeEntry::~RedmineClass_TimeEntry()
+{
+	return;
+}
+
 
 int RedmineClass_TimeEntry::setProjectId ( int projectId )
 {
@@ -39,10 +60,51 @@ int RedmineClass_TimeEntry::getIssueId()
 	return this->issueId;
 }
 
+void RedmineClass_TimeEntry::saveCallback( QNetworkReply *reply, QJsonDocument *timeEntry_doc, void *_null )
+{
+	( void ) reply; ( void ) timeEntry_doc; ( void ) _null;
+	qDebug ( "RedmineClass_TimeEntry::saveCallback()" );
+
+	this->saveTimer.stop();
+
+	QJsonObject timeEntry = timeEntry_doc->object()["time_entry"].toObject();
+
+	if (timeEntry.empty()) {
+		qDebug ( "RedmineClass_TimeEntry::saveCallback(): timeEntry.empty()" );
+		this->on_saveFailure(reply);
+		return;
+	}
+
+	int timeEntryId = timeEntry["id"].toInt();
+
+	if (timeEntryId == 0) {
+		qDebug ( "RedmineClass_TimeEntry::saveCallback(): timeEntryId == 0" );
+		this->on_saveFailure(reply);
+		return;
+	}
+
+	qDebug ( "RedmineClass_TimeEntry::saveCallback(): ok" );
+	this->on_saveSuccess();
+	return;
+}
+
+void RedmineClass_TimeEntry::saveTimeout()
+{
+	qDebug ( "RedmineClass_TimeEntry::saveTimeout()" );
+
+	this->on_saveTimeout();
+	return;
+}
+
 int RedmineClass_TimeEntry::save()
 {
 	if ( this->redmine == NULL )
 		return EHOSTUNREACH;
+
+	if ( this->saveTimer.isActive() ) {
+		qDebug("RedmineClass_TimeEntry::save(): Saving is already in progress. Cancelling the new request.");
+		return EINPROGRESS;
+	}
 
 	QVariantMap timeEntries, timeEntry;
 	QString uri;
@@ -73,7 +135,12 @@ int RedmineClass_TimeEntry::save()
 	timeEntry["spent_on"] = QVariant ( this->endtime.date() );
 	timeEntry["activity_id"] = QVariant ( this->activityId );
 	timeEntries["time_entry"] = timeEntry;
-	this->redmine->request ( mode, "time_entries", NULL, NULL, NULL, false, "", timeEntries );
+	this->saveReply = this->redmine->request ( mode, "time_entries", this, (Redmine::callback_t)&RedmineClass_TimeEntry::saveCallback, NULL, false, "", timeEntries );
+
+	this->saveTimer.setSingleShot ( true );
+	connect ( &this->saveTimer, SIGNAL ( timeout() ), this, SLOT ( saveTimeout() ) );
+	this->saveTimer.start ( REDMINE_BASETIMEOUT );
+
 	return 0;
 }
 

@@ -45,6 +45,9 @@ private slots:
 	void on_issue_doubleClicked ( const QModelIndex &index );
 
 	void on_comment_editingFinished();
+	void on_saveSuccess();
+	void on_saveTimeout();
+	void on_saveFailure ( QNetworkReply *reply );
 
 private:
 	int updateLastLogTime();
