@@ -36,6 +36,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="showTimeWindowButton">
+       <property name="text">
+        <string>Посмотреть журнал</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="quitButton">
        <property name="text">
         <string>Выйти</string>

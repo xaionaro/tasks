@@ -19,15 +19,24 @@ public:
 	explicit ShowTimeWindow(QWidget *parent = 0);
 	~ShowTimeWindow();
 
-private:
+	private slots:
+	void on_closeButton_clicked();
+
+	void on_date_selectionChanged();
+
+	private:
 	Ui::ShowTimeWindow *ui;
 
 	void updateUsers();
-	void updateTimeEntries();
-	void updateUsers_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg );
+	void updateTimeEntries ( int userId );
+	void updateUsers_callback       ( QNetworkReply *reply, QJsonDocument *json, void *arg );
+	void updateTimeEntries_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg );
 
-	RedmineItemTree users;
-	RedmineItemTree timeEntries;
+	//RedmineItemTree users;
+	//RedmineItemTree timeEntries;
+	QJsonArray timeEntries;
+private:
+	void timeEntries_display();
 };
 
 #endif // SHOWTIMEWINDOW_H

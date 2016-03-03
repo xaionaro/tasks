@@ -100,30 +100,31 @@ public:
 
 	/* Request all roles
 	 */
-	QNetworkReply *get_roles ( callback_t callback, void *arg, bool free_arg = false );
+	QNetworkReply *get_roles ( callback_t callback, void *arg = NULL, bool free_arg = false );
 
 	/* Request all issues
 	 */
-	QNetworkReply *get_issues ( callback_t callback, void *arg, bool free_arg = false, QString customFilters = "" );
-	QNetworkReply *get_issues ( void *obj_ptr, callback_t callback, void *arg, bool free_arg = false, QString customFilters = "" );
+	QNetworkReply *get_issues ( callback_t callback, void *arg = NULL, bool free_arg = false, QString customFilters = "" );
+	QNetworkReply *get_issues ( void *obj_ptr, callback_t callback, void *arg = NULL, bool free_arg = false, QString customFilters = "" );
 
 	/* Request all projects
 	 */
-	QNetworkReply *get_projects ( callback_t callback, void *arg, bool free_arg = false, QString filterOptions = "" );
-	QNetworkReply *get_projects ( void *obj_ptr, callback_t callback, void *arg, bool free_arg = false, QString filterOptions = "" );
+	QNetworkReply *get_projects ( callback_t callback, void *arg = NULL, bool free_arg = false, QString filterOptions = "" );
+	QNetworkReply *get_projects ( void *obj_ptr, callback_t callback, void *arg = NULL, bool free_arg = false, QString filterOptions = "" );
 
 	/* Request all memberships
 	 */
-	QNetworkReply *get_memberships ( callback_t callback, void *arg, bool free_arg = false );
+	QNetworkReply *get_memberships ( callback_t callback, void *arg = NULL, bool free_arg = false );
 
 	/* Request all field values enumerations
 	 */
-	QNetworkReply *get_enumerations ( callback_t callback, void *arg, bool free_arg = false );
+	QNetworkReply *get_enumerations ( callback_t callback, void *arg = NULL, bool free_arg = false );
 
 	/* Request all issues
 	 */
-	QNetworkReply *get_time_entries ( void *obj_ptr, callback_t callback, void *arg, bool free_arg = false, QString filterOptions = "" );
-	QNetworkReply *get_time_entries ( callback_t callback, void *arg, bool free_arg = false, QString filterOptions = "" );
+	QNetworkReply *get_time_entries ( int userId, void *obj_ptr, callback_t callback, void *arg = NULL, bool free_arg = false, QString filterOptions = "" );
+	QNetworkReply *get_time_entries ( void *obj_ptr, callback_t callback, void *arg = NULL, bool free_arg = false, QString filterOptions = "" );
+	QNetworkReply *get_time_entries ( callback_t callback, void *arg = NULL, bool free_arg = false, QString filterOptions = "" );
 
 	/* Get issue status info
 	 */
@@ -136,7 +137,7 @@ public:
 	 */
 	QNetworkReply *get_user ( int user_id,
 	                          callback_t callback,
-	                          void *arg );
+				  void *arg = NULL );
 
 	/* Request stuffToDo index info of user with ID "user_id".
 	 * Set "user_id" to zero to get info for current user.
