@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     loginwindow.cpp \
     mainwindowandroid.cpp \
     logtimewindow.cpp \
-    redmineclass_time_entry.cpp
+    redmineclass_time_entry.cpp \
+    showtimewindow.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -52,7 +53,8 @@ HEADERS  += \
     loginwindow.h \
     mainwindowandroid.h \
     logtimewindow.h \
-    redmineclass_time_entry.h
+    redmineclass_time_entry.h \
+    showtimewindow.h
 
 FORMS    += \
     helpwindow.ui \
@@ -63,7 +65,8 @@ FORMS    += \
     signingwindow.ui \
     loginwindow.ui \
     mainwindowandroid.ui \
-    logtimewindow.ui
+    logtimewindow.ui \
+    showtimewindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Release/release/ -lqtredmine
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/ -lqtredmine

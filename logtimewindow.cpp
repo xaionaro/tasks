@@ -28,7 +28,7 @@ LogTimeWindow::LogTimeWindow ( QWidget *parent ) :
 	this->ui->sinceInput->setTime ( initialSinceTime );
 	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ: Учёт времени" );
 	connect ( redmine, SIGNAL ( callback_call       ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
-	      this,    SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
+		  this,    SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 	this->selected_project_id = 0;
 	this->timeEntry.setProjectId ( redmine->myProject() ["id"].toInt() );
 	this->updateLastLogTime();

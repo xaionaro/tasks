@@ -11,6 +11,7 @@
 #include "memberships.h"
 #include "enumerations.h"
 #include "logtimewindow.h"
+#include "showtimewindow.h"
 
 #include "common.h"
 
@@ -115,6 +116,8 @@ protected slots:
 	int updateRoles();
 	void openLogTimeWindow();
 	void on_closeLogTimeWindow();
+	void openShowTimeWindow();
+	void on_closeShowTimeWindow();
 
 signals:
 
@@ -140,7 +143,8 @@ private:
 
 
 	EStatus _status;
-	LogTimeWindow *logTimeWindow;
+	LogTimeWindow  *logTimeWindow;
+	ShowTimeWindow *showTimeWindow;
 };
 
 #endif // MAINWINDOWCOMMON_H

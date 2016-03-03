@@ -138,6 +138,16 @@ public:
 	                          callback_t callback,
 	                          void *arg );
 
+	/* Request stuffToDo index info of user with ID "user_id".
+	 * Set "user_id" to zero to get info for current user.
+	 *
+	 * Related to plugin: https://github.com/mephi-ut/stuff_to_do_plugin
+	 */
+	QNetworkReply *get_stuff_to_do ( void *obj_ptr, callback_t callback,
+					 int user_id = 0,
+					 void *arg = NULL, bool free_arg = false,
+					 QString filterOptions = "" );
+
 	/* Parses JSON values like "2015-03-13T21:34:28.000+03:00" to QDateTime
 	 */
 	QDateTime parseDateTime ( QJsonValueRef dateTime_json );

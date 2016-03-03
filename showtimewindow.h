@@ -1,0 +1,33 @@
+#ifndef SHOWTIMEWINDOW_H
+#define SHOWTIMEWINDOW_H
+
+#include <QWidget>
+
+#include "common.h"
+#include "redmineitemtree.h"
+
+namespace Ui {
+	class ShowTimeWindow;
+}
+
+class ShowTimeWindow : public QWidget
+{
+	Q_OBJECT
+	CALLBACK_DISPATCHER ( Redmine, ShowTimeWindow, this )
+
+public:
+	explicit ShowTimeWindow(QWidget *parent = 0);
+	~ShowTimeWindow();
+
+private:
+	Ui::ShowTimeWindow *ui;
+
+	void updateUsers();
+	void updateTimeEntries();
+	void updateUsers_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg );
+
+	RedmineItemTree users;
+	RedmineItemTree timeEntries;
+};
+
+#endif // SHOWTIMEWINDOW_H

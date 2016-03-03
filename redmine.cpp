@@ -607,3 +607,25 @@ QUrl Redmine::getUrl ( QString objectType, int objectId )
 }
 
 /********* /getUrl *********/
+
+/********* get_stuff_to_do *********/
+
+QNetworkReply *Redmine::get_stuff_to_do ( void *obj_ptr, callback_t callback,
+				 int user_id,
+				 void *arg, bool free_arg,
+				 QString filterOptions )
+{
+	QString user_id_str = ( user_id == 0 ? "" : "user_id=" + QString::number ( user_id ) );
+
+	return this->request(
+				GET,
+				"stuff_to_do",
+				obj_ptr,
+				callback,
+				arg,
+				free_arg,
+				user_id_str+"&"+filterOptions );
+}
+
+/********* /get_stuff_to_do *********/
+

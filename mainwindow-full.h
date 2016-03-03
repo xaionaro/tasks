@@ -161,6 +161,7 @@ private:
 	QAction *showHideAction;
 	QAction *quitAction;
 	QAction *openLogTimeWindowAction;
+	QAction *openShowTimeWindowAction;
 
 	void iconActivated ( QSystemTrayIcon::ActivationReason reason );
 };

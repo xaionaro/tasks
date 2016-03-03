@@ -302,6 +302,28 @@ void MainWindowCommon::openLogTimeWindow()
 	return;
 }
 
+
+void MainWindowCommon::on_closeShowTimeWindow()
+{
+	this->showTimeWindow = NULL;
+
+	return;
+}
+
+void MainWindowCommon::openShowTimeWindow()
+{
+	if (this->showTimeWindow != NULL)
+		delete this->showTimeWindow;
+	this->showTimeWindow = new ShowTimeWindow;
+
+	connect ( this->showTimeWindow, SIGNAL ( on_destructor() ), this, SLOT ( on_closeShowTimeWindow() ) );
+
+	this->showTimeWindow->show();
+
+	return;
+}
+
+
 void MainWindowCommon::showOnTop()
 {
 #ifdef Q_OS_WIN32
