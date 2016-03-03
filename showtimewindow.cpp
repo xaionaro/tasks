@@ -90,7 +90,7 @@ void ShowTimeWindow::timeEntries_display()
 		if (date != dateSelected)
 			continue;
 
-		qDebug ( "\"from\": \"%s\", sec_diff == %i; from.minute() == %i; to.minute() == %i", timeEntry ["from"].toString().toStdString().c_str(), sec_diff, from.time().minute(), to.time().minute() );
+		//qDebug ( "\"from\": \"%s\", sec_diff == %i; from.minute() == %i; to.minute() == %i", timeEntry ["from"].toString().toStdString().c_str(), sec_diff, from.time().minute(), to.time().minute() );
 
 		this->ui->timeEntries->setItem(row, 0, new QTableWidgetItem ( from.toString("hh:mm") ) );
 		this->ui->timeEntries->setItem(row, 1, new QTableWidgetItem ( to  .toString("hh:mm") ) );
@@ -100,11 +100,16 @@ void ShowTimeWindow::timeEntries_display()
 		if (timeEntry ["issue"].toObject().empty()) {
 			QString projectIdentifier = timeEntry ["project"].toObject() ["identifier"].toString();
 			QString projectName;
-			if ( projectIdentifier == timeEntry ["user"].toObject() ["login"].toString() ) {
+			QString userLogin = timeEntry ["user"].toObject() ["login"].toString();
+
+			if ( projectIdentifier.toLower() == userLogin.toLower() ) {
 				projectName = "Личный проект";
 			} else {
 				projectName = timeEntry ["project"].toObject() ["name"].toString();
 			}
+
+			//qDebug(("projectIdentifier == \""+projectIdentifier+"\"; userLogin == \""+userLogin+"\"; projectName == \""+projectName+"\"").toStdString().c_str());
+
 			this->ui->timeEntries->setItem(row, 4, new QTableWidgetItem ( projectIdentifier ) );
 			this->ui->timeEntries->setItem(row, 5, new QTableWidgetItem ( projectName       ) );
 		} else {
@@ -149,4 +154,35 @@ void ShowTimeWindow::on_closeButton_clicked()
 void ShowTimeWindow::on_date_selectionChanged()
 {
 	this->timeEntries_display();
+}
+
+void ShowTimeWindow::on_timeEntries_itemSelectionChanged()
+{
+	QTableWidget                     *timeEntries        = this->ui->timeEntries;
+	int                               columns_count      = timeEntries->columnCount();
+	int                               rows_count         = timeEntries->rowCount();
+	QList<QTableWidgetSelectionRange> selected_list      = timeEntries->selectedRanges();
+	foreach ( QTableWidgetSelectionRange range, selected_list ) {
+		if ( range.leftColumn() != 0 || range.rightColumn() != columns_count - 1 )
+			timeEntries->setRangeSelected (
+			    QTableWidgetSelectionRange (
+				range.topRow(),    0,
+				range.bottomRow(), columns_count - 1
+			    ),
+			    true
+			);
+		else
+
+			/* Workaround: Drop selection if everything is selected
+			 * it's required to do not select everything on sort switching
+			 */
+			if ( range.leftColumn() == 0 && range.rightColumn() == columns_count - 1 &&
+			     range.topRow()     == 0 && range.bottomRow()   == rows_count - 1 ) {
+				timeEntries->setRangeSelected (
+				    QTableWidgetSelectionRange ( 0, 0, rows_count - 1, columns_count - 1 ),
+				    false
+				);
+				break;
+			}
+	}
 }

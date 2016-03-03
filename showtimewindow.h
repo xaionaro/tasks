@@ -24,6 +24,8 @@ public:
 
 	void on_date_selectionChanged();
 
+	void on_timeEntries_itemSelectionChanged();
+
 	private:
 	Ui::ShowTimeWindow *ui;
 
