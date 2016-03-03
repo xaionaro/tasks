@@ -26,6 +26,8 @@ public:
 
 	void on_timeEntries_itemSelectionChanged();
 
+	void on_user_currentIndexChanged(int index);
+
 	private:
 	Ui::ShowTimeWindow *ui;
 

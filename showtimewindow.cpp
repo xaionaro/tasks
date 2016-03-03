@@ -56,6 +56,9 @@ void ShowTimeWindow::updateUsers_callback ( QNetworkReply *reply, QJsonDocument 
 		int userId = user["id"].toInt();
 		QString userDisplayName = user["name"].toString();
 		this->ui->user->addItem ( userDisplayName, userId );
+
+		// To make a cache:
+		redmine->get_time_entries( userId, NULL, NULL, NULL, false, "limit=1000" );
 	}
 
 	return;
@@ -193,4 +196,15 @@ void ShowTimeWindow::on_timeEntries_itemSelectionChanged()
 				break;
 			}
 	}
+}
+
+void ShowTimeWindow::on_user_currentIndexChanged(int index)
+{
+	(void) index;
+
+	int userId = this->ui->user->currentData().toInt();
+
+	this->updateTimeEntries(userId);
+
+	return;
 }
