@@ -30,7 +30,6 @@ public:
 	~MainWindowRector();
 
 protected slots:
-	void toggleShowHide();
 
 private slots:
 	void on_actionExit_triggered();

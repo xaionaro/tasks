@@ -42,6 +42,7 @@ void loadSettings()
 	QSettings qsettings ( settings.settingsFilePath, QSettings::IniFormat );
 	settings.apiKey       = qsettings.value ( "apiKey" ).toString();
 	settings.issuesFilter = qsettings.value ( "issuesFilter" ).toString();
+	settings.hideOnStart  = qsettings.value ( "hideOnStart" ).toBool();
 	QString mode          = qsettings.value ( "mode" ).toString();
 
 	if ( mode == "rector" ) {
@@ -59,6 +60,7 @@ void saveSettings()
 	qsettings.setValue ( "apiKey",        settings.apiKey );
 	qsettings.setValue ( "issuesFilter",  settings.issuesFilter );
 	qsettings.setValue ( "mode",         ( settings.mode == MODE_RECTOR ) ? "rector" : "full" );
+	qsettings.setValue ( "hideOnStart",   settings.hideOnStart );
 	return;
 }
 
@@ -112,7 +114,8 @@ int main ( int argc, char *argv[] )
 		switch ( settings.mode ) {
 			case MODE_RECTOR: {
 					MainWindowRector w;
-					w.show();
+					if (!settings.hideOnStart)
+						w.show();
 					a.setQuitOnLastWindowClosed ( false );
 					rc = a.exec();
 					break;
@@ -120,7 +123,8 @@ int main ( int argc, char *argv[] )
 
 			default: {
 					MainWindowFull w;
-					w.show();
+					if (!settings.hideOnStart)
+						w.show();
 					a.setQuitOnLastWindowClosed ( false );
 					rc = a.exec();
 					break;

@@ -35,7 +35,7 @@ protected:
 	bool eventFilter ( QObject *obj, QEvent *event );
 
 protected slots:
-	void toggleShowHide();
+
 
 private slots:
 	void on_actionHelp_triggered();

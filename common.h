@@ -20,6 +20,7 @@ struct settings {
 	QString apiKey;
 	QString issuesFilter;
 	enum mode mode;
+	bool hideOnStart;
 };
 extern struct settings settings;
 extern void loadSettings();

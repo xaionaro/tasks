@@ -319,5 +319,18 @@ void MainWindowCommon::showOnTop()
 	return;
 }
 
+void MainWindowCommon::toggleShowHide()
+{
+	if ( this->isVisible() ) {
+		settings.hideOnStart = true;
+		this->hide();
+	} else {
+		settings.hideOnStart = false;
+		this->showOnTop();
+	}
+
+	return;
+}
+
 
 /**** /tray-related stuff ****/

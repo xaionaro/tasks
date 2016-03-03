@@ -118,6 +118,9 @@ protected slots:
 
 signals:
 
+protected slots:
+	void toggleShowHide();
+
 public slots:
 
 private:
