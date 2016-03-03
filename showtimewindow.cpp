@@ -73,56 +73,64 @@ void ShowTimeWindow::updateUsers()
 
 void ShowTimeWindow::timeEntries_display()
 {
+	QList<QJsonObject> list;
 	//this->ui->timeEntries->clear();
-	this->ui->timeEntries->setRowCount ( this->timeEntries.count() );
+	//this->ui->timeEntries->setRowCount ( this->timeEntries.count() );
 
 	QDate dateSelected = this->ui->date->selectedDate();
 
-	int row = 0;
 	foreach (const QJsonValue &timeEntryV, this->timeEntries) {
 		QJsonObject timeEntry = timeEntryV.toObject();
 		QDateTime from = QDateTime::fromString(timeEntry ["from"].toString(), Qt::ISODate);
-		QDateTime to   = QDateTime::fromString(timeEntry ["to"  ].toString(), Qt::ISODate);
-		int sec_diff  = from.time().secsTo(to.time());
 
 		QDate date = from.date();
 
 		if (date != dateSelected)
 			continue;
 
-		//qDebug ( "\"from\": \"%s\", sec_diff == %i; from.minute() == %i; to.minute() == %i", timeEntry ["from"].toString().toStdString().c_str(), sec_diff, from.time().minute(), to.time().minute() );
-
-		this->ui->timeEntries->setItem(row, 0, new QTableWidgetItem ( from.toString("hh:mm") ) );
-		this->ui->timeEntries->setItem(row, 1, new QTableWidgetItem ( to  .toString("hh:mm") ) );
-		this->ui->timeEntries->setItem(row, 2, new QTableWidgetItem ( QString::number( sec_diff/60 ) ) );
-		this->ui->timeEntries->setItem(row, 3, new QTableWidgetItem ( timeEntry ["activity"].toObject() ["name"].toString() ) );
-
-		if (timeEntry ["issue"].toObject().empty()) {
-			QString projectIdentifier = timeEntry ["project"].toObject() ["identifier"].toString();
-			QString projectName;
-			QString userLogin = timeEntry ["user"].toObject() ["login"].toString();
-
-			if ( projectIdentifier.toLower() == userLogin.toLower() ) {
-				projectName = "Личный проект";
-			} else {
-				projectName = timeEntry ["project"].toObject() ["name"].toString();
-			}
-
-			//qDebug(("projectIdentifier == \""+projectIdentifier+"\"; userLogin == \""+userLogin+"\"; projectName == \""+projectName+"\"").toStdString().c_str());
-
-			this->ui->timeEntries->setItem(row, 4, new QTableWidgetItem ( projectIdentifier ) );
-			this->ui->timeEntries->setItem(row, 5, new QTableWidgetItem ( projectName       ) );
-		} else {
-			this->ui->timeEntries->setItem(row, 4, new QTableWidgetItem ( QString::number(timeEntry ["issue"].toObject()    ["id"].toInt()) ) );
-			this->ui->timeEntries->setItem(row, 5, new QTableWidgetItem ( timeEntry ["issue"].toObject()    ["subject"].toString() ) );
-		}
-
-		this->ui->timeEntries->setItem(row, 6, new QTableWidgetItem ( timeEntry ["comments"].toString() ) );
-
-		row++;
+		list.append(timeEntry);
 	}
 
-	this->ui->timeEntries->setRowCount ( row );
+	qSort ( list.begin(), list.end(), timeEntryCmpFunct_from_lt );
+
+	this->ui->timeEntries->setRowCount ( list.size() );
+
+	for (int row = 0; row < list.size(); ++row) {
+	    QJsonObject timeEntry = list.at(row);
+
+	    QDateTime from = QDateTime::fromString(timeEntry ["from"].toString(), Qt::ISODate);
+	    QDateTime to   = QDateTime::fromString(timeEntry ["to"  ].toString(), Qt::ISODate);
+	    int sec_diff  = from.time().secsTo(to.time());
+
+	    //qDebug ( "\"from\": \"%s\", sec_diff == %i; from.minute() == %i; to.minute() == %i", timeEntry ["from"].toString().toStdString().c_str(), sec_diff, from.time().minute(), to.time().minute() );
+
+	    this->ui->timeEntries->setItem(row, 0, new QTableWidgetItem ( from.toString("hh:mm") ) );
+	    this->ui->timeEntries->setItem(row, 1, new QTableWidgetItem ( to  .toString("hh:mm") ) );
+	    this->ui->timeEntries->setItem(row, 2, new QTableWidgetItem ( QString::number( sec_diff/60 ) ) );
+	    this->ui->timeEntries->setItem(row, 3, new QTableWidgetItem ( timeEntry ["activity"].toObject() ["name"].toString() ) );
+
+	    if (timeEntry ["issue"].toObject().empty()) {
+		    QString projectIdentifier = timeEntry ["project"].toObject() ["identifier"].toString();
+		    QString projectName;
+		    QString userLogin = timeEntry ["user"].toObject() ["login"].toString();
+
+		    if ( projectIdentifier.toLower() == userLogin.toLower() ) {
+			    projectName = "Личный проект";
+		    } else {
+			    projectName = timeEntry ["project"].toObject() ["name"].toString();
+		    }
+
+		    //qDebug(("projectIdentifier == \""+projectIdentifier+"\"; userLogin == \""+userLogin+"\"; projectName == \""+projectName+"\"").toStdString().c_str());
+
+		    this->ui->timeEntries->setItem(row, 4, new QTableWidgetItem ( projectIdentifier ) );
+		    this->ui->timeEntries->setItem(row, 5, new QTableWidgetItem ( projectName       ) );
+	    } else {
+		    this->ui->timeEntries->setItem(row, 4, new QTableWidgetItem ( QString::number(timeEntry ["issue"].toObject()    ["id"].toInt()) ) );
+		    this->ui->timeEntries->setItem(row, 5, new QTableWidgetItem ( timeEntry ["issue"].toObject()    ["subject"].toString() ) );
+	    }
+
+	    this->ui->timeEntries->setItem(row, 6, new QTableWidgetItem ( timeEntry ["comments"].toString() ) );
+	}
 }
 
 void ShowTimeWindow::updateTimeEntries_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg )

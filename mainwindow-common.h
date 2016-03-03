@@ -76,6 +76,8 @@ protected:
 		SORT_UPDATED_ON_DESC,
 
 		SORT_STATUS_ISCLOSED_ASC,
+
+		SORT_TIMEENTRY_FROM_ASC,
 	};
 
 	typedef bool ( *sortfunct_t ) ( const QJsonObject &issue_a, const QJsonObject &issue_b );
