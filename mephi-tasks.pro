@@ -11,7 +11,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = mephi-tasks
 TEMPLATE = app
 #QMAKE_CXX = ccache g++
-QMAKE_CXXFLAGS += -std=c++11 -O0 #-march=native
+gcc:QMAKE_CXXFLAGS += -std=c++11
+gcc:QMAKE_CXXFLAGS_RELEASE += -O2 -march=native
+gcc:QMAKE_CXXFLAGS_DEBUG += -O0 -ggdb3
 
 SOURCES += main.cpp\
     helpwindow.cpp \
@@ -31,7 +33,8 @@ SOURCES += main.cpp\
     loginwindow.cpp \
     mainwindowandroid.cpp \
     logtimewindow.cpp \
-    redmineclass_time_entry.cpp
+    redmineclass_time_entry.cpp \
+    showtimewindow.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -52,7 +55,8 @@ HEADERS  += \
     loginwindow.h \
     mainwindowandroid.h \
     logtimewindow.h \
-    redmineclass_time_entry.h
+    redmineclass_time_entry.h \
+    showtimewindow.h
 
 FORMS    += \
     helpwindow.ui \
@@ -63,11 +67,31 @@ FORMS    += \
     signingwindow.ui \
     loginwindow.ui \
     mainwindowandroid.ui \
-    logtimewindow.ui
+    logtimewindow.ui \
+    showtimewindow.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_5_1_MinGW_32bit-Release/release/ -lqtredmine
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_5_1_MinGW_32bit-Debug/debug/ -lqtredmine
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine/release/ -lqtredmine
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine/debug/ -lqtredmine
 else:unix: LIBS += -L$$PWD/build-qtredmine-Desktop/ -lqtredmine
+
+win32:contains(QT_ARCH, i386) {
+    LIBS += -LC:/OpenSSL-Win32/lib -llibeay32
+    INCLUDEPATH += C:/OpenSSL-Win32/include
+} else {
+    LIBS += -LC:/OpenSSL-Win64/lib -llibeay32
+    INCLUDEPATH += C:/OpenSSL-Win64/include
+}
+
+winrt {
+    winphone:equals(WINSDK_VER, 8.0) {
+        WINRT_MANIFEST.capabilities += ID_CAP_NETWORKING
+    } else {
+        WINRT_MANIFEST.capabilities += internetClient
+    }
+    CONFIG += windeployqt
+    QMAKE_CXXFLAGS += -D__WINRT__
+}
+
 
 INCLUDEPATH += $$PWD/qtredmine
 DEPENDPATH += $$PWD/qtredmine

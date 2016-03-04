@@ -36,15 +36,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QPushButton" name="showTimeWindowButton">
        <property name="text">
-        <string>PushButton</string>
+        <string>Посмотреть журнал</string>
        </property>
       </widget>
      </item>

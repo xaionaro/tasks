@@ -22,10 +22,23 @@
 
 #include <QDir>
 #include <QFile>
+#include <QStandardPaths>
+#include <QMessageBox>
 
 Redmine::Redmine()
 {
+	if ( ! QSslSocket::supportsSsl() ) {
+		qDebug ( "! QSslSocket::supportsSsl()" );
+		QMessageBox messageBox;
+		messageBox.critical(0, "Error", "Отсутствует поддержка SSL. Проверьте наличие библиотек libeay32.dll и ssleay32.dll, либо установите пакет OpenSSL.");
+	}
 	this->setBaseUrl ( SERVER_URL );
+
+#ifdef __MOBILE__
+	this->cacheBasePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+#else
+	this->cacheBasePath = "cache/";
+#endif
 }
 
 Redmine::~Redmine()
@@ -76,8 +89,8 @@ int Redmine::init()
 		this->setAuth ( this->_apiKey );
 	}
 
-	connect ( this, SIGNAL ( requestFinished ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
-	          this, SLOT ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
+	connect ( this, SIGNAL ( requestFinished     ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
+		  this, SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 	this->initBarrier_jobsDone = 0;
 	QNetworkReply *updateIssueStatusesReply = this->updateIssueStatuses();
 	// Wait until issue statuses will be received:
@@ -99,7 +112,7 @@ int Redmine::init()
 
 void Redmine::cacheLoad()
 {
-	QDir dir = QDir ( "cache/" + this->apiKey() );
+	QDir dir = QDir ( this->cacheBasePath + this->apiKey() );
 	QFileInfoList fileInfoList = dir.entryInfoList ( QDir::Files );
 
 	for ( int i = 0; i < fileInfoList.size(); ++i ) {
@@ -205,7 +218,8 @@ QNetworkReply *Redmine::request ( RedmineClient::EMode    mode,
 
 	if ( !this->cache[signature].isEmpty() ) {
 		qDebug ( "Found cache for \"%s\"", signature.toStdString().c_str() );
-		this->callback_call ( obj_ptr, callback, NULL, &this->cache[signature], callback_arg );
+		if (obj_ptr != NULL && callback != NULL)
+			this->callback_call ( obj_ptr, callback, NULL, &this->cache[signature], callback_arg );
 	}
 
 	/*
@@ -499,7 +513,17 @@ QNetworkReply *Redmine::get_time_entries ( void *obj_ptr, callback_t callback,
 QNetworkReply *Redmine::get_time_entries ( callback_t callback,
         void *arg, bool free_arg, QString filterOptions )
 {
+	qDebug("deprecated variant of Redmine::get_time_entries had been called");
+
 	return this->get_time_entries ( NULL, callback, arg, free_arg, filterOptions );
+}
+
+QNetworkReply *Redmine::get_time_entries ( int userId, void *obj_ptr, callback_t callback,
+	void *arg, bool free_arg, QString filterOptions )
+{
+	QString userId_str = ( userId == 0 ? "" : QString ( "user_id=" + QString::number(userId) ) );
+
+	return this->get_time_entries ( obj_ptr, callback, arg, free_arg, userId_str+"&"+filterOptions );
 }
 
 /********* /get_time_entries *********/
@@ -580,13 +604,22 @@ QNetworkReply *Redmine::get_user ( int user_id,
 
 QDateTime Redmine::parseDateTime ( QString date_str )
 {
+	qDebug ( "Used deprecated function Redmine::parseDateTime(). Use \"QDateTime::fromString (arg, Qt::ISODate)\" instead." );
+
 	// TODO: FIXME: make this function working on any timezone.
 	QDateTime date;
 	date = QDateTime::fromString ( date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+03:00'" );
 
 	if ( !date.isValid() )
+		date = QDateTime::fromString ( date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+0300'" );
+
+	if ( !date.isValid() )
 		// TODO: FIXME: add a hour
 		date = QDateTime::fromString ( date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+04:00'" );
+
+	if ( !date.isValid() )
+		// TODO: FIXME: add a hour
+		date = QDateTime::fromString ( date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+0400'" );
 
 	return date;
 }
@@ -606,3 +639,25 @@ QUrl Redmine::getUrl ( QString objectType, int objectId )
 }
 
 /********* /getUrl *********/
+
+/********* get_stuff_to_do *********/
+
+QNetworkReply *Redmine::get_stuff_to_do ( void *obj_ptr, callback_t callback,
+				 int user_id,
+				 void *arg, bool free_arg,
+				 QString filterOptions )
+{
+	QString user_id_str = ( user_id == 0 ? "" : "user_id=" + QString::number ( user_id ) );
+
+	return this->request(
+				GET,
+				"stuff_to_do",
+				obj_ptr,
+				callback,
+				arg,
+				free_arg,
+				user_id_str+"&"+filterOptions );
+}
+
+/********* /get_stuff_to_do *********/
+

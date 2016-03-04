@@ -25,8 +25,8 @@
 #include <QStringList>
 #include <QDesktopServices>
 #include <QDateTime>
-#include <QMenu>
 #include <QList>
+#include <QMenu>
 #include <QScrollBar>
 
 void MainWindowRector::issuesSetup()
@@ -106,12 +106,12 @@ MainWindowRector::MainWindowRector ( QWidget *parent ) :
 	          this,    SLOT (  callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 	this->issuesSetup();
 	this->updateTasks();
-	this->createIconComboBox();
+
 	this->createTrayActions();
-	this->createTrayIcon();
-	this->status ( GOOD );
-	this->setIcon ( GOOD );
-	this->trayIcon->show();
+	connect ( this->trayIcon, SIGNAL ( activated     ( QSystemTrayIcon::ActivationReason ) ),
+		  this,		  SLOT   ( iconActivated ( QSystemTrayIcon::ActivationReason ) ) );
+
+
 	this->timerUpdateTasks = new QTimer ( this );
 	connect ( this->timerUpdateTasks, SIGNAL ( timeout() ), this, SLOT ( updateTasks() ) );
 	this->timerUpdateTasks->start ( 10000 );
@@ -193,7 +193,7 @@ void MainWindowRector::issue_display_oneissue ( int pos )
 					// TODO: fix a memleak if redmine->get_user doesn't success
 					append_assignee_arg_p->pos     = pos;
 					redmine->get_user ( coassignee_id,
-					                    ( Redmine::callback_t ) &MainWindowRector::append_assignee,
+                                        ( Redmine::callback_t ) &MainWindowRector::append_assignee,
 					                    ( void * ) append_assignee_arg_p );
 				}
 			}
@@ -350,40 +350,15 @@ void MainWindowRector::on_actionHelp_triggered()
 	return;
 }
 
-void MainWindowRector::showOnTop()
-{
-#ifdef Q_OS_WIN32
-	// raise() doesn't work :(
-	Qt::WindowFlags flags_old   = this->windowFlags();
-	Qt::WindowFlags flags_ontop = flags_old | Qt::WindowStaysOnTopHint;
-	this->setWindowFlags ( flags_ontop );
-	this->show();
-	this->setWindowFlags ( flags_old );
-	this->show();
-#else
-	this->show();
-	this->raise();
-#endif
-	return;
-}
-
-void MainWindowRector::toggleShowHide()
-{
-	if ( this->isVisible() )
-		this->hide();
-	else {
-		this->showOnTop();
-	}
-
-	return;
-}
-
 void MainWindowRector::createTrayActions()
 {
-	showHideAction = new QAction ( tr ( "Показать/Спрятать" ), this );
+	this->showHideAction = new QAction ( tr ( "Показать/Спрятать" ), this );
 	connect ( showHideAction, SIGNAL ( triggered() ), this, SLOT ( toggleShowHide() ) );
-	quitAction = new QAction ( tr ( "Завершить" ), this );
+	this->quitAction = new QAction ( tr ( "Завершить" ), this );
 	connect ( quitAction, SIGNAL ( triggered() ), qApp, SLOT ( quit() ) );
+
+	this->trayIconMenu->addAction ( showHideAction );
+	this->trayIconMenu->addAction ( quitAction );
 }
 
 void MainWindowRector::iconActivated ( QSystemTrayIcon::ActivationReason reason )
@@ -400,33 +375,6 @@ void MainWindowRector::iconActivated ( QSystemTrayIcon::ActivationReason reason 
 		default:
 			break;
 	}
-}
-
-void MainWindowRector::createTrayIcon()
-{
-	trayIconMenu = new QMenu ( this );
-	trayIconMenu->addAction ( showHideAction );
-	trayIconMenu->addAction ( quitAction );
-	trayIcon = new QSystemTrayIcon ( this );
-	trayIcon->setContextMenu ( trayIconMenu );
-	connect ( trayIcon, SIGNAL ( activated ( QSystemTrayIcon::ActivationReason ) ),
-	          this, SLOT ( iconActivated ( QSystemTrayIcon::ActivationReason ) ) );
-}
-
-void MainWindowRector::setIcon ( EIcon index )
-{
-	//qDebug("icon: %i", index);
-	QIcon icon = this->iconComboBox.itemIcon ( index );
-	this->trayIcon->setIcon ( icon );
-	this->setWindowIcon ( icon );
-	this->trayIcon->setToolTip ( this->iconComboBox.itemText ( index ) );
-}
-
-void MainWindowRector::createIconComboBox()
-{
-	this->iconComboBox.addItem ( QIcon ( ":/images/good.png" ), tr ( "Просроченных задач нет" ) );
-	this->iconComboBox.addItem ( QIcon ( ":/images/bad.png" ),  tr ( "Есть просроченные задачи" ) );
-	return;
 }
 
 void MainWindowRector::resizeEvent ( QResizeEvent *event )

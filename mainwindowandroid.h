@@ -21,7 +21,9 @@ private slots:
 
 	void on_logTimeWindowButton_clicked();
 
-private:
+	void on_showTimeWindowButton_clicked();
+
+	private:
 	Ui::MainWindowAndroid *ui;
 };
 

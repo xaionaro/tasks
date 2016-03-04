@@ -16,10 +16,16 @@ LogTimeWindow::LogTimeWindow ( QWidget *parent ) :
 
 	this->timeEntry.setRedmine ( redmine );
 
+	QTime currentTime      = QTime::currentTime();
+	QTime initialSinceTime = QTime::fromString ( "09:00", "hh':'mm" );
+	if (initialSinceTime > currentTime) {
+		initialSinceTime = currentTime;
+	}
+
 	this->ui->untilInput->setDate ( QDate::currentDate() );
 	this->ui->sinceInput->setDate ( QDate::currentDate() );
-	this->ui->untilInput->setTime ( QTime::currentTime() );
-	this->ui->sinceInput->setTime ( QTime::fromString ( "09:00", "hh':'mm" ) );
+	this->ui->untilInput->setTime ( currentTime );
+	this->ui->sinceInput->setTime ( initialSinceTime );
 	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ: Учёт времени" );
 	connect ( redmine, SIGNAL ( callback_call       ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
               this,    SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
@@ -34,13 +40,14 @@ LogTimeWindow::LogTimeWindow ( QWidget *parent ) :
 
 LogTimeWindow::~LogTimeWindow()
 {
+	this->on_destructor();
 	delete ui;
 }
 
 void LogTimeWindow::on_saveSuccess()
 {
 	qDebug ( "LogTimeWindow::on_saveSuccess()" );
-	redmine->get_time_entries ( NULL, NULL, NULL, false, "user_id=me&limit=1" ); // Just to update the cache
+    redmine->get_time_entries ( ( void * ) NULL, NULL, NULL, false, "user_id=me&limit=1" ); // Just to update the cache
 	delete this;
 }
 

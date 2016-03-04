@@ -92,6 +92,11 @@ MainWindowFull::MainWindowFull ( QWidget *parent ) :
 	connect ( &this->projectsDisplayRetryTimer, SIGNAL ( timeout() ), this, SLOT ( projects_display() ) );
 	this->ui->issuesFilter_field_assigned_to->addItem ( "", 0 );
 	this->ui->issuesFilter_field_status     ->addItem ( "", 0 );
+
+	this->createTrayActions();
+	connect ( this->trayIcon, SIGNAL ( activated     ( QSystemTrayIcon::ActivationReason ) ),
+		  this,		  SLOT   ( iconActivated ( QSystemTrayIcon::ActivationReason ) ) );
+
 	return;
 }
 
@@ -1088,3 +1093,50 @@ void MainWindowFull::on_issuesFilter_field_status_currentIndexChanged ( int inde
 		this->issues_display();
 	}
 }
+
+
+/**** tray-related stuff ****/
+
+void MainWindowFull::createTrayActions()
+{
+	this->showHideAction = new QAction ( tr ( "Показать/Спрятать" ), this );
+	connect ( this->showHideAction, SIGNAL ( triggered() ), this, SLOT ( toggleShowHide() ) );
+
+	this->openLogTimeWindowAction = new QAction ( tr ( "Зажурналировать время" ), this );
+	connect ( this->openLogTimeWindowAction, SIGNAL ( triggered() ), this, SLOT ( openLogTimeWindow() ) );
+
+	this->openShowTimeWindowAction = new QAction ( tr ( "Журнал времени" ), this );
+	connect ( this->openShowTimeWindowAction, SIGNAL ( triggered() ), this, SLOT ( openShowTimeWindow() ) );
+
+	this->quitAction = new QAction ( tr ( "Завершить" ), this );
+	connect ( this->quitAction, SIGNAL ( triggered() ), qApp, SLOT ( quit() ) );
+
+	this->trayIconMenu->addAction ( this->showHideAction );
+	this->trayIconMenu->addAction ( this->openLogTimeWindowAction );
+	this->trayIconMenu->addAction ( this->openShowTimeWindowAction );
+	this->trayIconMenu->addAction ( this->quitAction );
+
+	return;
+}
+
+void MainWindowFull::iconActivated ( QSystemTrayIcon::ActivationReason reason )
+{
+	qDebug("MainWindowFull::iconActivated(%i)", reason);
+
+	switch ( reason ) {
+		case QSystemTrayIcon::Trigger:
+		case QSystemTrayIcon::DoubleClick:
+			this->toggleShowHide();
+			break;
+
+		case QSystemTrayIcon::MiddleClick:
+			this->openLogTimeWindow();
+			break;
+
+		default:
+			break;
+	}
+}
+
+
+/**** /tray-related stuff ****/

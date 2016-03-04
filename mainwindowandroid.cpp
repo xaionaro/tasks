@@ -2,6 +2,7 @@
 #include "ui_mainwindowandroid.h"
 
 #include "logtimewindow.h"
+#include "showtimewindow.h"
 
 MainWindowAndroid::MainWindowAndroid ( QWidget *parent ) :
 	QFrame ( parent ),
@@ -9,6 +10,9 @@ MainWindowAndroid::MainWindowAndroid ( QWidget *parent ) :
 {
 	this->ui->setupUi ( this );
 	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ" );
+#ifdef __WINRT__
+	delete this->ui->quitButton;
+#endif
 }
 
 MainWindowAndroid::~MainWindowAndroid()
@@ -24,5 +28,11 @@ void MainWindowAndroid::on_quitButton_clicked()
 void MainWindowAndroid::on_logTimeWindowButton_clicked()
 {
 	LogTimeWindow *w = new LogTimeWindow();
+	w->show();
+}
+
+void MainWindowAndroid::on_showTimeWindowButton_clicked()
+{
+	ShowTimeWindow *w = new ShowTimeWindow();
 	w->show();
 }
