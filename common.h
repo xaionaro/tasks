@@ -5,6 +5,10 @@
 #pragma pointers_to_members( full_generality, virtual_inheritance )
 #endif
 
+#if __ANDROID__ || _M_ARM || __WINRT__
+#define __MOBILE__
+#endif
+
 #include <QApplication>
 
 #include "redmine.h"

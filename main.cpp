@@ -186,8 +186,8 @@ int main ( int argc, char *argv[] )
 		redmine = &_redmine;
 		redmine->apiKey ( settings.apiKey );
 		redmine->init();
-#ifdef __ANDROID__
-        qDebug("Mode: ANDROID");
+#ifdef __MOBILE__
+		qDebug("Mode: MOBILE");
 		MainWindowAndroid w;
 		w.show();
 		rc = a.exec();

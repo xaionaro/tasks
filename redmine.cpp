@@ -82,8 +82,8 @@ int Redmine::init()
 		this->setAuth ( this->_apiKey );
 	}
 
-	connect ( this, SIGNAL ( requestFinished ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
-	          this, SLOT ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
+	connect ( this, SIGNAL ( requestFinished     ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
+		  this, SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 	this->initBarrier_jobsDone = 0;
 	QNetworkReply *updateIssueStatusesReply = this->updateIssueStatuses();
 	// Wait until issue statuses will be received:
