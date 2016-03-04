@@ -22,10 +22,17 @@
 
 #include <QDir>
 #include <QFile>
+#include <QStandardPaths>
 
 Redmine::Redmine()
 {
 	this->setBaseUrl ( SERVER_URL );
+
+#ifdef __MOBILE__
+	this->cacheBasePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+#else
+	this->cacheBasePath = "cache/";
+#endif
 }
 
 Redmine::~Redmine()
@@ -99,7 +106,7 @@ int Redmine::init()
 
 void Redmine::cacheLoad()
 {
-	QDir dir = QDir ( "cache/" + this->apiKey() );
+	QDir dir = QDir ( this->cacheBasePath + this->apiKey() );
 	QFileInfoList fileInfoList = dir.entryInfoList ( QDir::Files );
 
 	for ( int i = 0; i < fileInfoList.size(); ++i ) {

@@ -50,6 +50,8 @@ private:
 
 	void callback_cache ( QNetworkReply *reply, QJsonDocument *obj, void *_real_callback_info );
 
+	QString cacheBasePath;
+
 public:
 
 	QString apiKey ( QString apiKey );
