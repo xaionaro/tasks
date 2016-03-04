@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ShowTimeWindow</class>
+ <widget class="QWidget" name="ShowTimeWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>699</width>
+    <height>452</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <layout class="QVBoxLayout" name="layout">
+     <item>
+      <widget class="QComboBox" name="user">
+       <item>
+        <property name="text">
+         <string>Я</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCalendarWidget" name="date">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="locale">
+        <locale language="Russian" country="Russia"/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTableWidget" name="timeEntries">
+       <column>
+        <property name="text">
+         <string>с</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>по</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>мин.</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>тип</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>#</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>задача/проект</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>комментарий</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeButton">
+       <property name="text">
+        <string>Закрыть</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

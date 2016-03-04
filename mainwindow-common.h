@@ -11,6 +11,7 @@
 #include "memberships.h"
 #include "enumerations.h"
 #include "logtimewindow.h"
+#include "showtimewindow.h"
 
 #include "common.h"
 
@@ -75,6 +76,8 @@ protected:
 		SORT_UPDATED_ON_DESC,
 
 		SORT_STATUS_ISCLOSED_ASC,
+
+		SORT_TIMEENTRY_FROM_ASC,
 	};
 
 	typedef bool ( *sortfunct_t ) ( const QJsonObject &issue_a, const QJsonObject &issue_b );
@@ -115,8 +118,13 @@ protected slots:
 	int updateRoles();
 	void openLogTimeWindow();
 	void on_closeLogTimeWindow();
+	void openShowTimeWindow();
+	void on_closeShowTimeWindow();
 
 signals:
+
+protected slots:
+	void toggleShowHide();
 
 public slots:
 
@@ -137,7 +145,8 @@ private:
 
 
 	EStatus _status;
-	LogTimeWindow *logTimeWindow;
+	LogTimeWindow  *logTimeWindow;
+	ShowTimeWindow *showTimeWindow;
 };
 
 #endif // MAINWINDOWCOMMON_H

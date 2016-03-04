@@ -7,6 +7,9 @@ void RedmineClass_TimeEntry::init()
 	this->redmine   = NULL;
 	this->id        = 0;
 	this->saveReply = NULL;
+
+	connect ( &this->saveTimer, SIGNAL ( timeout() ), this, SLOT ( saveTimeout() ) );
+
 	return;
 }
 
@@ -143,7 +146,6 @@ int RedmineClass_TimeEntry::save()
 	this->saveReply = this->redmine->request ( mode, "time_entries", this, (Redmine::callback_t)&RedmineClass_TimeEntry::saveCallback, NULL, false, "", timeEntries );
 
 	this->saveTimer.setSingleShot ( true );
-	connect ( &this->saveTimer, SIGNAL ( timeout() ), this, SLOT ( saveTimeout() ) );
 	this->saveTimer.start ( REDMINE_BASETIMEOUT );
 
 	return 0;

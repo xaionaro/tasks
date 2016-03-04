@@ -350,17 +350,6 @@ void MainWindowRector::on_actionHelp_triggered()
 	return;
 }
 
-void MainWindowRector::toggleShowHide()
-{
-	if ( this->isVisible() )
-		this->hide();
-	else {
-		this->showOnTop();
-	}
-
-	return;
-}
-
 void MainWindowRector::createTrayActions()
 {
 	this->showHideAction = new QAction ( tr ( "Показать/Спрятать" ), this );

@@ -35,7 +35,7 @@ protected:
 	bool eventFilter ( QObject *obj, QEvent *event );
 
 protected slots:
-	void toggleShowHide();
+
 
 private slots:
 	void on_actionHelp_triggered();
@@ -161,6 +161,7 @@ private:
 	QAction *showHideAction;
 	QAction *quitAction;
 	QAction *openLogTimeWindowAction;
+	QAction *openShowTimeWindowAction;
 
 	void iconActivated ( QSystemTrayIcon::ActivationReason reason );
 };

@@ -1105,11 +1105,15 @@ void MainWindowFull::createTrayActions()
 	this->openLogTimeWindowAction = new QAction ( tr ( "Зажурналировать время" ), this );
 	connect ( this->openLogTimeWindowAction, SIGNAL ( triggered() ), this, SLOT ( openLogTimeWindow() ) );
 
+	this->openShowTimeWindowAction = new QAction ( tr ( "Журнал времени" ), this );
+	connect ( this->openShowTimeWindowAction, SIGNAL ( triggered() ), this, SLOT ( openShowTimeWindow() ) );
+
 	this->quitAction = new QAction ( tr ( "Завершить" ), this );
 	connect ( this->quitAction, SIGNAL ( triggered() ), qApp, SLOT ( quit() ) );
 
 	this->trayIconMenu->addAction ( this->showHideAction );
 	this->trayIconMenu->addAction ( this->openLogTimeWindowAction );
+	this->trayIconMenu->addAction ( this->openShowTimeWindowAction );
 	this->trayIconMenu->addAction ( this->quitAction );
 
 	return;
@@ -1134,16 +1138,5 @@ void MainWindowFull::iconActivated ( QSystemTrayIcon::ActivationReason reason )
 	}
 }
 
-
-void MainWindowFull::toggleShowHide()
-{
-	if ( this->isVisible() )
-		this->hide();
-	else {
-		this->showOnTop();
-	}
-
-	return;
-}
 
 /**** /tray-related stuff ****/

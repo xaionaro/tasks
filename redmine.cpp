@@ -500,7 +500,17 @@ QNetworkReply *Redmine::get_time_entries ( void *obj_ptr, callback_t callback,
 QNetworkReply *Redmine::get_time_entries ( callback_t callback,
         void *arg, bool free_arg, QString filterOptions )
 {
+	qDebug("deprecated variant of Redmine::get_time_entries had been called");
+
 	return this->get_time_entries ( NULL, callback, arg, free_arg, filterOptions );
+}
+
+QNetworkReply *Redmine::get_time_entries ( int userId, void *obj_ptr, callback_t callback,
+	void *arg, bool free_arg, QString filterOptions )
+{
+	QString userId_str = ( userId == 0 ? "" : QString ( "user_id=" + QString::number(userId) ) );
+
+	return this->get_time_entries ( obj_ptr, callback, arg, free_arg, userId_str+"&"+filterOptions );
 }
 
 /********* /get_time_entries *********/
@@ -581,13 +591,22 @@ QNetworkReply *Redmine::get_user ( int user_id,
 
 QDateTime Redmine::parseDateTime ( QString date_str )
 {
+	qDebug ( "Used deprecated function Redmine::parseDateTime(). Use \"QDateTime::fromString (arg, Qt::ISODate)\" instead." );
+
 	// TODO: FIXME: make this function working on any timezone.
 	QDateTime date;
 	date = QDateTime::fromString ( date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+03:00'" );
 
 	if ( !date.isValid() )
+		date = QDateTime::fromString ( date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+0300'" );
+
+	if ( !date.isValid() )
 		// TODO: FIXME: add a hour
 		date = QDateTime::fromString ( date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+04:00'" );
+
+	if ( !date.isValid() )
+		// TODO: FIXME: add a hour
+		date = QDateTime::fromString ( date_str, "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'zzz'+0400'" );
 
 	return date;
 }
@@ -607,3 +626,25 @@ QUrl Redmine::getUrl ( QString objectType, int objectId )
 }
 
 /********* /getUrl *********/
+
+/********* get_stuff_to_do *********/
+
+QNetworkReply *Redmine::get_stuff_to_do ( void *obj_ptr, callback_t callback,
+				 int user_id,
+				 void *arg, bool free_arg,
+				 QString filterOptions )
+{
+	QString user_id_str = ( user_id == 0 ? "" : "user_id=" + QString::number ( user_id ) );
+
+	return this->request(
+				GET,
+				"stuff_to_do",
+				obj_ptr,
+				callback,
+				arg,
+				free_arg,
+				user_id_str+"&"+filterOptions );
+}
+
+/********* /get_stuff_to_do *********/
+
