@@ -14,20 +14,38 @@ ShowTimeWindow::ShowTimeWindow(QWidget *parent) :
 	this->updateTimeEntries(0);
 
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 0, QHeaderView::Interactive );
-	this->ui->timeEntries->horizontalHeader()->resizeSection ( 0, 50 );
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 1, QHeaderView::Interactive );
-	this->ui->timeEntries->horizontalHeader()->resizeSection ( 1, 50 );
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 2, QHeaderView::Interactive );
-	this->ui->timeEntries->horizontalHeader()->resizeSection ( 2, 45 );
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 3, QHeaderView::Interactive );
-	this->ui->timeEntries->horizontalHeader()->resizeSection ( 3, 70 );
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 4, QHeaderView::Interactive );
-	this->ui->timeEntries->horizontalHeader()->resizeSection ( 4, 60 );
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 5, QHeaderView::Interactive );
-	this->ui->timeEntries->horizontalHeader()->resizeSection ( 5, 200 );
+
+#ifdef __ANDROID__
+	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 6, QHeaderView::Interactive );
+
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 0, 80 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 1, 80 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 2, 72 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 3, 104 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 4, 82 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 5, 500 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 6, 500 );
+#else
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 6, QHeaderView::Stretch );
 
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 0, 50 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 1, 50 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 2, 45 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 3, 70 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 4, 60 );
+	this->ui->timeEntries->horizontalHeader()->resizeSection ( 5, 200 );
+
+	this->ui->date->setMaximumHeight(120);
+#endif
+
 	this->ui->timeEntries->horizontalHeader()->setSortIndicatorShown ( true );
+
+	this->ui->date->setSelectedDate(QDate::currentDate());
 }
 
 ShowTimeWindow::~ShowTimeWindow()
