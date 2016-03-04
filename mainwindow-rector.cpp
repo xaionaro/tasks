@@ -193,7 +193,7 @@ void MainWindowRector::issue_display_oneissue ( int pos )
 					// TODO: fix a memleak if redmine->get_user doesn't success
 					append_assignee_arg_p->pos     = pos;
 					redmine->get_user ( coassignee_id,
-					                    ( Redmine::callback_t ) &MainWindowRector::append_assignee,
+                                        ( Redmine::callback_t ) &MainWindowRector::append_assignee,
 					                    ( void * ) append_assignee_arg_p );
 				}
 			}

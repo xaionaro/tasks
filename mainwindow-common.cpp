@@ -150,7 +150,7 @@ void MainWindowCommon::get_roles_callback ( QNetworkReply *reply, QJsonDocument 
 
 int MainWindowCommon::updateRoles()
 {
-	redmine->get_roles ( ( Redmine::callback_t ) &MainWindowCommon::get_roles_callback, this );
+    redmine->get_roles ( ( Redmine::callback_t ) &MainWindowCommon::get_roles_callback, this );
 	return 0;
 }
 
@@ -167,7 +167,7 @@ void MainWindowCommon::get_memberships_callback ( QNetworkReply *reply, QJsonDoc
 
 int MainWindowCommon::updateMemberships()
 {
-	redmine->get_memberships ( ( Redmine::callback_t ) &MainWindowCommon::get_memberships_callback, this );
+    redmine->get_memberships ( ( Redmine::callback_t ) &MainWindowCommon::get_memberships_callback, this );
 	return 0;
 }
 
@@ -187,7 +187,7 @@ void MainWindowCommon::get_enumerations_callback ( QNetworkReply *reply, QJsonDo
 
 int MainWindowCommon::updateEnumerations()
 {
-	redmine->get_enumerations ( ( Redmine::callback_t ) &MainWindowCommon::get_enumerations_callback, this );
+    redmine->get_enumerations ( ( Redmine::callback_t ) &MainWindowCommon::get_enumerations_callback, this );
 	return 0;
 }
 
@@ -220,7 +220,7 @@ QList<QJsonObject> MainWindowCommon::issues_get_byProjectId ( int project_id )
 
 int MainWindowCommon::updateProjects()
 {
-	redmine->get_projects ( ( Redmine::callback_t ) &MainWindowCommon::get_projects_callback, this );
+    redmine->get_projects ( ( Redmine::callback_t ) &MainWindowCommon::get_projects_callback, this );
 	return 0;
 }
 
@@ -249,7 +249,7 @@ void MainWindowCommon::get_issues_callback ( QNetworkReply *reply, QJsonDocument
 
 int MainWindowCommon::updateIssues()
 {
-	redmine->get_issues ( ( Redmine::callback_t ) &MainWindowCommon::get_issues_callback, this, false, "status=*&limit=10000" );
+    redmine->get_issues ( ( Redmine::callback_t ) &MainWindowCommon::get_issues_callback, this, false, "status=*&limit=10000" );
 	return 0;
 }
 

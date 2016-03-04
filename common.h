@@ -1,6 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#if _MSC_VER && !__INTEL_COMPILER
+#pragma pointers_to_members( full_generality, virtual_inheritance )
+#endif
+
 #include <QApplication>
 
 #include "redmine.h"

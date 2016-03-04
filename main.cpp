@@ -104,6 +104,7 @@ int main ( int argc, char *argv[] )
 		redmine->apiKey ( settings.apiKey );
 		redmine->init();
 #ifdef __ANDROID__
+        qDebug("Mode: ANDROID");
 		MainWindowAndroid w;
 		w.show();
 		rc = a.exec();
@@ -112,7 +113,8 @@ int main ( int argc, char *argv[] )
 		switch ( settings.mode ) {
 			case MODE_RECTOR: {
 					MainWindowRector w;
-					w.show();
+                    qDebug("Mode: RECTOR");
+                    w.show();
 					a.setQuitOnLastWindowClosed ( false );
 					rc = a.exec();
 					break;
@@ -120,7 +122,8 @@ int main ( int argc, char *argv[] )
 
 			default: {
 					MainWindowFull w;
-					w.show();
+                    qDebug("Mode: FULL");
+                    w.show();
 					a.setQuitOnLastWindowClosed ( false );
 					rc = a.exec();
 					break;
