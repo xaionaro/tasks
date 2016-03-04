@@ -13,7 +13,7 @@ TEMPLATE = app
 #QMAKE_CXX = ccache g++
 gcc:QMAKE_CXXFLAGS += -std=c++11
 gcc:QMAKE_CXXFLAGS_RELEASE += -O2 -march=native
-gcc:QMAKE_CXXFLAGS_DEBUG += -O0 -ggdb3
+gcc:QMAKE_CXXFLAGS_DEBUG += -O0 -ggdb3 -D__MOBILE__
 
 SOURCES += main.cpp\
     helpwindow.cpp \

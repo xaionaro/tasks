@@ -11,7 +11,7 @@ ShowTimeWindow::ShowTimeWindow(QWidget *parent) :
 		  this,    SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 
 	this->updateUsers();
-	this->updateTimeEntries(0);
+    this->updateTimeEntries(redmine->me()["id"].toInt());
 
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 0, QHeaderView::Interactive );
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 1, QHeaderView::Interactive );
@@ -66,12 +66,18 @@ void ShowTimeWindow::updateUsers_callback ( QNetworkReply *reply, QJsonDocument 
 	qDebug ( "ShowTimeWindow::updateUsers_callback: users.count() == %i", users.count() );
 
 	this->ui->user->clear();
-	this->ui->user->addItem ( "Я", 0 );
+    this->ui->user->addItem ( "Я", redmine->me()["id"].toInt() );
 
 	foreach (const QJsonValue &userV, users) {
 		QJsonObject user = userV.toObject();
 
 		int userId = user["id"].toInt();
+
+        if (redmine->me()["id"].toInt() == userId)
+        {
+            continue;
+        }
+
 		QString userDisplayName = user["name"].toString();
 		this->ui->user->addItem ( userDisplayName, userId );
 
@@ -95,6 +101,7 @@ void ShowTimeWindow::updateUsers()
 void ShowTimeWindow::timeEntries_display()
 {
 	QList<QJsonObject> list;
+
 	//this->ui->timeEntries->clear();
 	//this->ui->timeEntries->setRowCount ( this->timeEntries.count() );
 
@@ -114,6 +121,17 @@ void ShowTimeWindow::timeEntries_display()
 
 	qSort ( list.begin(), list.end(), timeEntryCmpFunct_from_lt );
 
+/*
+    QString jsonString;
+    foreach (const QJsonObject &jsonObject, list)
+    {
+        QJsonDocument doc(jsonObject);
+        QString strJson(doc.toJson(QJsonDocument::Indented));
+        jsonString += strJson;
+    }
+
+    qDebug(jsonString.toStdString().c_str());
+*/
 	this->ui->timeEntries->setRowCount ( list.size() );
 
 	for (int row = 0; row < list.size(); ++row) {

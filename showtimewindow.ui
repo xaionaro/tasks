@@ -17,13 +17,7 @@
    <item>
     <layout class="QVBoxLayout" name="layout">
      <item>
-      <widget class="QComboBox" name="user">
-       <item>
-        <property name="text">
-         <string>Я</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="user"/>
      </item>
      <item>
       <widget class="QCalendarWidget" name="date">
