@@ -22,9 +22,15 @@
 
 #include <QDir>
 #include <QFile>
+#include <QMessageBox>
 
 Redmine::Redmine()
 {
+	if ( ! QSslSocket::supportsSsl() ) {
+		qDebug ( "! QSslSocket::supportsSsl()" );
+		QMessageBox messageBox;
+		messageBox.critical(0, "Error", "Отсутствует поддержка SSL. Проверьте наличие библиотек libeay32.dll и ssleay32.dll, либо установите пакет OpenSSL.");
+	}
 	this->setBaseUrl ( SERVER_URL );
 }
 

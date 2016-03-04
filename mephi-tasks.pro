@@ -72,6 +72,14 @@ win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine/release/ -
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine/debug/ -lqtredmine
 else:unix: LIBS += -L$$PWD/build-qtredmine-Desktop/ -lqtredmine
 
+win32:contains(QT_ARCH, i386) {
+    LIBS += -LC:/OpenSSL-Win32/bin -leay32
+    INCLUDEPATH += C:/OpenSSL-Win32/include
+} else {
+    LIBS += -LC:/OpenSSL-Win64/bin -leay32
+    INCLUDEPATH += C:/OpenSSL-Win64/include
+}
+
 INCLUDEPATH += $$PWD/qtredmine
 DEPENDPATH += $$PWD/qtredmine
 
