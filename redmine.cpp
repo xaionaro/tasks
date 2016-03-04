@@ -23,9 +23,15 @@
 #include <QDir>
 #include <QFile>
 #include <QStandardPaths>
+#include <QMessageBox>
 
 Redmine::Redmine()
 {
+	if ( ! QSslSocket::supportsSsl() ) {
+		qDebug ( "! QSslSocket::supportsSsl()" );
+		QMessageBox messageBox;
+		messageBox.critical(0, "Error", "Отсутствует поддержка SSL. Проверьте наличие библиотек libeay32.dll и ssleay32.dll, либо установите пакет OpenSSL.");
+	}
 	this->setBaseUrl ( SERVER_URL );
 
 #ifdef __MOBILE__
@@ -83,8 +89,8 @@ int Redmine::init()
 		this->setAuth ( this->_apiKey );
 	}
 
-	connect ( this, SIGNAL ( requestFinished ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
-	          this, SLOT ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
+	connect ( this, SIGNAL ( requestFinished     ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
+		  this, SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 	this->initBarrier_jobsDone = 0;
 	QNetworkReply *updateIssueStatusesReply = this->updateIssueStatuses();
 	// Wait until issue statuses will be received:

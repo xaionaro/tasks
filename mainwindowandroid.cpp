@@ -10,6 +10,9 @@ MainWindowAndroid::MainWindowAndroid ( QWidget *parent ) :
 {
 	this->ui->setupUi ( this );
 	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ" );
+#ifdef __WINRT__
+	delete this->ui->quitButton;
+#endif
 }
 
 MainWindowAndroid::~MainWindowAndroid()

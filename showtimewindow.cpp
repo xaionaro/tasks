@@ -20,7 +20,7 @@ ShowTimeWindow::ShowTimeWindow(QWidget *parent) :
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 4, QHeaderView::Interactive );
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 5, QHeaderView::Interactive );
 
-#ifdef __ANDROID__
+#ifdef __MOBILE__
 	this->ui->timeEntries->horizontalHeader()->setSectionResizeMode ( 6, QHeaderView::Interactive );
 
 	this->ui->timeEntries->horizontalHeader()->resizeSection ( 0, 80 );
