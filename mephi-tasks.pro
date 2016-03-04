@@ -65,8 +65,8 @@ FORMS    += \
     mainwindowandroid.ui \
     logtimewindow.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Release/release/ -lqtredmine
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/ -lqtredmine
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_5_1_MinGW_32bit-Release/release/ -lqtredmine
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine-Desktop_Qt_5_5_1_MinGW_32bit-Debug/debug/ -lqtredmine
 else:unix: LIBS += -L$$PWD/build-qtredmine-Desktop/ -lqtredmine
 
 INCLUDEPATH += $$PWD/qtredmine
