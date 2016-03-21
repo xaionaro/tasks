@@ -16,6 +16,9 @@ public:
 	explicit SigningWindow ( QWidget *parent = 0 );
 	~SigningWindow();
 
+signals:
+	void on_destructor();
+
 private:
 	Ui::SigningWindow *ui;
 };

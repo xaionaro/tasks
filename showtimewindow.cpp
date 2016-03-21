@@ -50,6 +50,7 @@ ShowTimeWindow::ShowTimeWindow(QWidget *parent) :
 
 ShowTimeWindow::~ShowTimeWindow()
 {
+	this->on_destructor();
 	delete ui;
 }
 

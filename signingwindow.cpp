@@ -10,5 +10,6 @@ SigningWindow::SigningWindow ( QWidget *parent ) :
 
 SigningWindow::~SigningWindow()
 {
+	this->on_destructor();
 	delete ui;
 }

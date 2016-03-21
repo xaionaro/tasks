@@ -19,16 +19,13 @@ public:
 	explicit ShowTimeWindow(QWidget *parent = 0);
 	~ShowTimeWindow();
 
-	private slots:
+private slots:
 	void on_closeButton_clicked();
-
 	void on_date_selectionChanged();
-
 	void on_timeEntries_itemSelectionChanged();
-
 	void on_user_currentIndexChanged(int index);
 
-	private:
+private:
 	Ui::ShowTimeWindow *ui;
 
 	void updateUsers();
@@ -39,6 +36,11 @@ public:
 	//RedmineItemTree users;
 	//RedmineItemTree timeEntries;
 	QJsonArray timeEntries;
+
+
+signals:
+	void on_destructor();
+
 private:
 	void timeEntries_display();
 };
