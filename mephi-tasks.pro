@@ -13,7 +13,7 @@ TEMPLATE = app
 unix:QMAKE_CXX = ccache g++
 gcc:QMAKE_CXXFLAGS += -std=c++11
 gcc:QMAKE_CXXFLAGS_RELEASE += -O2 -march=native
-gcc:QMAKE_CXXFLAGS_DEBUG += -O0 -ggdb3 -D__MOBILE__
+gcc:QMAKE_CXXFLAGS_DEBUG += -O0 -ggdb3 #-D__MOBILE__
 #win32:gcc:QMAKE_LFLAGS_RELEASE += -static-libgcc -static-libstdc++ -static
 #win32:CONFIG += static
 
