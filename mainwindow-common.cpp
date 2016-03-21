@@ -54,6 +54,7 @@ MainWindowCommon::MainWindowCommon ( QWidget *parent ) :
 	this->trayIcon->show();
 
 	this->logTimeWindow = NULL;
+	this->showTimeWindow = NULL;
 
 	return;
 }
