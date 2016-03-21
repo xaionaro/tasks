@@ -10,10 +10,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = mephi-tasks
 TEMPLATE = app
-#QMAKE_CXX = ccache g++
+unix:QMAKE_CXX = ccache g++
 gcc:QMAKE_CXXFLAGS += -std=c++11
 gcc:QMAKE_CXXFLAGS_RELEASE += -O2 -march=native
 gcc:QMAKE_CXXFLAGS_DEBUG += -O0 -ggdb3 -D__MOBILE__
+#win32:gcc:QMAKE_LFLAGS_RELEASE += -static-libgcc -static-libstdc++ -static
+#win32:CONFIG += static
 
 SOURCES += main.cpp\
     helpwindow.cpp \
@@ -70,8 +72,8 @@ FORMS    += \
     logtimewindow.ui \
     showtimewindow.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine/release/ -lqtredmine
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/build-qtredmine/debug/ -lqtredmine
+     win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine/release/ -lqtredmine
+else:win32:CONFIG(debug,   debug|release): LIBS += -L$$PWD/build-qtredmine/debug/   -lqtredmine
 else:unix: LIBS += -L$$PWD/build-qtredmine-Desktop/ -lqtredmine
 
 win32:contains(QT_ARCH, i386) {
