@@ -52,7 +52,13 @@ private slots:
 	void on_saveTimeout();
 	void on_saveFailure ( QNetworkReply *reply );
 
-private:
+    void on_continousLoggingStartButton_clicked();
+
+    void on_continousLoggingStopButton_clicked();
+
+	void on_issue_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+
+	private:
 	int updateLastLogTime();
 	void get_time_entries_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg );
 	QMutex updateProjectsMutex;
@@ -67,6 +73,8 @@ private:
 
 	void get_projects_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg );
 	void projects_display();
+
+	void saveCurrentEntry();
 
 	QMutex projectsDisplayMutex;
 	QMutex projectsDisplayExceptionMutex;

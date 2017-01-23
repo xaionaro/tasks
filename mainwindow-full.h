@@ -64,6 +64,8 @@ private slots:
 
 	void on_issuesFilter_field_status_currentIndexChanged ( int index );
 
+    void on_actionLogTime_triggered();
+
 private:
 	Ui::MainWindowFull *ui;
 

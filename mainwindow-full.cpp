@@ -226,6 +226,12 @@ void MainWindowFull::on_toolActionHelp_triggered()
 	this->on_actionHelp_triggered();
 }
 
+void MainWindowFull::on_actionLogTime_triggered()
+{
+    LogTimeWindow *w = new LogTimeWindow();
+    w->show();
+}
+
 /**** /actions ****/
 
 /**** updateProjects ****/

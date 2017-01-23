@@ -47,8 +47,8 @@ LogTimeWindow::~LogTimeWindow()
 void LogTimeWindow::on_saveSuccess()
 {
 	qDebug ( "LogTimeWindow::on_saveSuccess()" );
-    redmine->get_time_entries ( ( void * ) NULL, NULL, NULL, false, "user_id=me&limit=1" ); // Just to update the cache
-	delete this;
+	redmine->get_time_entries ( ( void * ) NULL, NULL, NULL, false, "user_id=me&limit=1" ); // Just to update the cache
+	//delete this;
 }
 
 
@@ -113,25 +113,11 @@ void LogTimeWindow::on_cancel_clicked()
 
 void LogTimeWindow::on_accept_clicked()
 {
-	int activityId = 0;
+	this->saveCurrentEntry();
 
-	switch ( this->ui->activityType->currentIndex() ) { // This values are from source code of https://tasks.mephi.ru/issues/47429/time_entries/new. You can fix it manually
-		case 0:
-			activityId = 8;
-			break;
-
-		case 1:
-			activityId = 9;
-			break;
-
-		case 2:
-			activityId = 10;
-			break;
-	}
-
-	this->timeEntry.set ( this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), -1, -1, this->ui->comment->text(), activityId );
-	this->timeEntry.save();
 //	this->initBarrier.exec();
+
+	delete this;
 }
 
 
@@ -318,6 +304,34 @@ int LogTimeWindow::updateIssues()
 
 /**** /updateIssues ****/
 
+
+void LogTimeWindow::saveCurrentEntry()
+{
+	int activityId = 0;
+
+	switch ( this->ui->activityType->currentIndex() ) { // This values are from source code of https://tasks.mephi.ru/issues/47429/time_entries/new. You can fix it manually
+		case 0:
+			activityId = 8;
+			break;
+
+		case 1:
+			activityId = 9;
+			break;
+
+		case 2:
+			activityId = 10;
+			break;
+	}
+
+	QDateTime now = QDateTime::currentDateTime();
+	this->ui->untilInput->setDateTime(now);
+
+	this->timeEntry.set ( this->ui->sinceInput->dateTime(), this->ui->untilInput->dateTime(), -1, -1, this->ui->comment->text(), activityId );
+	this->timeEntry.save();
+
+	this->ui->sinceInput->setDateTime(now);
+}
+
 void LogTimeWindow::on_issue_itemClicked ( QTreeWidgetItem *item, int column )
 {
 	( void ) item; ( void ) column;
@@ -366,4 +380,33 @@ void LogTimeWindow::on_comment_editingFinished()
 	this->ui->accept->setFocus();
 
 	return;
+}
+
+void LogTimeWindow::on_continousLoggingStartButton_clicked()
+{
+	this->ui->continousLoggingStartButton->setEnabled(false);
+
+	QDateTime now = QDateTime::currentDateTime();
+	this->ui->sinceInput->setDateTime(now);
+
+	this->ui->continousLoggingStopButton->setEnabled(true);
+}
+
+
+void LogTimeWindow::on_continousLoggingStopButton_clicked()
+{
+
+	this->ui->continousLoggingStopButton->setEnabled(false);
+	this->saveCurrentEntry();
+	this->ui->continousLoggingStartButton->setEnabled(true);
+}
+
+void LogTimeWindow::on_issue_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+{
+	Q_UNUSED(current)
+	Q_UNUSED(previous)
+
+	if (this->ui->continousLoggingStopButton->isEnabled()) {
+		this->saveCurrentEntry();
+	}
 }

@@ -176,6 +176,7 @@
     <property name="title">
      <string>Программа</string>
     </property>
+    <addaction name="actionLogTime"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -460,8 +461,6 @@
       </item>
      </layout>
     </widget>
-    <zorder>verticalLayoutWidget</zorder>
-    <zorder>verticalLayoutWidget_6</zorder>
    </widget>
   </widget>
   <widget class="QDockWidget" name="issueDock">
@@ -686,6 +685,11 @@
   <action name="actionHelp">
    <property name="text">
     <string>Помощь</string>
+   </property>
+  </action>
+  <action name="actionLogTime">
+   <property name="text">
+    <string>Зажурналировать время</string>
    </property>
   </action>
   <zorder>filtersDock</zorder>
