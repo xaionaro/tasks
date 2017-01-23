@@ -36,11 +36,16 @@ LogTimeWindow::LogTimeWindow ( QWidget *parent ) :
 	this->updateProjects();
 	this->ui->issue->setSortingEnabled ( true );
 	this->ui->issue->sortByColumn ( 0, Qt::AscendingOrder );
+
+	this->continousLoggingTimer = new QTimer(this);
+
+	connect ( this->continousLoggingTimer, SIGNAL(timeout()), this, SLOT(updateUntilTime()) );
 }
 
 LogTimeWindow::~LogTimeWindow()
 {
 	this->on_destructor();
+	delete this->continousLoggingTimer;
 	delete ui;
 }
 
@@ -386,8 +391,12 @@ void LogTimeWindow::on_continousLoggingStartButton_clicked()
 {
 	this->ui->continousLoggingStartButton->setEnabled(false);
 
+	this->continousLoggingTimer->start(1000);
+
 	QDateTime now = QDateTime::currentDateTime();
 	this->ui->sinceInput->setDateTime(now);
+
+
 
 	this->ui->continousLoggingStopButton->setEnabled(true);
 }
@@ -398,6 +407,8 @@ void LogTimeWindow::on_continousLoggingStopButton_clicked()
 
 	this->ui->continousLoggingStopButton->setEnabled(false);
 	this->saveCurrentEntry();
+
+	this->continousLoggingTimer->stop();
 	this->ui->continousLoggingStartButton->setEnabled(true);
 }
 
@@ -413,7 +424,27 @@ void LogTimeWindow::on_issue_currentItemChanged(QTreeWidgetItem *current, QTreeW
 
 void LogTimeWindow::on_comment_textEdited(const QString &arg1)
 {
-	if (this->ui->continousLoggingStopButton->isEnabled()) {
-		this->saveCurrentEntry();
+	Q_UNUSED(arg1)
+}
+
+void LogTimeWindow::on_comment_textChanged(const QString &arg1)
+{
+	Q_UNUSED(arg1)
+	if (!this->ui->comment->isEnabled()) {
+		return;
 	}
+
+	if (this->ui->continousLoggingStopButton->isEnabled()) {
+		this->ui->comment->setEnabled(false);
+		this->ui->comment->undo();
+		this->saveCurrentEntry();
+		this->ui->comment->redo();
+		this->ui->comment->setEnabled(true);
+	}
+}
+
+void LogTimeWindow::updateUntilTime()
+{
+	QDateTime now = QDateTime::currentDateTime();
+	this->ui->untilInput->setDateTime(now);
 }

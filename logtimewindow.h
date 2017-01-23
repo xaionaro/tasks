@@ -61,6 +61,10 @@ private slots:
 	void on_comment_textEdited(const QString &arg1);
 
 
+	void on_comment_textChanged(const QString &arg1);
+
+	void updateUntilTime();
+
 private:
 	int updateLastLogTime();
 	void get_time_entries_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg );
@@ -83,6 +87,7 @@ private:
 	QMutex projectsDisplayExceptionMutex;
 
 	QTimer projectsDisplayRetryTimer;
+	QTimer *continousLoggingTimer;
 
 	QHash<int, int> selected_issues_id;
 	RedmineClass_TimeEntry timeEntry;
