@@ -58,7 +58,10 @@ private slots:
 
 	void on_issue_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 
-	private:
+	void on_comment_textEdited(const QString &arg1);
+
+
+private:
 	int updateLastLogTime();
 	void get_time_entries_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg );
 	QMutex updateProjectsMutex;

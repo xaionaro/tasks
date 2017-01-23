@@ -177,7 +177,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="comment">
+       <widget class="MyQLineEdit" name="comment">
         <property name="placeholderText">
          <string>Комментарий</string>
         </property>
@@ -389,6 +389,13 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MyQLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>myqlineedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

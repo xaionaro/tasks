@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     mainwindowandroid.cpp \
     logtimewindow.cpp \
     redmineclass_time_entry.cpp \
-    showtimewindow.cpp
+    showtimewindow.cpp \
+    myqlineedit.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -58,7 +59,8 @@ HEADERS  += \
     mainwindowandroid.h \
     logtimewindow.h \
     redmineclass_time_entry.h \
-    showtimewindow.h
+    showtimewindow.h \
+    myqlineedit.h
 
 FORMS    += \
     helpwindow.ui \

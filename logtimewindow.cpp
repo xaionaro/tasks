@@ -410,3 +410,10 @@ void LogTimeWindow::on_issue_currentItemChanged(QTreeWidgetItem *current, QTreeW
 		this->saveCurrentEntry();
 	}
 }
+
+void LogTimeWindow::on_comment_textEdited(const QString &arg1)
+{
+	if (this->ui->continousLoggingStopButton->isEnabled()) {
+		this->saveCurrentEntry();
+	}
+}
