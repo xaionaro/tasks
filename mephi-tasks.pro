@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     logtimewindow.cpp \
     redmineclass_time_entry.cpp \
     showtimewindow.cpp \
-    myqlineedit.cpp
+    myqlineedit.cpp \
+    planwindow.cpp
 
 HEADERS  += \
     helpwindow.h \
@@ -60,7 +61,8 @@ HEADERS  += \
     logtimewindow.h \
     redmineclass_time_entry.h \
     showtimewindow.h \
-    myqlineedit.h
+    myqlineedit.h \
+    planwindow.h
 
 FORMS    += \
     helpwindow.ui \
@@ -72,7 +74,8 @@ FORMS    += \
     loginwindow.ui \
     mainwindowandroid.ui \
     logtimewindow.ui \
-    showtimewindow.ui
+    showtimewindow.ui \
+    planwindow.ui
 
      win32:CONFIG(release, debug|release): LIBS += -L$$PWD/build-qtredmine/release/ -lqtredmine
 else:win32:CONFIG(debug,   debug|release): LIBS += -L$$PWD/build-qtredmine/debug/   -lqtredmine

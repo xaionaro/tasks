@@ -65,7 +65,9 @@ private slots:
 
 	void updateUntilTime();
 
-private:
+	void on_refresh_clicked();
+
+	private:
 	int updateLastLogTime();
 	void get_time_entries_callback ( QNetworkReply *reply, QJsonDocument *json, void *arg );
 	QMutex updateProjectsMutex;
@@ -82,6 +84,8 @@ private:
 	void projects_display();
 
 	void saveCurrentEntry();
+
+	QString previousComment;
 
 	QMutex projectsDisplayMutex;
 	QMutex projectsDisplayExceptionMutex;

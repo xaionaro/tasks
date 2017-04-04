@@ -205,6 +205,24 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="refresh">
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>⟳</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="accept">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">

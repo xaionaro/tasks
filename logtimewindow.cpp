@@ -39,6 +39,8 @@ LogTimeWindow::LogTimeWindow ( QWidget *parent ) :
 
 	this->continousLoggingTimer = new QTimer(this);
 
+	this->previousComment = "";
+
 	connect ( this->continousLoggingTimer, SIGNAL(timeout()), this, SLOT(updateUntilTime()) );
 }
 
@@ -382,7 +384,27 @@ void LogTimeWindow::on_issue_doubleClicked ( const QModelIndex &index )
 void LogTimeWindow::on_comment_editingFinished()
 {
 	//this->ui->accept->click();
-	this->ui->accept->setFocus();
+
+	if (!this->ui->continousLoggingStopButton->isEnabled()) {
+		this->ui->accept->setFocus();
+		return;
+	}
+
+	QDateTime now = QDateTime::currentDateTime();
+	if (now.toSecsSinceEpoch() - this->ui->sinceInput->dateTime().toSecsSinceEpoch() < 60) {
+		return;
+	}
+
+	this->ui->comment->setEnabled(false);
+	this->ui->comment->undo();
+
+	QString currentComment = this->ui->comment->text();
+	if (this->previousComment != currentComment) {
+		this->saveCurrentEntry();
+		this->previousComment = currentComment;
+	}
+	this->ui->comment->redo();
+	this->ui->comment->setEnabled(true);
 
 	return;
 }
@@ -417,6 +439,11 @@ void LogTimeWindow::on_issue_currentItemChanged(QTreeWidgetItem *current, QTreeW
 	Q_UNUSED(current)
 	Q_UNUSED(previous)
 
+	QDateTime now = QDateTime::currentDateTime();
+	if (now.toSecsSinceEpoch() - this->ui->sinceInput->dateTime().toSecsSinceEpoch() < 60) {
+		return;
+	}
+
 	if (this->ui->continousLoggingStopButton->isEnabled()) {
 		this->saveCurrentEntry();
 	}
@@ -433,18 +460,15 @@ void LogTimeWindow::on_comment_textChanged(const QString &arg1)
 	if (!this->ui->comment->isEnabled()) {
 		return;
 	}
-
-	if (this->ui->continousLoggingStopButton->isEnabled()) {
-		this->ui->comment->setEnabled(false);
-		this->ui->comment->undo();
-		this->saveCurrentEntry();
-		this->ui->comment->redo();
-		this->ui->comment->setEnabled(true);
-	}
 }
 
 void LogTimeWindow::updateUntilTime()
 {
 	QDateTime now = QDateTime::currentDateTime();
 	this->ui->untilInput->setDateTime(now);
+}
+
+void LogTimeWindow::on_refresh_clicked()
+{
+	this->updateIssues();
 }

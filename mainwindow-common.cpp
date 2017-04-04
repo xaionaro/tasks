@@ -176,6 +176,7 @@ void MainWindowCommon::get_issues_callback ( QNetworkReply *reply, QJsonDocument
 	this->issues.set ( issues );
 	this->issues_display();
 	this->updateIssuesMutex.unlock();
+	this->on_updatedIssues();
 	return;
 }
 
@@ -254,7 +255,6 @@ void MainWindowCommon::openShowTimeWindow()
 
 	return;
 }
-
 
 void MainWindowCommon::showOnTop()
 {

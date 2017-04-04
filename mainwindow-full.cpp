@@ -31,6 +31,8 @@ MainWindowFull::MainWindowFull ( QWidget *parent ) :
 	MainWindowCommon ( parent ),
 	ui ( new Ui::MainWindowFull )
 {
+	this->planWindow = NULL;
+
 	this->ui->setupUi ( this );
 	connect ( redmine, SIGNAL ( callback_call      ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
 	          this,    SLOT (  callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
@@ -95,7 +97,7 @@ MainWindowFull::MainWindowFull ( QWidget *parent ) :
 
 	this->createTrayActions();
 	connect ( this->trayIcon, SIGNAL ( activated     ( QSystemTrayIcon::ActivationReason ) ),
-		  this,		  SLOT   ( iconActivated ( QSystemTrayIcon::ActivationReason ) ) );
+			  this,			  SLOT   ( iconActivated ( QSystemTrayIcon::ActivationReason ) ) );
 
 	return;
 }
@@ -228,8 +230,20 @@ void MainWindowFull::on_toolActionHelp_triggered()
 
 void MainWindowFull::on_actionLogTime_triggered()
 {
-    LogTimeWindow *w = new LogTimeWindow();
-    w->show();
+	LogTimeWindow *w = new LogTimeWindow();
+	w->show();
+}
+
+void MainWindowFull::on_actionShowTime_triggered()
+{
+	ShowTimeWindow *w = new ShowTimeWindow();
+	w->show();
+}
+
+void MainWindowFull::on_actionPlan_triggered()
+{
+	PlanWindow *w = new PlanWindow(this);
+	w->show();
 }
 
 /**** /actions ****/
@@ -729,7 +743,7 @@ void MainWindowFull::issue_display_postproc()
 	QList<int> ids = this->issue_fields.keys();
 	qSort ( ids.begin(), ids.end() );
 	foreach ( const int &id, ids )
-	this->ui->issueLeftColumn->addRow ( this->issue_fields[id].first, this->issue_fields[id].second );
+		this->ui->issueLeftColumn->addRow ( this->issue_fields[id].first, this->issue_fields[id].second );
 	return;
 }
 
@@ -1114,12 +1128,16 @@ void MainWindowFull::createTrayActions()
 	this->openShowTimeWindowAction = new QAction ( tr ( "Журнал времени" ), this );
 	connect ( this->openShowTimeWindowAction, SIGNAL ( triggered() ), this, SLOT ( openShowTimeWindow() ) );
 
+	this->openPlanWindowAction = new QAction ( tr ( "Оперативный план" ), this );
+	connect ( this->openPlanWindowAction, SIGNAL ( triggered() ), this, SLOT ( openPlanWindow() ) );
+
 	this->quitAction = new QAction ( tr ( "Завершить" ), this );
 	connect ( this->quitAction, SIGNAL ( triggered() ), qApp, SLOT ( quit() ) );
 
 	this->trayIconMenu->addAction ( this->showHideAction );
 	this->trayIconMenu->addAction ( this->openLogTimeWindowAction );
 	this->trayIconMenu->addAction ( this->openShowTimeWindowAction );
+	this->trayIconMenu->addAction ( this->openPlanWindowAction );
 	this->trayIconMenu->addAction ( this->quitAction );
 
 	return;
@@ -1146,3 +1164,45 @@ void MainWindowFull::iconActivated ( QSystemTrayIcon::ActivationReason reason )
 
 
 /**** /tray-related stuff ****/
+
+
+void MainWindowFull::on_issue_button_toOpPlan_up_clicked()
+{
+	/*foreach ( QTreeWidgetItem * selectedIssueItem, this->ui->issuesTree->selectedItems() ) {
+		QJsonObject issue    = this->issues.get ( selectedIssueItem );
+		int         issue_id = issue["id"].toInt();
+	}*/
+	this->on_updatedIssues();
+}
+
+void MainWindowFull::on_issue_button_removeFromOpPlan_clicked()
+{
+	this->on_updatedIssues();
+}
+
+void MainWindowFull::on_issue_button_toOpPlan_down_clicked()
+{
+	this->on_updatedIssues();
+}
+
+
+
+void MainWindowFull::on_closePlanWindow()
+{
+	this->planWindow = NULL;
+
+	return;
+}
+
+void MainWindowFull::openPlanWindow()
+{
+	if (this->planWindow != NULL)
+		delete this->planWindow;
+	this->planWindow = new PlanWindow(this);
+
+	connect ( this->planWindow, SIGNAL ( on_destructor() ), this, SLOT ( on_closePlanWindow() ) );
+
+	this->planWindow->show();
+
+	return;
+}

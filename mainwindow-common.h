@@ -122,6 +122,7 @@ protected slots:
 	void on_closeShowTimeWindow();
 
 signals:
+	void on_updatedIssues();
 
 protected slots:
 	void toggleShowHide();

@@ -6,11 +6,13 @@
 #include <QComboBox>
 
 #include <mainwindow-common.h>
+//#include "planwindow.h"
 
 namespace Ui
 {
-class MainWindowFull;
+	class MainWindowFull;
 }
+class PlanWindow;
 
 class MainWindowFull : public MainWindowCommon
 {
@@ -35,7 +37,8 @@ protected:
 	bool eventFilter ( QObject *obj, QEvent *event );
 
 protected slots:
-
+	void openPlanWindow();
+	void on_closePlanWindow();
 
 private slots:
 	void on_actionHelp_triggered();
@@ -64,10 +67,22 @@ private slots:
 
 	void on_issuesFilter_field_status_currentIndexChanged ( int index );
 
-    void on_actionLogTime_triggered();
+	void on_actionLogTime_triggered();
+
+	void on_actionPlan_triggered();
+
+	void on_actionShowTime_triggered();
+
+	void on_issue_button_toOpPlan_up_clicked();
+
+	void on_issue_button_removeFromOpPlan_clicked();
+
+	void on_issue_button_toOpPlan_down_clicked();
 
 private:
 	Ui::MainWindowFull *ui;
+
+	PlanWindow     *planWindow;
 
 	QMutex projects_display_mutex;
 	QMutex issues_display_mutex;
@@ -164,8 +179,10 @@ private:
 	QAction *quitAction;
 	QAction *openLogTimeWindowAction;
 	QAction *openShowTimeWindowAction;
+	QAction *openPlanWindowAction;
 
 	void iconActivated ( QSystemTrayIcon::ActivationReason reason );
 };
 
+#include "planwindow.h"
 #endif // MAINWINDOWFULL_H
