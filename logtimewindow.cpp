@@ -391,7 +391,7 @@ void LogTimeWindow::on_comment_editingFinished()
 	}
 
 	QDateTime now = QDateTime::currentDateTime();
-	if (now.toSecsSinceEpoch() - this->ui->sinceInput->dateTime().toSecsSinceEpoch() < 60) {
+	if (now.toMSecsSinceEpoch() - this->ui->sinceInput->dateTime().toMSecsSinceEpoch() < 60000) {
 		return;
 	}
 
@@ -440,7 +440,7 @@ void LogTimeWindow::on_issue_currentItemChanged(QTreeWidgetItem *current, QTreeW
 	Q_UNUSED(previous)
 
 	QDateTime now = QDateTime::currentDateTime();
-	if (now.toSecsSinceEpoch() - this->ui->sinceInput->dateTime().toSecsSinceEpoch() < 60) {
+	if (now.toMSecsSinceEpoch() - this->ui->sinceInput->dateTime().toMSecsSinceEpoch() < 60000) {
 		return;
 	}
 
