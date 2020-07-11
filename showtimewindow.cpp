@@ -67,7 +67,7 @@ void ShowTimeWindow::updateUsers_callback ( QNetworkReply *reply, QJsonDocument 
 	qDebug ( "ShowTimeWindow::updateUsers_callback: users.count() == %i", users.count() );
 
 	this->ui->user->clear();
-    this->ui->user->addItem ( "Я", redmine->me()["id"].toInt() );
+    this->ui->user->addItem ( "Me", redmine->me()["id"].toInt() );
 
 	foreach (const QJsonValue &userV, users) {
 		QJsonObject user = userV.toObject();
@@ -155,7 +155,7 @@ void ShowTimeWindow::timeEntries_display()
 		    QString userLogin = timeEntry ["user"].toObject() ["login"].toString();
 
 		    if ( projectIdentifier.toLower() == userLogin.toLower() ) {
-			    projectName = "Личный проект";
+			    projectName = "Personal project";
 		    } else {
 			    projectName = timeEntry ["project"].toObject() ["name"].toString();
 		    }

@@ -1,7 +1,7 @@
 /*
-    mephi-tasks — a client to NRNU MEPhI Redmine server
+    tasks — a Qt-based client to an ITS
 
-    Copyright (C) 2015  Dmitry Yu Okunev <dyokunev@ut.mephi.ru> 0x8E30679C
+    Copyright (C) 2015-2020  Dmitrii Okunev <xaionaro@dx.center>
  */
 
 
@@ -22,7 +22,7 @@ HTMLDelegate::HTMLDelegate()
  * Authors (in order of contribution decrease):
  *     * serge-gubenko,
  *     * satanas,
- *     * Dmitry Yu Okunev <dyokunev@ut.mephi.ru>.
+ *     * Dmitrii Okunev <xaionaro@dx.center>.
  *
  * The code is licensed by "CC BY-SA 3.0 with attribution required" according
  * to "stackoverflow.com"'s footer.

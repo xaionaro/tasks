@@ -1,7 +1,7 @@
 /*
-    mephi-tasks — a client to NRNU MEPhI Redmine server
+    tasks — a Qt-based client to an ITS
 
-    Copyright (C) 2015  Dmitry Yu Okunev <dyokunev@ut.mephi.ru> 0x8E30679C
+    Copyright (C) 2015-2020  Dmitrii Okunev <xaionaro@dx.center>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -210,8 +210,8 @@ void MainWindowCommon::setIcon ( EIcon index )
 
 void MainWindowCommon::createIconComboBox()
 {
-	this->iconComboBox.addItem ( QIcon ( ":/images/good.png" ), tr ( "Просроченных задач нет" ) );
-	this->iconComboBox.addItem ( QIcon ( ":/images/bad.png" ),  tr ( "Есть просроченные задачи" ) );
+	this->iconComboBox.addItem ( QIcon ( ":/images/good.png" ), tr ( "No expired tasks" ) );
+	this->iconComboBox.addItem ( QIcon ( ":/images/bad.png" ),  tr ( "There're expired tasks" ) );
 	return;
 }
 

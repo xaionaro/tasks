@@ -1,5 +1,5 @@
-#include "mainwindowandroid.h"
-#include "ui_mainwindowandroid.h"
+#include "mainwindow-android.h"
+#include "ui_mainwindow-android.h"
 
 #include "logtimewindow.h"
 #include "showtimewindow.h"
@@ -9,7 +9,7 @@ MainWindowAndroid::MainWindowAndroid ( QWidget *parent ) :
 	ui ( new Ui::MainWindowAndroid )
 {
 	this->ui->setupUi ( this );
-	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ" );
+	this->setWindowTitle ( "tasks" );
 #ifdef __WINRT__
 	delete this->ui->quitButton;
 #endif

@@ -28,7 +28,10 @@
         </size>
        </property>
        <property name="locale">
-        <locale language="Russian" country="Russia"/>
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="firstDayOfWeek">
+        <enum>Qt::Sunday</enum>
        </property>
       </widget>
      </item>
@@ -36,22 +39,22 @@
       <widget class="QTableWidget" name="timeEntries">
        <column>
         <property name="text">
-         <string>с</string>
+         <string>since</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>по</string>
+         <string>until</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>мин.</string>
+         <string>min.</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>тип</string>
+         <string>type</string>
         </property>
        </column>
        <column>
@@ -61,12 +64,12 @@
        </column>
        <column>
         <property name="text">
-         <string>задача/проект</string>
+         <string>task/project</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>комментарий</string>
+         <string>comment</string>
         </property>
        </column>
       </widget>
@@ -74,7 +77,7 @@
      <item>
       <widget class="QPushButton" name="closeButton">
        <property name="text">
-        <string>Закрыть</string>
+        <string>Close</string>
        </property>
       </widget>
      </item>

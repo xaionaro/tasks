@@ -174,7 +174,7 @@
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>Программа</string>
+     <string>Menu</string>
     </property>
     <addaction name="actionLogTime"/>
     <addaction name="actionShowTime"/>
@@ -183,7 +183,7 @@
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
-     <string>Информация</string>
+     <string>Info</string>
     </property>
     <addaction name="actionHelp"/>
    </widget>
@@ -195,7 +195,7 @@
     <locale language="Russian" country="Russia"/>
    </property>
    <property name="windowTitle">
-    <string>Навигация</string>
+    <string>Navigation</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -211,19 +211,25 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
      </property>
      <widget class="QWidget" name="meTab">
+      <property name="locale">
+       <locale language="English" country="UnitedStates"/>
+      </property>
       <attribute name="title">
-       <string>Я</string>
+       <string>Me</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="projectsTab">
+      <property name="locale">
+       <locale language="English" country="UnitedStates"/>
+      </property>
       <attribute name="title">
-       <string>Проекты</string>
+       <string>Projects</string>
       </attribute>
       <widget class="QTreeWidget" name="projects">
        <property name="geometry">
@@ -264,8 +270,11 @@
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QRadioButton" name="projectsRadio_recursive_off">
+          <property name="locale">
+           <locale language="English" country="UnitedStates"/>
+          </property>
           <property name="text">
-           <string>Одиночно</string>
+           <string>Single</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -274,8 +283,11 @@
         </item>
         <item>
          <widget class="QRadioButton" name="projectsRadio_recursive_on">
+          <property name="locale">
+           <locale language="English" country="UnitedStates"/>
+          </property>
           <property name="text">
-           <string>Рекурсивно</string>
+           <string>Recursive</string>
           </property>
          </widget>
         </item>
@@ -301,13 +313,16 @@
         </rect>
        </property>
        <property name="text">
-        <string>Фильтр:</string>
+        <string>Filter:</string>
        </property>
       </widget>
      </widget>
      <widget class="QWidget" name="structureTab">
+      <property name="locale">
+       <locale language="English" country="UnitedStates"/>
+      </property>
       <attribute name="title">
-       <string>МИФИ</string>
+       <string>???</string>
       </attribute>
      </widget>
     </widget>
@@ -333,7 +348,7 @@
         <item>
          <widget class="QRadioButton" name="issuesFilter_showClosed_no">
           <property name="text">
-           <string>Только открытые</string>
+           <string>Only opened</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -346,7 +361,7 @@
         <item>
          <widget class="QRadioButton" name="issuesFilter_showClosed_yes">
           <property name="text">
-           <string>Все</string>
+           <string>All</string>
           </property>
           <property name="autoExclusive">
            <bool>false</bool>
@@ -367,7 +382,7 @@
         <item>
          <widget class="QRadioButton" name="issuesFilter_queryType_all">
           <property name="text">
-           <string>Все</string>
+           <string>All</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -380,7 +395,7 @@
         <item>
          <widget class="QRadioButton" name="issuesFilter_queryType_toMe">
           <property name="text">
-           <string>Поручено мне</string>
+           <string>Assigned to me</string>
           </property>
           <property name="autoExclusive">
            <bool>false</bool>
@@ -390,7 +405,7 @@
         <item>
          <widget class="QRadioButton" name="issuesFilter_queryType_fromMe">
           <property name="text">
-           <string>Мной поручено</string>
+           <string>Assigned by me</string>
           </property>
           <property name="autoExclusive">
            <bool>false</bool>
@@ -400,7 +415,7 @@
         <item>
          <widget class="QRadioButton" name="issuesFilter_queryType_followed">
           <property name="text">
-           <string>На контроле</string>
+           <string>Subscribed to</string>
           </property>
           <property name="autoExclusive">
            <bool>false</bool>
@@ -440,7 +455,7 @@
            </property>
            <item>
             <property name="text">
-             <string>Последние задачи</string>
+             <string>Recent tasks</string>
             </property>
            </item>
           </widget>
@@ -454,7 +469,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Архив:</string>
+            <string>Archive:</string>
            </property>
           </widget>
          </widget>
@@ -607,21 +622,21 @@
             <item>
              <widget class="QPushButton" name="issue_button_reset">
               <property name="text">
-               <string>Сбросить</string>
+               <string>Reset</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="issue_button_sign">
               <property name="text">
-               <string>Подписать</string>
+               <string>Sign</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="issue_button_save">
               <property name="text">
-               <string>Сохранить</string>
+               <string>Save</string>
               </property>
              </widget>
             </item>
@@ -644,21 +659,21 @@
             <item>
              <widget class="QPushButton" name="issue_button_toOpPlan_up">
               <property name="text">
-               <string>В начало плана</string>
+               <string>To the top of TODO</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="issue_button_removeFromOpPlan">
               <property name="text">
-               <string>Убрать из плана</string>
+               <string>Remove from TODO</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="issue_button_toOpPlan_down">
               <property name="text">
-               <string>В конец плана</string>
+               <string>To the bottom of TODO</string>
               </property>
              </widget>
             </item>
@@ -707,52 +722,52 @@
   </widget>
   <action name="toolActionHelp">
    <property name="icon">
-    <iconset resource="mephi-tasks.qrc">
+    <iconset resource="tasks.qrc">
      <normaloff>:/images/help.png</normaloff>:/images/help.png</iconset>
    </property>
    <property name="text">
-    <string>Помощь</string>
+    <string>Help</string>
    </property>
    <property name="toolTip">
-    <string>Помощь</string>
+    <string>Help</string>
    </property>
   </action>
   <action name="actionQuit">
    <property name="text">
-    <string>Завершить</string>
+    <string>Quit</string>
    </property>
   </action>
   <action name="actionHelp">
    <property name="text">
-    <string>Помощь</string>
+    <string>Help</string>
    </property>
   </action>
   <action name="actionLogTime">
    <property name="text">
-    <string>Зажурналировать время</string>
+    <string>Log time</string>
    </property>
   </action>
   <action name="actionShowTime">
    <property name="text">
-    <string>Журнал времени</string>
+    <string>Time log</string>
    </property>
    <property name="toolTip">
-    <string>Журнал времени</string>
+    <string>Time log</string>
    </property>
   </action>
   <action name="actionPlan">
    <property name="text">
-    <string>Оперативный план</string>
+    <string>TODO list</string>
    </property>
    <property name="toolTip">
-    <string>Оперативный план</string>
+    <string>TODO list</string>
    </property>
   </action>
   <zorder>filtersDock</zorder>
   <zorder>issueDock</zorder>
  </widget>
  <resources>
-  <include location="mephi-tasks.qrc"/>
+  <include location="tasks.qrc"/>
  </resources>
  <connections/>
 </ui>

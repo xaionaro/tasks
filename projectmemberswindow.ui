@@ -29,7 +29,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Закрыть</string>
+    <string>Close</string>
    </property>
   </widget>
   <widget class="QTableView" name="members">

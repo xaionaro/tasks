@@ -26,7 +26,7 @@ LogTimeWindow::LogTimeWindow ( QWidget *parent ) :
 	this->ui->sinceInput->setDate ( QDate::currentDate() );
 	this->ui->untilInput->setTime ( currentTime );
 	this->ui->sinceInput->setTime ( initialSinceTime );
-	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ: Учёт времени" );
+	this->setWindowTitle ( "tasks: time tracking" );
 	connect ( redmine, SIGNAL ( callback_call       ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
               this,    SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 	this->selected_project_id = 0;
@@ -63,7 +63,7 @@ void LogTimeWindow::on_saveTimeout()
 {
 	qDebug ( "LogTimeWindow::on_saveTimeout()" );
 	QMessageBox messageBox;
-	messageBox.critical(0, "Error", "Превышен интервал ожидания ответа. Проверьте качество подключения к сети «Интернет».");
+	messageBox.critical(0, "Error", "Request timed out.");
 }
 
 
@@ -75,7 +75,7 @@ void LogTimeWindow::on_saveFailure ( QNetworkReply *reply )
 
 	QString techInfo = QString("issueId == %1; projectId == %2").arg(this->timeEntry.getIssueId()).arg(this->timeEntry.getProjectId());
 	QMessageBox messageBox;
-	messageBox.critical(0, "Error", "Внутренняя ошибка. Рекомендуем связаться с технической поддержкой по адресу <tasks@mephi.ru>. Техническая информация: "+techInfo);
+    messageBox.critical(0, "Error", "Internal error. Info: "+techInfo);
 
 	return;
 }
@@ -235,7 +235,7 @@ bool LogTimeWindow_issuesFilter ( QWidget *__this, QJsonObject item )
 	int             project_id;
 	int status_id = item["status"].toObject() ["id"].toInt();
 
-	if ( status_id != 2 /* В НИЯУ МИФИ это статус «Выполняется» */ )
+	if ( status_id != 2 /* In NRNU MEPhI it was status "In progress" */ )
 		return false;
 
 	/*

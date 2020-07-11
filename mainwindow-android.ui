@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>НИЯУ МИФИ -- Задачи</string>
+   <string>tasks</string>
   </property>
   <property name="frameShape">
    <enum>QFrame::StyledPanel</enum>
@@ -31,21 +31,21 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Зажурналировать время</string>
+        <string>Log time</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="showTimeWindowButton">
        <property name="text">
-        <string>Посмотреть журнал</string>
+        <string>Time log</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="quitButton">
        <property name="text">
-        <string>Выйти</string>
+        <string>Quit</string>
        </property>
       </widget>
      </item>

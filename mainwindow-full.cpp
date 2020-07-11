@@ -1,7 +1,7 @@
 /*
-    mephi-tasks — a client to NRNU MEPhI Redmine server
+    tasks — a Qt-based client to an ITS
 
-    Copyright (C) 2015  Dmitry Yu Okunev <dyokunev@ut.mephi.ru> 0x8E30679C
+    Copyright (C) 2015-2020  Dmitrii Okunev <xaionaro@dx.center>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ MainWindowFull::MainWindowFull ( QWidget *parent ) :
 	this->ui->setupUi ( this );
 	connect ( redmine, SIGNAL ( callback_call      ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
 	          this,    SLOT (  callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
-	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ" );
+	this->setWindowTitle ( "tasks" );
 	this->setCorner ( Qt::TopLeftCorner,    Qt::LeftDockWidgetArea );
 	this->setCorner ( Qt::BottomLeftCorner, Qt::LeftDockWidgetArea );
 	this->setDockOptions ( AllowTabbedDocks | AllowNestedDocks );
@@ -48,12 +48,12 @@ MainWindowFull::MainWindowFull ( QWidget *parent ) :
 	this->ui->filtersDock->setMinimumWidth ( this->filtersDockInitialWidth );
 	this->ui->issueDock->setMinimumHeight ( this->issueDockInitialHeight );
 	QStringList projectsColumns;
-	projectsColumns << "Проект";
+	projectsColumns << "Project";
 	this->ui->projects->setHeaderLabels ( projectsColumns );
 	HTMLDelegate* delegate = new HTMLDelegate();
 	ui->projects->setItemDelegate ( delegate );
 	QStringList issuesColumns;
-	issuesColumns << "Название" << "Исполнитель" << "Срок" << "Статус" << "Обновлено";
+	issuesColumns << "Name" << "Assignee" << "Due" << "Status" << "Updated";
 	this->ui->issuesTree->setHeaderLabels ( issuesColumns );
 	this->updateRoles();
 	this->updateIssues();
@@ -557,10 +557,10 @@ void MainWindowFull::issue_display_dateField ( QString field_name, QString field
 	int pos = -1;
 
 	if ( field_name == "start_date" ) {
-		label->setText ( "Начать выполнение: " );
+		label->setText ( "Start date: " );
 		pos = 20;
 	} else if ( field_name == "due_date" ) {
-		label->setText ( "Срок выполнения: " );
+		label->setText ( "Due date: " );
 		pos = 21;
 	} else
 		label->setText ( field_name + ": " );
@@ -582,10 +582,10 @@ void MainWindowFull::issue_display_dateTimeField ( QString field_name, QString f
 	int pos = -1;
 
 	if ( field_name == "created_on" ) {
-		label->setText ( "Создано: " );
+		label->setText ( "Created: " );
 		pos = 10;
 	} else if ( field_name == "updated_on" ) {
-		label->setText ( "Обновлено: " );
+		label->setText ( "Updated: " );
 		pos = 11;
 	} else
 		label->setText ( field_name + ": " );
@@ -621,7 +621,7 @@ void MainWindowFull::issue_display_enumField ( QString field_name, int field_val
 	QLabel *label = new QLabel;
 
 	if ( field_name == "priority" )
-		label->setText ( "Приоритет: " );
+		label->setText ( "Priority: " );
 	else
 		label->setText ( field_name + ": " );
 
@@ -654,7 +654,7 @@ void MainWindowFull::issue_display_statusField ( QString field_name, int status_
 	( void ) status_id;
 	qDebug ( "issue_display_statusField: %s", field_name.toUtf8().data() );
 	QLabel *label = new QLabel;
-	label->setText ( "Статус: " );
+	label->setText ( "Status: " );
 	QHash<int, QPair<int, QString>> statuses;
 	QJsonArray allowed_statuses = this->issue["status"].toObject() ["allowed"].toArray();
 	foreach ( const QJsonValue & allowed_status_val, allowed_statuses ) {
@@ -702,7 +702,7 @@ void MainWindowFull::issue_display_assigneeField ( QString field_name, int assig
 
 	//int idx;
 	QLabel *label = new QLabel;
-	label->setText ( "Исполнитель: " );
+	label->setText ( "Assignee: " );
 	QComboBox *field = new QComboBox;
 	fill_combobox ( field, assignable, assignee_user_id );
 	this->issue_display_field ( label, field, 1 );
@@ -714,7 +714,7 @@ void MainWindowFull::issue_display_authorField ( QString field_name, int author_
 	( void ) author_user_id;
 	qDebug ( "issue_display_authorField: %s", field_name.toUtf8().data() );
 	QLabel *label = new QLabel;
-	label->setText ( "Автор: " );
+	label->setText ( "Author: " );
 	QLabel *field = new QLabel;
 	field->setText ( author_user_name );
 	this->issue_display_field ( label, field, 0 );
@@ -1068,7 +1068,7 @@ void MainWindowFull::projectsShowContextMenu ( const QPoint &pos )
 	QList<int> project_ids = this->selected_projects_id.keys();
 	QPoint     globalPos   = this->ui->projects->mapToGlobal ( pos );
 	QMenu contextMenu;
-	QAction *membersItem = contextMenu.addAction ( "Участники" );
+	QAction *membersItem = contextMenu.addAction ( "Members" );
 	QAction *selectedItem = contextMenu.exec ( globalPos );
 	qDebug ( "%p %p", membersItem, selectedItem );
 
@@ -1119,19 +1119,19 @@ void MainWindowFull::on_issuesFilter_field_status_currentIndexChanged ( int inde
 
 void MainWindowFull::createTrayActions()
 {
-	this->showHideAction = new QAction ( tr ( "Показать/Спрятать" ), this );
+	this->showHideAction = new QAction ( tr ( "Show/Hide" ), this );
 	connect ( this->showHideAction, SIGNAL ( triggered() ), this, SLOT ( toggleShowHide() ) );
 
-	this->openLogTimeWindowAction = new QAction ( tr ( "Зажурналировать время" ), this );
+	this->openLogTimeWindowAction = new QAction ( tr ( "Log time" ), this );
 	connect ( this->openLogTimeWindowAction, SIGNAL ( triggered() ), this, SLOT ( openLogTimeWindow() ) );
 
-	this->openShowTimeWindowAction = new QAction ( tr ( "Журнал времени" ), this );
+	this->openShowTimeWindowAction = new QAction ( tr ( "Time log" ), this );
 	connect ( this->openShowTimeWindowAction, SIGNAL ( triggered() ), this, SLOT ( openShowTimeWindow() ) );
 
-	this->openPlanWindowAction = new QAction ( tr ( "Оперативный план" ), this );
+	this->openPlanWindowAction = new QAction ( tr ( "TODO list" ), this );
 	connect ( this->openPlanWindowAction, SIGNAL ( triggered() ), this, SLOT ( openPlanWindow() ) );
 
-	this->quitAction = new QAction ( tr ( "Завершить" ), this );
+	this->quitAction = new QAction ( tr ( "Quit" ), this );
 	connect ( this->quitAction, SIGNAL ( triggered() ), qApp, SLOT ( quit() ) );
 
 	this->trayIconMenu->addAction ( this->showHideAction );

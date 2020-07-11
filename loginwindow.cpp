@@ -1,7 +1,7 @@
 /*
-    mephi-tasks — a client to NRNU MEPhI Redmine server
+    tasks — a Qt-based client to an ITS
 
-    Copyright (C) 2016  Dmitry Yu Okunev <dyokunev@ut.mephi.ru> 0x8E30679C
+    Copyright (C) 2015-2020  Dmitrii Okunev <xaionaro@dx.center>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,14 +37,16 @@ LoginWindow::~LoginWindow()
 
 void LoginWindow::on_buttonBox_accepted()
 {
-	Redmine redmine;
-	redmine.setAuth ( this->ui->login->text(), this->ui->password->text() );
-	redmine.init();
+    Redmine *redmine;
+    redmine = new Redmine(this->ui->url->text());
+    redmine->setAuth ( this->ui->login->text(), this->ui->password->text() );
+    redmine->init();
 
-	if ( !redmine.me().isEmpty() ) {
-		this->resultApiKey = redmine.me() ["api_key"].toString();
+    if ( !redmine->me().isEmpty() ) {
+        this->resultApiKey = redmine->me() ["api_key"].toString();
 		qDebug ( "Received information about me. Result apiKey: %s", this->resultApiKey.toStdString().c_str() );
 	}
+    delete redmine;
 }
 
 void LoginWindow::on_buttonBox_rejected()

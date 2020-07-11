@@ -8,7 +8,7 @@ PlanWindow::PlanWindow(MainWindowFull *mainWindow, QWidget *parent) :
 {
 	this->selectedUserId = 0;
 
-	this->setWindowTitle ( "Система «Задачи» НИЯУ МИФИ: Оперативный план" );
+	this->setWindowTitle ( "tasks: TODO list" );
 	connect ( redmine, SIGNAL ( callback_call       ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ),
 			  this,    SLOT   ( callback_dispatcher ( void*, callback_t, QNetworkReply*, QJsonDocument*, void* ) ) );
 

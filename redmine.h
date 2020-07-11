@@ -1,7 +1,7 @@
 #ifndef REDMINE_H
 #define REDMINE_H
 
-#include <RedmineClient.hpp>
+#include <qtredmine/RedmineClient.hpp>
 #include <QEventLoop>
 
 #define REDMINE_BASETIMEOUT 5000
@@ -171,7 +171,7 @@ public:
 	/* Constructor/destructor
 	 */
 
-	Redmine();
+    Redmine(QString serverURL);
 	~Redmine();
 };
 

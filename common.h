@@ -12,7 +12,6 @@
 #include <QApplication>
 
 #include "redmine.h"
-#define SERVER_URL "https://tasks.mephi.ru"
 
 extern Redmine      *redmine;
 extern QApplication *application;
@@ -20,10 +19,10 @@ extern QString       issues_filter;
 
 enum mode {
 	MODE_FULL,
-	MODE_RECTOR,
 };
 
 struct settings {
+    QString redmineURL;
 	QString settingsFilePath;
 	QString apiKey;
 	QString issuesFilter;

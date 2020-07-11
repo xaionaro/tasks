@@ -27,6 +27,30 @@
      <enum>QLayout::SetMaximumSize</enum>
     </property>
     <item>
+     <layout class="QHBoxLayout" name="urlLayout">
+      <item>
+       <widget class="QLineEdit" name="url">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>36</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="placeholderText">
+         <string>URL</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="loginLayout">
       <item>
        <widget class="QLineEdit" name="login">

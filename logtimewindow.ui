@@ -39,7 +39,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>По:</string>
+           <string>Since:</string>
           </property>
          </widget>
         </item>
@@ -52,7 +52,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>C:</string>
+           <string>Until:</string>
           </property>
          </widget>
         </item>
@@ -88,7 +88,7 @@
        <widget class="QComboBox" name="project">
         <item>
          <property name="text">
-          <string>По всем проектам</string>
+          <string>All projects</string>
          </property>
         </item>
        </widget>
@@ -114,7 +114,7 @@
         </column>
         <column>
          <property name="text">
-          <string>Задача</string>
+          <string>Task</string>
          </property>
         </column>
         <item>
@@ -137,7 +137,7 @@
           </brush>
          </property>
          <property name="text">
-          <string>Другое</string>
+          <string>Other</string>
          </property>
          <property name="font">
           <font>
@@ -154,24 +154,24 @@
          <bool>false</bool>
         </property>
         <property name="currentText">
-         <string>Разработка</string>
+         <string>Development</string>
         </property>
         <property name="currentIndex">
          <number>1</number>
         </property>
         <item>
          <property name="text">
-          <string>Проектирование</string>
+          <string>Designing</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Разработка</string>
+          <string>Development</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Отчётность</string>
+          <string>Reporting</string>
          </property>
         </item>
        </widget>
@@ -179,7 +179,7 @@
       <item>
        <widget class="MyQLineEdit" name="comment">
         <property name="placeholderText">
-         <string>Комментарий</string>
+         <string>Comment</string>
         </property>
        </widget>
       </item>
@@ -200,7 +200,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Отменить</string>
+           <string>Cancel</string>
           </property>
          </widget>
         </item>
@@ -237,7 +237,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Подтвердить</string>
+           <string>Commit</string>
           </property>
          </widget>
         </item>
@@ -254,7 +254,7 @@
        </size>
       </property>
       <property name="text">
-       <string>Непрерывное журналирование:</string>
+       <string>Continous logging:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
@@ -342,7 +342,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Начал работу!</string>
+       <string>Start working!</string>
       </property>
      </widget>
     </item>
@@ -400,7 +400,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Приостановил работу</string>
+       <string>Stop working</string>
       </property>
      </widget>
     </item>
